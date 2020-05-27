@@ -9,7 +9,8 @@
     "nodemon": "^2.0.3",
     "sails": "^1.2.4",
     "sails-hook-orm": "^2.1.1",
-    "sails-hook-sockets": "^2.0.0"
+    "sails-hook-sockets": "^2.0.0",
+    "sails-mongo": "^1.2.0"
   },
   "devDependencies": {
     "eslint": "5.16.0"
