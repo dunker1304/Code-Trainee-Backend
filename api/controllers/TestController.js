@@ -6,8 +6,19 @@
  */
 
 module.exports = {
-  get: function(req, res) {
-    return res.json({ get: 'true' });
+  get: async function(req, res) {
+     let user = {
+       'displayName' : 'anhoang',
+       'username' :'anhoang1201',
+       'email':'kieuquynh1201@gmail.com',
+       'DOB':'1998-01-12',
+       'password' : '123456789',
+       'phone' : '0972079516',
+
+     }
+
+     let a = await User.find({'id': '5ecdd4bab936051fdcf33a1b'});
+    return res.json({ get: a });
   },
   post: function(req, res) {
     return res.json({ post: 'true' });
