@@ -8,12 +8,12 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' }, 
+    'id': { type: 'number' ,  autoIncrement: true, required : true }, 
     'question_id' :  { type : 'number' , required: true}, 
-    'isHidden' : { type : 'boolean' , defaultsTo : false},
-    'inputData' : { type : 'string' , required : true },
-    'outputData' : { type : 'string' , required : true },
-    'executeTimeLimit' :  { type : 'number'  },
+    'is_hidden' : { type : 'number' },
+    'input_data' : { type : 'string'  },
+    'outputData' : { type : 'string'  },
+    'execute_time_limit' :  { type : 'number'  },
   
   },
 

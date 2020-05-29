@@ -8,13 +8,13 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
     'name' : { type : 'string' , required : true} ,
-    'creator' :  {
-      model : 'User'
-    },
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    // 'creator' :  {
+    //   model : 'User'
+    // },
+    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
+    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
 
   },
 
