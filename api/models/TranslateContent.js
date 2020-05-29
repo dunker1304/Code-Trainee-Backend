@@ -9,7 +9,7 @@ module.exports = {
 
   attributes: {
 
-    'id': { type: 'string', columnName: '_id' },
+    // 'id': { type: 'string', columnName: '_id' },
     'language_id' : { type : 'number' , required : true },
     'translatedContent' : { type : 'string' ,allowNull : true} ,
     'translatedTitle' : { type :'string' , allowNull : true }
