@@ -8,16 +8,16 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
-    'username' : { type : 'string' , required : true , unique : true },
-    'displayName' : { type : 'string' , required : true },
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
+    'username' : { type : 'string'  },
+    'displayname' : { type : 'string' },
     'email' : { type : 'string' , required : true },
     'DOB' : {type:'ref', columnType: 'datetime' },
-    'password' : { type : 'string' , required : true },
-    'phone' : { type : 'string' , required : true },
-    'isDeleted': { type : 'boolean' , defaultsTo : false} ,
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    'password' : { type : 'string' },
+    'phone' : { type : 'string'  },
+    'is_deleted': { type : 'boolean'} ,
+    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
+    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
   },
 
 };

@@ -9,10 +9,10 @@ module.exports = {
 
   attributes: {
 
-    'id': { type: 'string', columnName: '_id' },
-    'roleName' : { type : 'string' , required : true },
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
+    'name' : { type : 'string' , required : true },
+    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
+    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
 
   },
 

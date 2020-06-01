@@ -8,7 +8,7 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' }, 
+    'id': { type: 'number' ,  autoIncrement: true, required : true }, 
     'user_id' : { type : 'number' , required : true },
     'question_id' :  { type : 'number' , required : true },
     'time_needed' :  { type : 'number' , required : true },
@@ -16,8 +16,8 @@ module.exports = {
     'memory_needed' : { type : 'number' , allowNull : true },
     'program_language' : { type : 'number' , required : true},
     'is_finish' : { type : 'boolean', defaultsTo : false },
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
+    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
 
   },
 

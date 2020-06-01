@@ -8,9 +8,10 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
-    'category' : { model : 'Category'}
-
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
+    'category_id' : { type: 'number'  },
+    'question_id' : { type: 'number'  },
+    
   },
 
 };
