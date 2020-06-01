@@ -20,7 +20,8 @@ module.exports = {
      let a = await User.find({'id': '5ecdd4bab936051fdcf33a1b'});
     return res.json({ get: a });
   },
-  post: function(req, res) {
+  post: async function(req, res) {
+    await console.log(req.body)
     return res.json({ post: 'true' });
   }
 

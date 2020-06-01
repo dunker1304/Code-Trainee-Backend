@@ -9,7 +9,7 @@
  */
 
 module.exports.routes = {
-  'get /api/test': 'TestController.get',
-  'post /api/test': 'TestController.post'
+  'get /api/test': 'TestController.post',
+  'post /oauth/google': 'UserController.googleAuth'
 
 };
