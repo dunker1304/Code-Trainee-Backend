@@ -9,15 +9,15 @@ module.exports = {
 
   attributes: {
 
-    'id': { type: 'string', columnName: '_id' }, 
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
     'text' : {type : 'string', required : true},
     'parent_id' :  { type : 'number' ,allowNull : true },
-    'is_delete' : { type : 'boolean' , defaultsTo : false },
+    'is_deleted' : { type : 'boolean' , defaultsTo : false },
     'like' : { type : 'number' , defaultsTo : 0 },
     'dislike' : { type : 'number' , defaultsTo : 0},
     'sender' : { type : 'number'},
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
+    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
   },
 
 };

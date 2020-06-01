@@ -8,11 +8,11 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
     'question_id' : { type : 'number' , required: true},
-    'nameFunction' : { type : 'string' , required : true },
-    'paramType' : {type : 'string' , allowNull : true },
-    'returnType' : { type : 'string' ,allowNull : true },
+    'name_function' : { type : 'string' , required : true },
+    'param_type' : {type : 'string' , allowNull : true },
+    'return_type' : { type : 'string' ,allowNull : true },
     'order' : { type : 'number' }
   },
 

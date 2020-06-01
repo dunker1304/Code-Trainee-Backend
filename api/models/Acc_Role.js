@@ -8,7 +8,7 @@
 module.exports = {
 
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
+    'id': { type: 'number' ,  autoIncrement: true, required : true },
     'user_id' : { type : 'number' , required: true },
     'role_id' : { type : 'number' , required: true },
   },
