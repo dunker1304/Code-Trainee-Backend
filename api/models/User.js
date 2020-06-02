@@ -6,21 +6,33 @@
  */
 const bcrypt = require('bcryptjs');
 module.exports = {
-
+  tableName: "User",
   attributes: {
-    'id': { type: 'number' ,  autoIncrement: true},
-    'username' : { type : 'string'  },
-    'displayname' : { type : 'string' },
-    'email' : { type : 'string' , required : true },
-    'DOB' : {type:'ref', columnType: 'datetime' },
-    'password' : { type : 'string',allowNull : true },
-    'phone' : { type : 'string'  },
-    'isDeleted': { type : 'boolean'} ,
-    'createAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updateAt' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'googleId' : { type : 'string' },
-    'isLoginLocal' : { type : 'number'},
-    'isGoogleLogin': { type : 'number'}
+    username: { type: "string", unique: true },
+    password: { type: "string" },
+    displayName: { type: "string", columnName: "display_name" },
+    email: { type: "string", unique: true },
+    phone: { type: "string" },
+    imageLink: { type: "string", columnName: "image_link" },
+    dateOfBirth: { type: "ref", columnName: "DoB", columnType: "datetime" },
+    roles: {
+      collection: "Role",
+      via: "userId",
+      through: "UserAuthority",
+    },
+    comments: {
+      collection: "Comment",
+      via: "senderId",
+    },
+    trainingHistories: {
+      collection: "TrainingHistory",
+      via: "userId",
+    },
+    wishList: {
+      collection: "Question",
+      via: "userId",
+      through: "WishList",
+    },
   },
   customToJSON: function() {
     return _.omit(this, ['password'])
@@ -64,6 +76,6 @@ isValidPassword: async function(user,newPassword){
     throw new Error(error);
   }
 }
+}
 
-};
-
+  
