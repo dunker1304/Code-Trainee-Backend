@@ -21,5 +21,10 @@ module.exports = {
       collection: "TrainingHistory",
       via: "userId",
     },
+    wishList: {
+      collection: "Question",
+      via: "userId",
+      through: "WishList",
+    },
   },
 };

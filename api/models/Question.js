@@ -41,5 +41,10 @@ module.exports = {
       collection: "CodeSnippet",
       via: "questionId",
     },
+    wishListBy: {
+      collection: "User",
+      via: "questionId",
+      through: "WishList",
+    },
   },
 };
