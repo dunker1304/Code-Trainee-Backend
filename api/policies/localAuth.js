@@ -8,8 +8,8 @@
  *
  */
 const passport = require('passport');
-const passportGoogle = passport.authenticate('googleToken', {session : false})
+const passportLocal = passport.authenticate('local', {session : false})
 module.exports = async function(req, res, next) {
-   passportGoogle(req,res,next)
+    passportLocal(req,res,next)
    //next()
 };

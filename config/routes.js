@@ -10,6 +10,8 @@
 
 module.exports.routes = {
   'get /api/test': 'TestController.post',
-  'post /oauth/google': 'UserController.googleAuth'
+  'post /oauth/google': 'UserController.googleAuth',
+  'post /signup'  : 'UserController.signUp',
+  'post /signin'  : 'UserController.signIn'
 
 };
