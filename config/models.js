@@ -14,8 +14,6 @@
  */
 
 module.exports.models = {
-
-
   /***************************************************************************
   *                                                                          *
   * Whether model methods like `.create()` and `.update()` should ignore     *
@@ -37,7 +35,6 @@ module.exports.models = {
 
   // schema: true,
 
-
   /***************************************************************************
   *                                                                          *
   * How and whether Sails will attempt to automatically rebuild the          *
@@ -53,8 +50,7 @@ module.exports.models = {
   *                                                                          *
   ***************************************************************************/
 
-  migrate: 'safe',
-
+  migrate: "safe",
 
   /***************************************************************************
   *                                                                          *
@@ -69,9 +65,20 @@ module.exports.models = {
   ***************************************************************************/
 
   attributes: {
-    // createdAt: { type: 'number', autoCreatedAt: true, },
-    // updatedAt: { type: 'number', autoUpdatedAt: true, },
-    id: { type: 'string', columnName: '_id' },
+    createdAt: {
+      type: "ref",
+      columnType: "datetime",
+      columnName: "created_at",
+    },
+    updatedAt: {
+      type: "ref",
+      columnType: "datetime",
+      columnName: "updated_at",
+    },
+    id: {
+      type: "number",
+      autoIncrement: true,
+    },
     //--------------------------------------------------------------------------
     //  /\   Using MongoDB?
     //  ||   Replace `id` above with this instead:
@@ -84,7 +91,6 @@ module.exports.models = {
     // https://sailsjs.com/docs/tutorials/using-mongo-db
     //--------------------------------------------------------------------------
   },
-
 
   /******************************************************************************
   *                                                                             *
@@ -101,9 +107,8 @@ module.exports.models = {
   ******************************************************************************/
 
   dataEncryptionKeys: {
-    default: 'o6eJyBUaeKtVNsO3XLkE1JnA6Zc9vQqFIloJJxS2OlA='
+    default: "o6eJyBUaeKtVNsO3XLkE1JnA6Zc9vQqFIloJJxS2OlA=",
   },
-
 
   /***************************************************************************
   *                                                                          *
@@ -118,7 +123,5 @@ module.exports.models = {
   *                                                                          *
   ***************************************************************************/
 
-  cascadeOnDestroy: true
-
-
+  cascadeOnDestroy: true,
 };

@@ -1,22 +1,12 @@
-/**
- * Category.js
- *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
- */
-
 module.exports = {
-
+  tableName: "Category",
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
-    'name' : { type : 'string' , required : true} ,
-    'creator' :  {
-      model : 'User'
+    name: { type: "string", required: true },
+    createdBy: { type: "number", columnName: "created_by" },
+    questions: {
+      collection: "Question",
+      via: "categoryId",
+      through: "QuestionCategory",
     },
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
-
   },
-
 };
-

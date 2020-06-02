@@ -1,21 +1,14 @@
-/**
- * TestCase.js
- *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
- */
-
 module.exports = {
-
+  tableName: "TestCase",
   attributes: {
-    'id': { type: 'string', columnName: '_id' }, 
-    'question_id' :  { type : 'number' , required: true}, 
-    'isHidden' : { type : 'boolean' , defaultsTo : false},
-    'inputData' : { type : 'string' , required : true },
-    'outputData' : { type : 'string' , required : true },
-    'executeTimeLimit' :  { type : 'number'  },
-  
+    isHidden: { type: "boolean", columnName: "is_hidden" },
+    input: { type: "string" },
+    expectedOutput: { type: "string", columnName: "expected_output" },
+    executeTimeLimit: { type: "number", columnName: "execute_time_limit" },
+    createdBy: { type: "number", columnName: "created_by" },
+    questionId: {
+      model: "Question",
+      columnName: "question_id",
+    },
   },
-
 };
-
