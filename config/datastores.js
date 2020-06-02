@@ -14,8 +14,6 @@
  */
 
 module.exports.datastores = {
-
-
   /***************************************************************************
   *                                                                          *
   * Your app's default datastore.                                            *
@@ -33,7 +31,6 @@ module.exports.datastores = {
   ***************************************************************************/
 
   default: {
-
     /***************************************************************************
     *                                                                          *
     * Want to use a different database during development?                     *
@@ -48,12 +45,13 @@ module.exports.datastores = {
     *    (See https://sailsjs.com/config/datastores for help.)                 *
     *                                                                          *
     ***************************************************************************/
-    // adapter: 'sails-mysql',
-    // url: 'mysql://user:password@host:port/database',
-    adapter: require('sails-mysql'),
-    url : 'mysql://thanhnt4:wMuAS9Pc@10.10.2.214:3306/dev_thanhnt4'
 
+    adapter: "sails-mysql",
+    host: "localhost",
+    port: "3306",
+    user: "root",
+    password: "admin",
+    database: "codetrainee",
+    timezone: "utc",
   },
-
-
 };
