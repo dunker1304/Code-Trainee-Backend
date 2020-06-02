@@ -48,10 +48,13 @@ module.exports.datastores = {
     *    (See https://sailsjs.com/config/datastores for help.)                 *
     *                                                                          *
     ***************************************************************************/
-    // adapter: 'sails-mysql',
-    // url: 'mysql://user:password@host:port/database',
-    adapter: require('sails-mongo'),
-    url : 'mongodb://kieuquynh1201:kieuquynh1201@ds149056.mlab.com:49056/codetrainee'
+
+    adapter: require('sails-mysql'),
+    host: "localhost",
+    user: "root",
+    password: "admin",
+    database: "codetrainee",
+    timezone: "utc"
 
   },
 
