@@ -7,7 +7,7 @@
 
 module.exports = {
   get: async function(req, res) {
-    await Question.addToCollection(1, "comments").members([1,2,3]);
+    await User.addToCollection(1, "wishList").members([1]);
 
     return res.json({});
   },
