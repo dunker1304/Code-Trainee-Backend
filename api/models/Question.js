@@ -3,12 +3,20 @@ module.exports = {
   attributes: {
     points: { type: "number" },
     level: { type: "string", isIn: ["easy", "medium", "hard"] },
-    isDeleted: { type: "boolean", columnName: "is_deleted" },
-    isApproved: { type: "boolean", columnName: "is_approved" },
+    isDeleted: {
+      type: "boolean",
+      columnName: "is_deleted",
+      defaultsTo: false,
+    },
+    isApproved: {
+      type: "boolean",
+      columnName: "is_approved",
+      defaultsTo: false,
+    },
     otherRequire: { type: "string", columnName: "other_require" },
     limitCharaters: { type: "number", columnName: "limit_code_characters" },
-    like: { type: "number" },
-    dislike: { type: "number" },
+    like: { type: "number", defaultsTo: 0 },
+    dislike: { type: "number", defaultsTo: 0 },
     content: { type: "string" },
     title: { type: "string" },
     createdBy: { type: "number", columnName: "created_by" },
@@ -25,13 +33,13 @@ module.exports = {
       collection: "TrainingHistory",
       via: "questionId",
     },
-    testcases: {
+    testCases: {
       collection: "TestCase",
       via: "questionId",
     },
     codeSnippets: {
       collection: "CodeSnippet",
-      via: "questionId"
-    }
+      via: "questionId",
+    },
   },
 };

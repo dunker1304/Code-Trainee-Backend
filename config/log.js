@@ -16,9 +16,9 @@ customLogger.add(winston.transports.File, {
 });
 
 module.exports.log = {
-  // Pass in our custom logger, and pass all log levels through.
+  // open comment if you want to log to file.
   // custom: customLogger,
-  level: 'error',
+  level: 'info',
 
   // Disable captain's log so it doesn't prefix or stringify our meta data.
   inspect: false

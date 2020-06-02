@@ -1,7 +1,7 @@
 module.exports = {
   tableName: "ProgramLanguage",
   attributes: {
-    name: { type: "string", required: true },
+    name: { type: "string" },
     createdBy: { type: "number", columnName: "created_by" },
     trainingHistories: {
       collection: "TrainingHistory",

@@ -1,7 +1,7 @@
 module.exports = {
   tableName: "TestCase",
   attributes: {
-    isHidden: { type: "boolean", columnName: "is_hidden" },
+    isHidden: { type: "boolean", columnName: "is_hidden", defaultsTo: false },
     input: { type: "string" },
     expectedOutput: { type: "string", columnName: "expected_output" },
     executeTimeLimit: { type: "number", columnName: "execute_time_limit" },

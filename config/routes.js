@@ -10,6 +10,6 @@
 
 module.exports.routes = {
   'get /api/test': 'TestController.get',
-  'post /api/test': 'TestController.post'
+  'get /api/find': 'TestController.find'
 
 };

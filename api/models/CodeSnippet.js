@@ -3,7 +3,7 @@ module.exports = {
   attributes: {
     createdBy: { type: "number", columnName: "created_by" },
     functionName: { type: "string", columnName: "function_name" },
-    returnType: { type: "string", columnName: "return_type" },
+    returnType: { type: "string", columnName: "return_type"},
     questionId: {
       model: "Question",
       columnName: "question_id",

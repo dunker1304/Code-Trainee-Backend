@@ -11,15 +11,15 @@ module.exports = {
     roles: {
       collection: "Role",
       via: "userId",
-      through: "UserAuthority"
+      through: "UserAuthority",
     },
     comments: {
       collection: "Comment",
-      via: "senderId"
+      via: "senderId",
     },
     trainingHistories: {
       collection: "TrainingHistory",
-      via: "userId"
-    }
+      via: "userId",
+    },
   },
 };

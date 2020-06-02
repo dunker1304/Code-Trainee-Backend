@@ -69,11 +69,13 @@ module.exports.models = {
       type: "ref",
       columnType: "datetime",
       columnName: "created_at",
+      autoCreatedAt: true
     },
     updatedAt: {
       type: "ref",
       columnType: "datetime",
       columnName: "updated_at",
+      autoUpdatedAt: true
     },
     id: {
       type: "number",
