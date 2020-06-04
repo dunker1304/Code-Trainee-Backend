@@ -1,6 +1,6 @@
 
 const passport = require('passport');
-const GooglePlusTokenStrategy = require('passport-google-plus-token');
+const GooglePlusTokenStrategy = require('passport-google-oauth20');
 const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
 const { ExtractJwt } = require('passport-jwt');
@@ -41,7 +41,7 @@ passport.use(new JwtStrategy({
 passport.use('googleToken', new GooglePlusTokenStrategy({
     clientID: CONSTANTS.CLIENT_ID,
     clientSecret: CONSTANTS.CLIENT_SECRET,
-    passReqToCallback: true,
+    callbackURL: '/oauth/google/callback'
   }, async (req, accessToken, refreshToken, profile, next) => {
      // Could get accessed in two ways:
     // 1) When registering for the first time
@@ -79,8 +79,8 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
         'googleId' : profile.id,
         'email' : profile.emails[0].value,
         'imageLink' : profile.photos[0].value,
-        'displayname' : profile.displayName,
-        'isGoogleLogin' : 1
+        'displayName' : profile.displayName,
+        'isLoginGoogle' : 1
       }
       await User.create(user);
       next(null,user)
@@ -90,11 +90,16 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
 
   // LOCAL STRATEGY
 passport.use(new LocalStrategy({
-  usernameField: 'email'
+ // usernameField: 'email'
 }, async (email, password, done) => {
   try {
-    // Find the user given the email
-    const user = await User.findOne({ "email": email,'isLoginLocal':1 });
+
+    let criteria = (email.indexOf('@') === -1) ? { username : email} : { email : email};
+
+    criteria['isLoginLocal'] = 1;
+    
+    // Find the user given the email or username
+    const user = await User.findOne(criteria);
     
     // If not, handle it
     if (!user) {
@@ -107,6 +112,12 @@ passport.use(new LocalStrategy({
     // If not, handle it
     if (!isMatch) {
       return done(null, false);
+    }
+
+    //if account not verify
+    console.log(user)
+    if( user.status == 0 && user.isLoginLocal == 1 ){
+        return done(null ,false , { message : 'Account not verify!'})
     }
   
     // Otherwise, return the user

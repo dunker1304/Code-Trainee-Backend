@@ -14,6 +14,7 @@ module.exports.routes = {
   'post /signup'  : 'UserController.signUp',
   'post /signin'  : 'UserController.signIn',
   'get /api/test': 'TestController.get',
-  'get /api/find': 'TestController.find'
+  'get /api/find': 'TestController.find',
+  'get /accounts/confirm-email/:secret' : 'UserController.verifyAccount'
 
 };

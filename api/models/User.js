@@ -15,6 +15,11 @@ module.exports = {
     phone: { type: "string" },
     imageLink: { type: "string", columnName: "image_link" },
     dateOfBirth: { type: "ref", columnName: "DoB", columnType: "datetime" },
+    isLoginLocal : { type : "number" , columnName : "is_login_local"},
+    isLoginGoogle : { type : "number" , columnName : "is_login_google"},
+    googleId: { type : "string" , columnName : "google_id"},
+    status : { type : 'number' ,columnName : "status"},
+    secret : { type : 'string' ,columnName : 'secret'},
     roles: {
       collection: "Role",
       via: "userId",
@@ -65,6 +70,8 @@ module.exports = {
     user.password = passwordHash;
     cb();
     }
+    else 
+    cb()
   } catch (error) {
     cb(error);
   }

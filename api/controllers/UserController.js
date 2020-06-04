@@ -8,6 +8,8 @@ const passport = require('passport');
 const JWT  = require('jsonwebtoken');
 const passportGoogle = passport.authenticate('googleToken', {session : false})
 const CONSTANTS  = require('../../config/custom').custom;
+const MailService = require('../services/MailService');
+const uniqueString = require('unique-string');
 signToken = user => {
     return JWT.sign({
       iss: 'CodeTrainee',
@@ -43,7 +45,7 @@ module.exports = {
     }
 
      // Is there a Google account with the same email?
-     let googleUser = await User.findOne({'email' : data.email , 'isGoogleLogin' : 1});
+     let googleUser = await User.findOne({'email' : data.email , 'isLoginGoogle' : 1});
      if(googleUser) {
 
        await User.update({'email':data.email}).set({
@@ -62,13 +64,31 @@ module.exports = {
      }
      else {
         // Create a new user
+          let secret = uniqueString();
           const newUser = {
             'email' : data.email ,
             'password': data.password,
             'isLoginLocal' : 1,
+            'username' : data.username,
+            'secret' : secret
           }
 
           await User.create(newUser);
+
+          let sender = {
+            'email' : data.email,
+            'subject' : '[CodeTrainee] Confirm Email',
+            'content' : '',
+            'html':`Welcome ${data.username}!
+            <br/>
+           Thanks for signing up with CodeTrainee!<br/>
+           You must follow this link to activate your account:
+           <a href= 'http://localhost:1337/accounts/confirm-email/${secret}'>http://localhost:1337/accounts/confirm-email/${secret}</a>
+           <br/>Have fun coding, and don't hesitate to contact us with your feedback.`
+          }
+
+          await MailService.sendWelcomeMail(sender)
+
 
           // Generate the token
           const token = await signToken(newUser);
@@ -92,6 +112,26 @@ module.exports = {
     });
     res.status(200).json({ success: true });
       
+   },
+
+   verifyAccount : async function( req ,res ){
+     const secret = req.params.secret;
+     
+     const user = await User.findOne({'secret' : secret});
+
+    
+     if(!user) 
+        return res.status(200).json({'success' : false , 'message' : 'invalid token secret'})
+     
+    else {
+      await User.update({'id' : user.id}).set({'status' : 1 , 'secret' : ''})
+      return res.status(200).json({ 'success' : true , 'message': 'confirm email success'});
+    }
+
+  
+
+
+    
    }
 };
 
