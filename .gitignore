@@ -132,5 +132,5 @@ lib-cov
 *.out
 *.pid
 package-lock.json
-
+.config/datastores.js
 
