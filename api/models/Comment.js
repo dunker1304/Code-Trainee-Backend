@@ -1,24 +1,18 @@
-/**
- * Comment.js
- *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
- */
-
 module.exports = {
-
+  tableName: "Comment",
   attributes: {
-
-    'id': { type: 'string', columnName: '_id' }, 
-    'text' : {type : 'string', required : true},
-    'parent_id' :  { type : 'number' ,allowNull : true },
-    'is_delete' : { type : 'boolean' , defaultsTo : false },
-    'like' : { type : 'number' , defaultsTo : 0 },
-    'dislike' : { type : 'number' , defaultsTo : 0},
-    'sender' : { type : 'number'},
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    content: { type: "string" },
+    parentId: { type: "number", columnName: "parent_id", defaultsTo: -1 },
+    isDeleted: { type: "boolean", columnName: "is_deleted", defaultsTo: false },
+    like: { type: "number", defaultsTo: 0 },
+    dislike: { type: "number", defaultsTo: 0 },
+    senderId: {
+      model: "User",
+      columnName: "sender_id"
+    },
+    questionId: {
+      model: "Question",
+      columnName: "question_id"
+    },
   },
-
 };
-

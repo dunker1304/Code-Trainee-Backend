@@ -7,22 +7,12 @@
 
 module.exports = {
   get: async function(req, res) {
-     let user = {
-       'displayName' : 'anhoang',
-       'username' :'anhoang1201',
-       'email':'kieuquynh1201@gmail.com',
-       'DOB':'1998-01-12',
-       'password' : '123456789',
-       'phone' : '0972079516',
+    await User.addToCollection(1, "wishList").members([1]);
 
-     }
-
-     let a = await User.find({'id': '5ecdd4bab936051fdcf33a1b'});
-    return res.json({ get: a });
+    return res.json({});
   },
-  post: function(req, res) {
-    return res.json({ post: 'true' });
-  }
-
+  find: async function(req, res) {
+    var r = await Question.find({id: 1}).populate("comments");
+    return res.json(r);
+  },
 };
-

@@ -1,24 +1,30 @@
-/**
- * User.js
- *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
- */
-
 module.exports = {
-
+  tableName: "User",
   attributes: {
-    'id': { type: 'string', columnName: '_id' },
-    'username' : { type : 'string' , required : true , unique : true },
-    'displayName' : { type : 'string' , required : true },
-    'email' : { type : 'string' , required : true },
-    'DOB' : {type:'ref', columnType: 'datetime' },
-    'password' : { type : 'string' , required : true },
-    'phone' : { type : 'string' , required : true },
-    'isDeleted': { type : 'boolean' , defaultsTo : false} ,
-    'created' : {type:'ref', columnType: 'datetime', autoCreatedAt: true},
-    'updated' : {type:'ref', columnType: 'datetime', autoCreatedAt: true}
+    username: { type: "string", unique: true },
+    password: { type: "string" },
+    displayName: { type: "string", columnName: "display_name" },
+    email: { type: "string", unique: true },
+    phone: { type: "string" },
+    imageLink: { type: "string", columnName: "image_link" },
+    dateOfBirth: { type: "ref", columnName: "DoB", columnType: "datetime" },
+    roles: {
+      collection: "Role",
+      via: "userId",
+      through: "UserAuthority",
+    },
+    comments: {
+      collection: "Comment",
+      via: "senderId",
+    },
+    trainingHistories: {
+      collection: "TrainingHistory",
+      via: "userId",
+    },
+    wishList: {
+      collection: "Question",
+      via: "userId",
+      through: "WishList",
+    },
   },
-
 };
-

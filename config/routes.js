@@ -11,6 +11,7 @@
 module.exports.routes = {
   'get /api/test': 'TestController.get',
   'post /api/test': 'TestController.post',
-  'post /api/submissions' : 'QuestionController.submitQuestion'
+  'post /api/submissions' : 'QuestionController.submitQuestion',
+  'get /api/find': 'TestController.find'
 
 };
