@@ -35,6 +35,7 @@ module.exports.custom = {
     'RUNTIME_ERROR_(OTHER)' : 12,
     'INTERNAL_ERROR' : 13,
     'EXEC_FORMAT_ERROR' : 14,
-  }
+  },
+  ERROR_STATUS : [6,7,8,9,10,11,12,13,14]
 
 };
