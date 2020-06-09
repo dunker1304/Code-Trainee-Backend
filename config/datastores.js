@@ -47,11 +47,11 @@ module.exports.datastores = {
     ***************************************************************************/
 
     adapter: "sails-mysql",
-    host: "localhost",
+    host: "172.28.128.4",
     port: "3306",
     user: "root",
-    password: "admin",
-    database: "codetrainee",
+    password: "",
+    database: "CodeTrainee",
     timezone: "utc",
   },
 };

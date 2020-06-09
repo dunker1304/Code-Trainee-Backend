@@ -55,7 +55,7 @@ module.exports = {
     }
 
     res.send(testCaseResult);
-  }
+  },
 
 };
 
