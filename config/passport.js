@@ -51,7 +51,7 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
     // console.log('profile', profile);
     // console.log('accessToken', accessToken);
     // console.log('refreshToken', refreshToken);
-    console.log('req', req.user);
+    console.log('req', accessToken);
 
     // req.user.methods.push('google')
     //   req.user.google = {

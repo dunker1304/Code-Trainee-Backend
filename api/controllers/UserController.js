@@ -21,12 +21,27 @@ signToken = user => {
 module.exports = {
   
    googleAuth : async function(req,res){
-      let token = await signToken(req.user)
-      res.cookie('access_token', token, {
-        httpOnly: true
-      });
-      res.status(200).json({ success: true });
+      // let token = await signToken(req.user)
+      // res.cookie('access_token', token, {
+      //   httpOnly: true
+      // });
+      // res.status(200).json({ success: true });
+      // passport.authenticate('googleToken', {
+      //   scope: ['profile', 'email']
+      // })
    },
+   googleCallback: function(req, res, next) {
+    passport.authenticate('googleToken', function(err, user) {
+      if(err) {
+        // redirect to login page
+        console.log('google callback error: '+err);
+      } else {
+        console.log('google credentials');
+        console.log(user);
+        res.json(user);
+      }
+    })(req, res, next);
+  },
 
    signUp : async function( req, res) {
 

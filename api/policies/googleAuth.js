@@ -8,7 +8,7 @@
  *
  */
 const passport = require('passport');
-const passportGoogle = passport.authenticate('googleToken', {session : false})
+const passportGoogle = passport.authenticate('googleToken', {session : false, scope: ['profile', 'email']})
 module.exports = async function(req, res, next) {
    passportGoogle(req,res,next)
    //next()
