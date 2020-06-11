@@ -24,7 +24,7 @@ module.exports = {
       if (response.data.token) {
 
         do {
-          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}`, config)
+          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?fields=stdout,time,memory,stderr,token,compile_output,message,status,expected_output`, config)
           status = resultRes.data.status.id
           reTry = reTry + 1;
 
