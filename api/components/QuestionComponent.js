@@ -17,14 +17,14 @@ module.exports = {
         }
       }
 
-      let response = await axios.post(`${CONSTANTS.DOMAIN_JUDGE}/submissions`, submitData, config)
+      let response = await axios.post(`${CONSTANTS.DOMAIN_JUDGE}/submissions?base64_encoded=true`, submitData, config)
       let reTry = 0;
      
       let resultRes = {}
       if (response.data.token) {
 
         do {
-          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?fields=stdout,time,memory,stderr,token,compile_output,message,status,expected_output`, config)
+          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?base64_encoded=true&fields=stdout,stdin,time,memory,stderr,token,compile_output,message,status,expected_output`, config)
           status = resultRes.data.status.id
           reTry = reTry + 1;
 

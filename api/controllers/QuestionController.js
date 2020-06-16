@@ -24,7 +24,7 @@ module.exports = {
     }
 
     //get testcase of question
-    let testCase = await TestCase.find({ questionId: 1 })
+    let testCase = await TestCase.find({ questionId: 10 })
 
     //let q = await Question.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
     //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', questionId: '1' }).fetch();
@@ -34,15 +34,18 @@ module.exports = {
       console.log(testCase, 'k co testcase')
       let submitData = {
         'language_id': languageId,
-        'source_code': sourceCode,
-        'stdin' : `2\n20 10`,
+        'source_code': Buffer.from(sourceCode).toString('base64'),
+        'stdin' : Buffer.from('abc', 'base64').toString('ascii')
+        //'stdin' : `2\n20 10`
         //'expected_output': '40'
       }
       let submittedResult = await QuestionComponent.submitQuestion(submitData)
       console.log(submittedResult, 'submited result');
       if (submittedResult.data.stdout) {
         submittedResult.data.stdout = submittedResult.data.stdout.toString();
-        console.log(Buffer.from(submittedResult.data.stdout, 'utf8'), 'stdout')
+        var buf = Buffer.from(submittedResult.data.stdout, 'base64').toString('ascii')
+        var buf1 = Buffer.from('abc', 'base64').toString('ascii')
+        console.log(buf1, 'stdout')
       }
       res.send([submittedResult])
     } else {
@@ -71,6 +74,14 @@ module.exports = {
 
       res.send(testCaseResult);
     }
+  },
+
+  // get question by id
+  get: async (req, res) => {
+    let id = req.params.id 
+
+    let question = await Question.find({ id: id });
+    res.send(question[0])
   }
 
 };
