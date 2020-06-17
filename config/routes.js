@@ -9,7 +9,7 @@
  */
 
 module.exports.routes = {
-  'get /api/test': 'TestController.post',
+  'post /api/test': 'TestController.get',
   'get /oauth/google': 'UserController.googleAuth',
   'post /signup'  : 'UserController.signUp',
   'post /signin'  : 'UserController.signIn',
@@ -17,5 +17,6 @@ module.exports.routes = {
   'get /api/find': 'TestController.find',
   'get /accounts/confirm-email/:secret' : 'UserController.verifyAccount',
   'get /oauth/google/callback':'UserController.googleCallback',
+  'get /api/current_user' :'UserController.currentUser'
 
 };

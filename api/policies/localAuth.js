@@ -8,7 +8,7 @@
  *
  */
 const passport = require('passport');
-const passportLocal = passport.authenticate('local', {session : false})
+const passportLocal = passport.authenticate('localAuth', {session : false})
 module.exports = async function(req, res, next) {
     passportLocal(req,res,next)
    //next()

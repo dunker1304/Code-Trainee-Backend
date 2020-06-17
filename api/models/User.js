@@ -44,6 +44,7 @@ module.exports = {
  },
   beforeCreate: async function(user, cb){
     try {
+      console.log(user.id)
       if(user.password) {
          // Generate a salt
       const salt = await bcrypt.genSalt(10);

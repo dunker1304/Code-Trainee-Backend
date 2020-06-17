@@ -3,32 +3,24 @@ const passport = require('passport');
 const GooglePlusTokenStrategy = require('passport-google-oauth20');
 const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
-const { ExtractJwt } = require('passport-jwt');
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const CONSTANTS  = require('../config/custom').custom
 
-const cookieExtractor = req => {
-  let token = null;
-  if (req && req.cookies) {
-    token = req.cookies['access_token'];
-  }
-  return token;
-}
 
 // JSON WEB TOKENS STRATEGY
 passport.use(new JwtStrategy({
-  jwtFromRequest: cookieExtractor,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: CONSTANTS.JWT_SECRET,
   passReqToCallback: true
 }, async (req, payload, done) => {
   try {
-    // Find the user specified in token
-    console.log("đi vao đay")
-    const user = await User.findById(payload.sub);
-
+    //Find the user specified in token
+    const user = await User.findOne({id:payload.sub});
     // If user doesn't exists, handle it
     if (!user) {
       return done(null, false);
     }
+   
 
     // Otherwise, return the user
     req.user = user;
@@ -43,15 +35,12 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
     clientSecret: CONSTANTS.CLIENT_SECRET,
     callbackURL: '/oauth/google/callback'
   }, async (req, accessToken, refreshToken, profile, next) => {
-     // Could get accessed in two ways:
-    // 1) When registering for the first time
-    // 2) When linking account to the existing one
-
+  
     // Should have full user profile over here
     // console.log('profile', profile);
     // console.log('accessToken', accessToken);
     // console.log('refreshToken', refreshToken);
-    console.log('req', accessToken);
+    // console.log(req);
 
     // req.user.methods.push('google')
     //   req.user.google = {
@@ -74,23 +63,56 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
       next(null,existUser)
     }
     else {
-      console.log('creating new account');
-      let user = {
-        'googleId' : profile.id,
-        'email' : profile.emails[0].value,
-        'imageLink' : profile.photos[0].value,
-        'displayName' : profile.displayName,
-        'isLoginGoogle' : 1
+
+      let email = profile.emails[0].value;
+      let userLocal = await User.find({'email':email,'isLoginLocal':1})
+     
+      if(userLocal && userLocal.length > 0) {
+        console.log("exit account register local")
+        let userUpdate = await User.update({ email: email })
+        .set({
+          googleId : profile.id,
+          displayName : profile.displayName,
+          imageLink : profile.photos[0].value,
+          isLoginGoogle :1,
+          secret : ''
+        }).fetch();
+
+        next(null,userUpdate)
+
       }
-      await User.create(user);
-      next(null,user)
+      else {
+        try {
+          console.log('creating new account');
+          // //    console.log(profile)
+              let newUser = {
+                'googleId' : profile.id,
+                'email' : profile.emails[0].value,
+                'imageLink' : profile.photos[0].value,
+                'displayName' : profile.displayName,
+                'isLoginGoogle' : 1,
+                'username':profile.emails[0].value
+              }
+               // User.create(newUser);
+              let user = await User.create(newUser).fetch();
+              next(null,user)
+        } catch (error) {
+          console.log(error);
+          next(null,false)
+        }
+       
+      }
+     
 
     }
   }));
 
   // LOCAL STRATEGY
 passport.use(new LocalStrategy({
- // usernameField: 'email'
+  // or whatever you want to use
+    usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
+    passwordField: 'password'
+  
 }, async (email, password, done) => {
   try {
 
@@ -103,7 +125,7 @@ passport.use(new LocalStrategy({
     
     // If not, handle it
     if (!user) {
-      return done(null, false);
+      return done(null, false, {message : 'Account not exist!'});
     }
   
     // Check if the password is correct
@@ -111,11 +133,10 @@ passport.use(new LocalStrategy({
   
     // If not, handle it
     if (!isMatch) {
-      return done(null, false);
+      return done(null, false, { message : 'Password is not correct!'});
     }
 
     //if account not verify
-    console.log(user)
     if( user.status == 0 && user.isLoginLocal == 1 ){
         return done(null ,false , { message : 'Account not verify!'})
     }

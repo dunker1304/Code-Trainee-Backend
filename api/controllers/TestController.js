@@ -7,9 +7,9 @@
 
 module.exports = {
   get: async function(req, res) {
-    await User.addToCollection(1, "wishList").members([1]);
+    let x =  await User.find({id:5}).populate("roles")
 
-    return res.json({});
+    return res.json(x );
   },
   find: async function(req, res) {
     var r = await Question.find({id: 1}).populate("comments");
