@@ -9,14 +9,19 @@
  */
 
 module.exports.routes = {
-  'post /api/test': 'TestController.get',
+  // UserController
   'get /oauth/google': 'UserController.googleAuth',
   'post /signup'  : 'UserController.signUp',
   'post /signin'  : 'UserController.signIn',
-  'get /api/test': 'TestController.get',
-  'get /api/find': 'TestController.find',
   'get /accounts/confirm-email/:secret' : 'UserController.verifyAccount',
   'get /oauth/google/callback':'UserController.googleCallback',
-  'get /api/current_user' :'UserController.currentUser'
+  'get /api/current_user' :'UserController.currentUser',
 
+  // TestController
+  'post /api/test': 'TestController.post',
+  'get /api/find': 'TestController.find',
+
+  //QuestionController
+  'post /api/submissions': 'QuestionController.submitQuestion',
+  'get /api/question': 'QuestionController.get'
 };
