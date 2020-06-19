@@ -18,5 +18,9 @@ module.exports.policies = {
   ***************************************************************************/
 
   // '*': true,
-
+  UserController: {
+    // Apply the 'isLoggedIn' policy to the 'update' action of 'UserController'
+    //googleAuth: 'googleAuth',
+   // signIn : 'localAuth'
+  }
 };
