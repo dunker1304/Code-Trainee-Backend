@@ -2,7 +2,11 @@ module.exports = {
   tableName: "Question",
   attributes: {
     points: { type: "number" },
-    level: { type: "string", isIn: ["easy", "medium", "hard"] },
+    level: {
+      type: "string",
+      isIn: ["easy", "medium", "hard"],
+      defaultsTo: "easy",
+    },
     isDeleted: {
       type: "boolean",
       columnName: "is_deleted",
@@ -13,8 +17,6 @@ module.exports = {
       columnName: "is_approved",
       defaultsTo: false,
     },
-    otherRequire: { type: "string", columnName: "other_require" },
-    limitCharaters: { type: "number", columnName: "limit_code_characters" },
     like: { type: "number", defaultsTo: 0 },
     dislike: { type: "number", defaultsTo: 0 },
     content: { type: "string" },

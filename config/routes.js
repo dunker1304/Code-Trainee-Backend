@@ -10,18 +10,25 @@
 
 module.exports.routes = {
   // UserController
-  'get /oauth/google': 'UserController.googleAuth',
-  'post /signup'  : 'UserController.signUp',
-  'post /signin'  : 'UserController.signIn',
-  'get /accounts/confirm-email/:secret' : 'UserController.verifyAccount',
-  'get /oauth/google/callback':'UserController.googleCallback',
-  'get /api/current_user' :'UserController.currentUser',
+  "get /oauth/google": "UserController.googleAuth",
+  "post /signup": "UserController.signUp",
+  "post /signin": "UserController.signIn",
+  "get /accounts/confirm-email/:secret": "UserController.verifyAccount",
+  "get /oauth/google/callback": "UserController.googleCallback",
+  "get /api/current_user": "UserController.currentUser",
 
   // TestController
-  'post /api/test': 'TestController.post',
-  'get /api/find': 'TestController.find',
+  "post /api/test": "TestController.post",
+  "get /api/find": "TestController.find",
 
-  //QuestionController
-  'post /api/submissions': 'QuestionController.submitQuestion',
-  'get /api/question': 'QuestionController.get'
+  // QuestionController
+  "post /api/submissions": "QuestionController.submitQuestion",
+  "get /api/question": "QuestionController.getById",
+  "post /api/save-question": "QuestionController.saveQuestion",
+  "post /api/update-question": "QuestionController.updateQuestion",
+  
+  // TestcaseController
+  "get /api/testcase": "TestCaseController.getById",
+  "post /api/save-testcase": "TestCaseController.saveTestCase",
+  "post /api/update-tescase": "TestCaseController.updateTestCase",
 };
