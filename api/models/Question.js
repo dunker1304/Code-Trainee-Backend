@@ -2,7 +2,7 @@ module.exports = {
   tableName: "Question",
   attributes: {
     points: { type: "number" },
-    level: { type: "string", isIn: ["easy", "medium", "hard"] },
+    level: { type: "string", isIn: ["Easy", "Medium", "Hard"] },
     isDeleted: {
       type: "boolean",
       columnName: "is_deleted",
@@ -19,7 +19,7 @@ module.exports = {
     dislike: { type: "number", defaultsTo: 0 },
     content: { type: "string" },
     title: { type: "string" },
-    createdBy: { type: "number", columnName: "created_by" },
+    createdBy: { model : "User" , columnName: "created_by"},
     categories: {
       collection: "Category",
       via: "questionId",

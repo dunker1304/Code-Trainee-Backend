@@ -19,9 +19,13 @@ module.exports.routes = {
 
   // TestController
   'post /api/test': 'TestController.post',
-  'get /api/find': 'TestController.find',
+  'get /api/find': 'TestController.get',
 
   //QuestionController
   'post /api/submissions': 'QuestionController.submitQuestion',
-  'get /api/question': 'QuestionController.get'
+  'get /api/question': 'QuestionController.get',
+  'post /api/search-question' : 'QuestionController.searchQuestion',
+  'post /api/add-wishList'  : 'QuestionController.addWishList',
+  'get /api/get-category'  : 'QuestionController.getCategory',
+  'post /api/remove-wishList' : 'QuestionController.removeWishList',
 };

@@ -52,5 +52,15 @@ module.exports = {
     }
 
 
+  },
+  createQuery : async function(selectSQL , typeJoin) {
+    return `Select ${selectSQL} from Question as a 
+    inner join QuestionCategory as b
+    on a.id = b.question_id 
+    ${typeJoin} join TrainingHistory as c
+    on a.id = c.question_id
+    inner join Category as d
+    on b.category_id = d.id       
+     `
   }
 }
