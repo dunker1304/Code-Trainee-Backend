@@ -5,7 +5,8 @@ module.exports = {
   submitQuestion: async function (submitData) {
     let result = {
       message: '',
-      success: true
+      success: true,
+      code: ''
     }
     try {
       //config header
@@ -17,20 +18,19 @@ module.exports = {
         }
       }
 
-      let response = await axios.post(`${CONSTANTS.DOMAIN_JUDGE}/submissions?base64_encoded=true`, submitData, config)
+      let response = await axios.post(`${CONSTANTS.DOMAIN_JUDGE}/submissions`, submitData, config)
       let reTry = 0;
-     
+      console.log(response, 'response judge')
       let resultRes = {}
       if (response.data.token) {
-
         do {
-          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?base64_encoded=true&fields=stdout,stdin,time,memory,stderr,token,compile_output,message,status,expected_output`, config)
+          resultRes = await axios.get(`${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?fields=stdout,stdin,time,memory,stderr,token,compile_output,message,status,expected_output`, config)
           status = resultRes.data.status.id
           reTry = reTry + 1;
 
           if (reTry == 6) {
             result['success'] = false;
-            result['message'] = 'Hệ thống đã có lỗi xảy ra!'
+            result['message'] = 'Internal Server Error!'
             return result;
           }
 
@@ -46,8 +46,11 @@ module.exports = {
       }
       return response.data
     } catch (error) {
-      result['success'] = false;
-      result['message'] = error
+      result.success = false;
+      result.message = error.response.data;
+      result.code = error.response.status;
+      console.log(result, 'post judge erro');
+
       return result;
     }
 

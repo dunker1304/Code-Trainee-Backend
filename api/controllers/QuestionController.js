@@ -4,7 +4,8 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-const responseTemplate = require("../components/ResponseTemplate");
+//const responseTemplate = require("../components/ResponseTemplate");
+const QuestionComponent = require("../components/QuestionComponent")
 var Purifier = require("html-purify");
 var purifier = new Purifier();
 module.exports = {
@@ -25,7 +26,7 @@ module.exports = {
     };
 
     //get testcase of question
-    let testCase = await TestCase.find({ questionId: 10 });
+    let testCase = await TestCase.find({ questionId: 1 })
 
     //let q = await Question.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
     //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', questionId: '1' }).fetch();
@@ -39,16 +40,14 @@ module.exports = {
         stdin: Buffer.from("abc", "base64").toString("ascii"),
         //'stdin' : `2\n20 10`
         //'expected_output': '40'
-      };
-      let submittedResult = await QuestionComponent.submitQuestion(submitData);
-      console.log(submittedResult, "submited result");
+      }
+      let submittedResult = await QuestionComponent.submitQuestion(submitData)
+      console.log(submittedResult.message.response, 'submited result');
       if (submittedResult.data.stdout) {
         submittedResult.data.stdout = submittedResult.data.stdout.toString();
-        var buf = Buffer.from(submittedResult.data.stdout, "base64").toString(
-          "ascii"
-        );
-        var buf1 = Buffer.from("abc", "base64").toString("ascii");
-        console.log(buf1, "stdout");
+        var buf = Buffer.from(submittedResult.data.stdin, 'base64').toString('ascii')
+        var buf1 = Buffer.from('<Buffer 8b>', 'utf8')
+        console.log(buf, 'stdout')
       }
       res.send([submittedResult]);
     } else {
@@ -71,7 +70,7 @@ module.exports = {
         }
 
         testCaseResult.push(submitResult);
-        console.log(testCaseResult, "testcase duoi");
+
       }
 
       res.send(testCaseResult);
@@ -79,19 +78,33 @@ module.exports = {
   },
 
   // get question by id
-  getById: async (req, res) => {
+  getQuestionById: async (req, res) => {
     try {
       let questionId = req.query.id;
       questionId = Number.parseInt(questionId);
       if (!questionId || !Number.isInteger(questionId)) {
-        res.json(responseTemplate(400));
+        //res.json(responseTemplate(400));
+        res.send({ message: 'Invalid question id!' })
         return;
       }
+      let count = await Question.count();
       let question = await Question.findOne({ id: questionId });
-      res.json(responseTemplate(200, question));
+      //res.json(responseTemplate(200, question));
+      let testCases
+      if (question) {
+        testCases = await TestCase.find({ questionId: question.id })
+      }
+      res.send({ question: question, testCases: testCases, total: count })
     } catch (e) {
-      res.json(responseTemplate(500));
+      //res.json(responseTemplate(500));
+      res.send({ message: 'Error!' })
     }
+  },
+
+  getRandom: async (req, res) => {
+    let question = await Question.count()
+                          .then(count => Question.find().limit(1).skip(parseInt(Math.random() * count)))
+    console.log(question)
   },
 
   // save question
