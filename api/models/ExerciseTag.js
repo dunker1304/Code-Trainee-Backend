@@ -1,13 +1,13 @@
 module.exports = {
-  tableName: "WishList",
+  tableName: "ExerciseTag",
   attributes: {
-    userId: {
-      model: "User",
-      columnName: "user_id",
-    },
     exerciseId: {
       model: "Exercise",
       columnName: "exercise_id",
+    },
+    tagId: {
+      model: "Tag",
+      columnName: "tag_id",
     },
   },
 };

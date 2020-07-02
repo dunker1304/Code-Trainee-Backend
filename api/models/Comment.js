@@ -10,9 +10,9 @@ module.exports = {
       model: "User",
       columnName: "sender_id"
     },
-    questionId: {
-      model: "Question",
-      columnName: "question_id"
+    exerciseId: {
+      model: "Exercise",
+      columnName: "exercise_id"
     },
   },
 };
