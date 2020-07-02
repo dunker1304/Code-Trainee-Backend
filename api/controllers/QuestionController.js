@@ -1,15 +1,14 @@
 /**
- * QuestionController
+ * ExerciseController
  *
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-//const responseTemplate = require("../components/ResponseTemplate");
-const QuestionComponent = require("../components/QuestionComponent")
+const ExerciseComponent = require("../components/ExerciseComponent");
 var Purifier = require("html-purify");
 var purifier = new Purifier();
 module.exports = {
-  submitQuestion: async (req, res) => {
+  submitExercise: async (req, res) => {
     // call thirty system
 
     let data = req.body;
@@ -25,11 +24,11 @@ module.exports = {
       // 'expected_output':ele['expectedOutput']
     };
 
-    //get testcase of question
-    let testCase = await TestCase.find({ questionId: 1 })
+    //get testcase of exercise
+    let testCase = await TestCase.find({ exerciseId: 1 });
 
-    //let q = await Question.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
-    //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', questionId: '1' }).fetch();
+    //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
+    //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', exerciseId: '1' }).fetch();
     //console.log(a, 'create testcase')
 
     if (testCase.length == 0) {
@@ -40,14 +39,16 @@ module.exports = {
         stdin: Buffer.from("abc", "base64").toString("ascii"),
         //'stdin' : `2\n20 10`
         //'expected_output': '40'
-      }
-      let submittedResult = await QuestionComponent.submitQuestion(submitData)
-      console.log(submittedResult.message.response, 'submited result');
+      };
+      let submittedResult = await ExerciseComponent.submitExercise(submitData);
+      console.log(submittedResult.message.response, "submited result");
       if (submittedResult.data.stdout) {
         submittedResult.data.stdout = submittedResult.data.stdout.toString();
-        var buf = Buffer.from(submittedResult.data.stdin, 'base64').toString('ascii')
-        var buf1 = Buffer.from('<Buffer 8b>', 'utf8')
-        console.log(buf, 'stdout')
+        var buf = Buffer.from(submittedResult.data.stdin, "base64").toString(
+          "ascii"
+        );
+        var buf1 = Buffer.from("<Buffer 8b>", "utf8");
+        console.log(buf, "stdout");
       }
       res.send([submittedResult]);
     } else {
@@ -62,7 +63,7 @@ module.exports = {
           expected_output: testCase[i]["expectedOutput"],
         };
 
-        let submitResult = await QuestionComponent.submitQuestion(submitData);
+        let submitResult = await ExerciseComponent.submitExercise(submitData);
 
         // một testcase xảy ra lỗi runtime or compile thì dừng lại ctr và trả ra lỗi
         if (submitResult.success === false) {
@@ -70,116 +71,114 @@ module.exports = {
         }
 
         testCaseResult.push(submitResult);
-
       }
 
       res.send(testCaseResult);
     }
   },
 
-  // get question by id
-  getQuestionById: async (req, res) => {
+  // get exercise by id
+  getExerciseById: async (req, res) => {
     try {
-      let questionId = req.query.id;
-      questionId = Number.parseInt(questionId);
-      if (!questionId || !Number.isInteger(questionId)) {
-        //res.json(responseTemplate(400));
-        res.send({ message: 'Invalid question id!' })
+      let id = req.query.id;
+      id = Number.parseInt(id);
+      if (!id || !Number.isInteger(id)) {
+        res.send({ message: "Invalid exercise id!" });
         return;
       }
-      let count = await Question.count();
-      let question = await Question.findOne({ id: questionId });
-      //res.json(responseTemplate(200, question));
-      let testCases
-      if (question) {
-        testCases = await TestCase.find({ questionId: question.id })
+      let count = await Exercise.count();
+      let exercise = await Exercise.findOne({ id: id });
+      let testCases;
+      if (exercise) {
+        testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({ question: question, testCases: testCases, total: count })
+      res.send({ question: exercise, testCases: testCases, total: count });
     } catch (e) {
-      //res.json(responseTemplate(500));
-      res.send({ message: 'Error!' })
+      res.send({ message: "Error!" });
     }
   },
 
   getRandom: async (req, res) => {
-    let question = await Question.count()
-                          .then(count => Question.find().limit(1).skip(parseInt(Math.random() * count)))
-    console.log(question)
+    let exercise = await Exercise.count().then((count) =>
+      Exercise.find()
+        .limit(1)
+        .skip(parseInt(Math.random() * count))
+    );
+    console.log(exercise);
   },
 
-  // save question
-  saveQuestion: async (req, res) => {
+  // save exercise
+  saveExercise: async (req, res) => {
     try {
-      let {
-        questionContent,
-        questionTitle,
-        questionPoints,
-        questionLevel,
-      } = req.body;
-      if (
-        !questionContent ||
-        !questionTitle ||
-        !questionLevel ||
-        !Number.isInteger(questionPoints)
-      ) {
-        res.json(responseTemplate(400));
+      let { content, title, points, level } = req.body;
+      if (!content || !title || !level || !Number.isInteger(points)) {
+        res.json({
+          success: false,
+          data: {},
+          code: 1,
+        });
         return;
       }
-      questionContent = purifier.purify(questionContent);
-      let question = await Question.create({
-        points: questionPoints,
-        level: questionLevel,
-        content: questionContent,
-        title: questionTitle,
-        createdBy: 1,
+      content = purifier.purify(content); // escape XSR
+      let exercise = await Exercise.create({
+        points,
+        level,
+        content,
+        title,
       }).fetch();
 
-      res.json(
-        responseTemplate(200, {
-          id: question.id,
-        })
-      );
+      res.json({
+        success: true,
+        data: {
+          id: exercise.id,
+        },
+      });
     } catch (e) {
-      res.json(responseTemplate(500));
+      res.json({
+        success: false,
+        data: {},
+        code: 1,
+      });
     }
   },
 
-  // save question basic information
-  updateQuestion: async (req, res) => {
+  // save exercise basic information
+  updateExercise: async (req, res) => {
     try {
-      let {
-        questionId,
-        questionContent,
-        questionTitle,
-        questionPoints,
-        questionLevel,
-      } = req.body;
-      questionId = Number(questionId);
-      questionPoints = Number(questionPoints);
+      let { id, content, title, points, level } = req.body;
+      id = Number(id);
+      points = Number(points);
       if (
-        !questionContent ||
-        !questionTitle ||
-        !questionLevel ||
-        !Number.isInteger(questionPoints) ||
-        !Number.isInteger(questionId)
+        !content ||
+        !title ||
+        !level ||
+        !Number.isInteger(points) ||
+        !Number.isInteger(id)
       ) {
-        res.json(responseTemplate(400));
+        res.json({
+          success: false,
+          data: {},
+          code: 1,
+        });
         return;
       }
-      questionContent = purifier.purify(questionContent);
-      let updatedQuesiton = await Question.updateOne({ id: questionId }).set({
-        points: questionPoints,
-        level: questionLevel,
-        content: questionContent,
-        title: questionTitle,
+      content = purifier.purify(content);
+      let updatedExercise = await Exercise.updateOne({ id: id }).set({
+        points: points,
+        level: level,
+        content: content,
+        title: title,
       });
-      res.json(
-        responseTemplate(200, {
-          id: updatedQuesiton.id,
-        })
-      );
+      res.json({
+        success: true,
+        data: {},
+      });
     } catch (e) {
-      res.json(responseTemplate(500));
+      res.json({
+        success: false,
+        data: {},
+        code: 1,
+      });
     }
   },
 };

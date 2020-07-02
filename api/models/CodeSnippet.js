@@ -2,15 +2,11 @@ module.exports = {
   tableName: "CodeSnippet",
   attributes: {
     createdBy: { type: "number", columnName: "created_by" },
-    functionName: { type: "string", columnName: "function_name" },
-    returnType: { type: "string", columnName: "return_type"},
-    questionId: {
-      model: "Question",
-      columnName: "question_id",
-    },
-    parameters: {
-      collection: "Parameter",
-      via: "snippetId",
+    sampleCode: { type: "string", columnName: "sample_code" },
+    isActive: { type: "boolean", columnName: "is_active", defaultsTo: false },
+    exerciseId: {
+      model: "Exercise",
+      columnName: "exercise_id",
     },
     programLanguageId: {
       model: "ProgramLanguage",

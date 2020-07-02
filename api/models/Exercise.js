@@ -1,5 +1,5 @@
 module.exports = {
-  tableName: "Question",
+  tableName: "exercise",
   attributes: {
     points: { type: "number" },
     level: {
@@ -22,30 +22,30 @@ module.exports = {
     content: { type: "string" },
     title: { type: "string" },
     createdBy: { type: "number", columnName: "created_by" },
-    categories: {
-      collection: "Category",
-      via: "questionId",
-      through: "QuestionCategory",
+    tags: {
+      collection: "Tag",
+      via: "exerciseId",
+      through: "ExerciseTag",
     },
     comments: {
       collection: "Comment",
-      via: "questionId",
+      via: "exerciseId",
     },
     trainingHistories: {
       collection: "TrainingHistory",
-      via: "questionId",
+      via: "exerciseId",
     },
     testCases: {
       collection: "TestCase",
-      via: "questionId",
+      via: "exerciseId",
     },
     codeSnippets: {
       collection: "CodeSnippet",
-      via: "questionId",
+      via: "exerciseId",
     },
     wishListBy: {
       collection: "User",
-      via: "questionId",
+      via: "exerciseId",
       through: "WishList",
     },
   },

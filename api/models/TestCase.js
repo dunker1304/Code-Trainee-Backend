@@ -6,9 +6,9 @@ module.exports = {
     expectedOutput: { type: "string", columnName: "expected_output" },
     executeTimeLimit: { type: "number", columnName: "execute_time_limit" },
     createdBy: { type: "number", columnName: "created_by" },
-    questionId: {
-      model: "Question",
-      columnName: "question_id",
+    exerciseId: {
+      model: "Exercise",
+      columnName: "exercise_id",
     },
   },
 };

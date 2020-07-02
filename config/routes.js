@@ -21,12 +21,12 @@ module.exports.routes = {
   "post /api/test": "TestController.post",
   "get /api/find": "TestController.find",
 
-  // QuestionController
-  "post /api/submissions": "QuestionController.submitQuestion",
-  "get /api/question": "QuestionController.getQuestionById",
-  'get /api/question/random': 'QuestionController.getRandom',
-  "post /api/save-question": "QuestionController.saveQuestion",
-  "post /api/update-question": "QuestionController.updateQuestion",
+  // ExerciseController
+  "post /api/submissions": "ExerciseController.submitExercise",
+  "get /api/exercise": "ExerciseController.getExerciseById",
+  'get /api/exercise/random': 'ExerciseController.getRandom',
+  "post /api/save-exercise": "ExerciseController.saveExercise",
+  "post /api/update-exercise": "ExerciseController.updateExercise",
   
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",

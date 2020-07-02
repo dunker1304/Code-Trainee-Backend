@@ -9,9 +9,9 @@ module.exports = {
       columnName: "is_finished",
       defaultsTo: false,
     },
-    questionId: {
-      model: "Question",
-      columnName: "question_id",
+    exerciseId: {
+      model: "Exercise",
+      columnName: "exercise_id",
     },
     userId: {
       model: "User",
