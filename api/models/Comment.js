@@ -14,5 +14,9 @@ module.exports = {
       model: "Question",
       columnName: "question_id"
     },
+    title : {
+      type : "string",
+      columnName: "title"
+    }
   },
 };

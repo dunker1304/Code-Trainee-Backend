@@ -28,4 +28,11 @@ module.exports.routes = {
   'post /api/add-wishList'  : 'QuestionController.addWishList',
   'get /api/get-category'  : 'QuestionController.getCategory',
   'post /api/remove-wishList' : 'QuestionController.removeWishList',
+
+  //CommentController : 
+  'post /api/create-comment' : 'CommentController.createAComment',
+  'post /api/create-vote-comment' : 'CommentController.voteAComment',
+  'post /api/get-comment-question-id' : 'CommentController.getCommentByQuestionId',
+  'post /api/get-comment-comment-id' : 'CommentController.getCommentByCommentId',
+  'post /api/delete-a-comment' : 'CommentController.deleteAComment'
 };
