@@ -98,6 +98,23 @@ module.exports = {
     }
   },
 
+  // get basic information
+  getBasicInfoById: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let exercise = await Exercise.findOne({ id: id });
+      res.json({
+        success: true,
+        data: { ...exercise },
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+
   getRandom: async (req, res) => {
     let exercise = await Exercise.count().then((count) =>
       Exercise.find()
@@ -107,18 +124,18 @@ module.exports = {
     console.log(exercise);
   },
 
-  // save exercise
-  saveExercise: async (req, res) => {
+  // create exercise
+  createExercise: async (req, res) => {
     try {
       let { content, title, points, level } = req.body;
-      if (!content || !title || !level || !Number.isInteger(points)) {
-        res.json({
-          success: false,
-          data: {},
-          code: 1,
-        });
-        return;
-      }
+      // if (!content || !title || !level || !Number.isInteger(points)) {
+      //   res.json({
+      //     success: false,
+      //     data: {},
+      //     code: 1,
+      //   });
+      //   return;
+      // }
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -136,9 +153,8 @@ module.exports = {
     } catch (e) {
       res.json({
         success: false,
-        data: {},
-        code: 1,
       });
+      console.log(e);
     }
   },
 
@@ -148,20 +164,20 @@ module.exports = {
       let { id, content, title, points, level } = req.body;
       id = Number(id);
       points = Number(points);
-      if (
-        !content ||
-        !title ||
-        !level ||
-        !Number.isInteger(points) ||
-        !Number.isInteger(id)
-      ) {
-        res.json({
-          success: false,
-          data: {},
-          code: 1,
-        });
-        return;
-      }
+      // if (
+      //   !content ||
+      //   !title ||
+      //   !level ||
+      //   !Number.isInteger(points) ||
+      //   !Number.isInteger(id)
+      // ) {
+      //   res.json({
+      //     success: false,
+      //     data: {},
+      //     code: 1,
+      //   });
+      //   return;
+      // }
       content = purifier.purify(content);
       let updatedExercise = await Exercise.updateOne({ id: id }).set({
         points: points,
@@ -171,14 +187,15 @@ module.exports = {
       });
       res.json({
         success: true,
-        data: {},
+        data: {
+          id: updatedExercise.id,
+        },
       });
     } catch (e) {
       res.json({
         success: false,
-        data: {},
-        code: 1,
       });
+      console.log(e);
     }
   },
 };

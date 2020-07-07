@@ -24,12 +24,23 @@ module.exports.routes = {
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
   "get /api/exercise": "ExerciseController.getExerciseById",
-  'get /api/exercise/random': 'ExerciseController.getRandom',
-  "post /api/save-exercise": "ExerciseController.saveExercise",
-  "post /api/update-exercise": "ExerciseController.updateExercise",
-  
+  "get /api/exercise/random": "ExerciseController.getRandom",
+  "get /api/exercise/basic-info": "ExerciseController.getBasicInfoById",
+  "post /api/exercise/create": "ExerciseController.createExercise",
+  "post /api/exercise/update": "ExerciseController.updateExercise",
+
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
   "post /api/save-testcase": "TestCaseController.saveTestCase",
-  "post /api/update-tescase": "TestCaseController.updateTestCase"
+  "post /api/update-testcase": "TestCaseController.updateTestCase",
+  "post /api/delete-testcase": "TestCaseController.deleteTestcase",
+  "get /api/get-testcases-by-execercise": "TestCaseController.getByExercise",
+
+  // SnippetController
+  "post /api/update-or-create-sample": "SnippetController.updateOrCreateSample",
+  "post /api/update-or-create-supported-lang":
+    "SnippetController.updateOrCreateSupportedLanguage",
+
+  // ProgramLanguageController
+  "get /api/get-all-languages": "ProgramLanguageController.getAllByExercise",
 };
