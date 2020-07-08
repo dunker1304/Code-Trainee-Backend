@@ -220,4 +220,27 @@ module.exports = {
       console.log(e);
     }
   },
+
+  // delete exercise
+  deleteExercise: async (req, res) => {
+    try {
+      let { id } = req.body;
+      let deletedExercise = Exercise.update({
+        id: id,
+      }).set({
+        isDeleted: true,
+      });
+      res.json({
+        success: true,
+        data: {
+          id: deletedExercise.id,
+        },
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
 };

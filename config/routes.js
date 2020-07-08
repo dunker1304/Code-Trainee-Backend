@@ -30,6 +30,7 @@ module.exports.routes = {
   "post /api/exercise/create": "ExerciseController.createExercise",
   "post /api/exercise/update": "ExerciseController.updateExercise",
   "get /api/exercise/get-by-owner": "ExerciseController.getByOwner",
+  "post /api/exercise/delete": "ExerciseController.deleteExercise",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
