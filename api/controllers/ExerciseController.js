@@ -206,8 +206,11 @@ module.exports = {
     try {
       let { ownerId } = req.query;
       let exercises = await Exercise.find({
-        createdBy: ownerId,
-        isDeleted: false,
+        where: {
+          createdBy: ownerId,
+          isDeleted: false,
+        },
+        sort: "updatedAt DESC",
       });
       res.json({
         success: true,
@@ -225,7 +228,7 @@ module.exports = {
   deleteExercise: async (req, res) => {
     try {
       let { id } = req.body;
-      let deletedExercise = Exercise.update({
+      let deletedExercise = await Exercise.updateOne({
         id: id,
       }).set({
         isDeleted: true,
