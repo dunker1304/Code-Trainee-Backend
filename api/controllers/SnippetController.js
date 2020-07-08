@@ -42,43 +42,51 @@ module.exports = {
         exerciseId,
       } = req.body;
       console.log(req.body);
-      activeLangIds.forEach(async (i) => {
-        let snippet = await CodeSnippet.findOrCreate(
-          {
-            exerciseId: exerciseId,
-            programLanguageId: i,
-          },
-          {
-            exerciseId: exerciseId,
-            programLanguageId: i,
-            sampleCode: "",
+      let actives = [
+        ...activeLangIds.map(async (i) => {
+          let snippet = await CodeSnippet.findOrCreate(
+            {
+              exerciseId: exerciseId,
+              programLanguageId: i,
+            },
+            {
+              exerciseId: exerciseId,
+              programLanguageId: i,
+              sampleCode: "",
+              isActive: true,
+            }
+          );
+          await CodeSnippet.updateOne({
+            id: snippet.id,
+          }).set({
             isActive: true,
-          }
-        );
-        await CodeSnippet.updateOne({
-          id: snippet.id,
-        }).set({
-          isActive: true,
-        });
-      });
-      notActiveLangIds.forEach(async (i) => {
-        let snippet = await CodeSnippet.findOrCreate(
-          {
-            exerciseId: exerciseId,
-            programLanguageId: i,
-          },
-          {
-            exerciseId: exerciseId,
-            programLanguageId: i,
-            sampleCode: "",
+          });
+        }),
+      ];
+      let notActives = [
+        ...notActiveLangIds.map(async (i) => {
+          let snippet = await CodeSnippet.findOrCreate(
+            {
+              exerciseId: exerciseId,
+              programLanguageId: i,
+            },
+            {
+              exerciseId: exerciseId,
+              programLanguageId: i,
+              sampleCode: "",
+              isActive: false,
+            }
+          );
+          await CodeSnippet.updateOne({
+            id: snippet.id,
+          }).set({
             isActive: false,
-          }
-        );
-        await CodeSnippet.updateOne({
-          id: snippet.id,
-        }).set({
-          isActive: false,
-        });
+          });
+        }),
+      ];
+      await Promise.all([...actives, ...notActives]);
+      res.json({
+        success: true,
       });
     } catch (e) {
       res.json({

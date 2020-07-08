@@ -31,16 +31,16 @@ module.exports.routes = {
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
-  "post /api/save-testcase": "TestCaseController.saveTestCase",
-  "post /api/update-testcase": "TestCaseController.updateTestCase",
-  "post /api/delete-testcase": "TestCaseController.deleteTestcase",
-  "get /api/get-testcases-by-execercise": "TestCaseController.getByExercise",
+  "post /api/testcase/create": "TestCaseController.createTestCase",
+  "post /api/testcase/update": "TestCaseController.updateTestCase",
+  "post /api/testcase/delete": "TestCaseController.deleteTestcase",
+  "get /api/testcase/get-by-exercise": "TestCaseController.getByExercise",
 
   // SnippetController
-  "post /api/update-or-create-sample": "SnippetController.updateOrCreateSample",
-  "post /api/update-or-create-supported-lang":
+  "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",
+  "post /api/snippet/supported-language/update":
     "SnippetController.updateOrCreateSupportedLanguage",
 
   // ProgramLanguageController
-  "get /api/get-all-languages": "ProgramLanguageController.getAllByExercise",
+  "get /api/program-language/all": "ProgramLanguageController.getAllByExercise",
 };
