@@ -27,9 +27,6 @@ module.exports = {
     //get testcase of exercise
     let testCase = await TestCase.find({ exerciseId: 1 });
 
-    //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
-    //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', exerciseId: '1' }).fetch();
-    //console.log(a, 'create testcase')
 
     if (testCase.length == 0) {
       console.log(testCase, "k co testcase");
@@ -79,7 +76,13 @@ module.exports = {
 
   // get exercise by id
   getExerciseById: async (req, res) => {
+    //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
+    //let a = await TestCase.create({ input: '6\n1 2 3 4 5 6', expectedOutput: '21', exerciseId: '1', isHidden: true }).fetch();
+    //let l = await ProgramLanguage.create({ name: 'C', code: 53, createdBy: 3 })
+    //let s = await CodeSnippet.create({ sampleCode: 'System.out.println("asd")', exerciseId: '1', programLanguageId: 2, createdBy: 3 })
     try {
+      console.log('ashdkja')
+
       let id = req.query.id;
       id = Number.parseInt(id);
       if (!id || !Number.isInteger(id)) {
@@ -94,7 +97,10 @@ module.exports = {
       }
       res.send({ question: exercise, testCases: testCases, total: count });
     } catch (e) {
-      res.send({ message: "Error!" });
+      res.send({ success: false, 
+                 message: "Error!",
+                 code: 500
+              });
     }
   },
 
