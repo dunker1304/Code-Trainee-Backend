@@ -27,7 +27,6 @@ module.exports = {
     //get testcase of exercise
     let testCase = await TestCase.find({ exerciseId: 1 });
 
-
     if (testCase.length == 0) {
       console.log(testCase, "k co testcase");
       let submitData = {
@@ -81,7 +80,7 @@ module.exports = {
     //let l = await ProgramLanguage.create({ name: 'C', code: 53, createdBy: 3 })
     //let s = await CodeSnippet.create({ sampleCode: 'System.out.println("asd")', exerciseId: '1', programLanguageId: 2, createdBy: 3 })
     try {
-      console.log('ashdkja')
+      console.log("ashdkja");
 
       let id = req.query.id;
       id = Number.parseInt(id);
@@ -97,10 +96,7 @@ module.exports = {
       }
       res.send({ question: exercise, testCases: testCases, total: count });
     } catch (e) {
-      res.send({ success: false, 
-                 message: "Error!",
-                 code: 500
-              });
+      res.send({ success: false, message: "Error!", code: 500 });
     }
   },
 
@@ -196,6 +192,26 @@ module.exports = {
         data: {
           id: updatedExercise.id,
         },
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+
+  // get list exercise by owner
+  getByOwner: async (req, res) => {
+    try {
+      let { ownerId } = req.query;
+      let exercises = await Exercise.find({
+        createdBy: ownerId,
+        isDeleted: false,
+      });
+      res.json({
+        success: true,
+        data: exercises,
       });
     } catch (e) {
       res.json({
