@@ -23,6 +23,7 @@ module.exports.routes = {
 
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
+  "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
   "get /api/exercise/basic-info": "ExerciseController.getBasicInfoById",
@@ -40,6 +41,7 @@ module.exports.routes = {
   "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",
   "post /api/snippet/supported-language/update":
     "SnippetController.updateOrCreateSupportedLanguage",
+  "get /api/snippet-code": "SnippetController.getSnippetCode",
 
   // ProgramLanguageController
   "get /api/program-language/all": "ProgramLanguageController.getAllByExercise",
