@@ -1,27 +1,18 @@
 module.exports = {
   // save test case
-  saveTestCase: async (req, res) => {
+  createTestCase: async (req, res) => {
     try {
       let { isHidden, dataInput, expectedOutput, exerciseId } = req.body;
       isHidden = !!isHidden;
       exerciseId = Number.parseInt(exerciseId);
-      // if (!dataInput || !expectedOuput || !Number.isInteger(exerciseId)) {
-      //   res.json({
-      //     success: false,
-      //     data: {},
-      //     code: 1,
-      //   });
-      //   return;
-      // }
+
       let testcase = await TestCase.create({
         isHidden,
         input: dataInput,
         expectedOutput,
         exerciseId: exerciseId,
       }).fetch();
-      // await Exercise.addToCollection(exerciseId, "testCases").numbers([
-      //   testcase.id,
-      // ]);
+
       res.json({
         success: true,
         data: { id: testcase.id },
@@ -66,18 +57,7 @@ module.exports = {
       let { isHidden, input, output, id } = req.body;
       isHidden = !!isHidden;
       id = Number.parseInt(id);
-      // if (
-      //   !dataInput ||
-      //   !expectedOuput ||
-      //   !testcaseId ||
-      //   Number.isInteger(testcaseId)
-      // ) {
-      //   res.json({
-      //     success: false,
-      //     code: 1,
-      //   });
-      //   return;
-      // }
+
       let testcase = await TestCase.updateOne({ id: id }).set({
         isHidden: isHidden,
         input: input,
