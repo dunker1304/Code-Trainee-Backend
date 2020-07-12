@@ -1,12 +1,12 @@
 module.exports = {
-  tableName: "Category",
+  tableName: "Tag",
   attributes: {
     name: { type: "string" },
     createdBy: { type: "number", columnName: "created_by" },
-    questions: {
-      collection: "Question",
-      via: "categoryId",
-      through: "QuestionCategory",
+    exercises: {
+      collection: "Exercise",
+      via: "tagId",
+      through: "ExerciseTag",
     },
   },
 };

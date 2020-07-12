@@ -1,5 +1,5 @@
 module.exports = {
-  tableName: "Question",
+  tableName: "Exercise",
   attributes: {
     points: { type: "number" },
     level: { type: "string", isIn: ["Easy", "Medium", "Hard"] },
@@ -13,37 +13,35 @@ module.exports = {
       columnName: "is_approved",
       defaultsTo: false,
     },
-    otherRequire: { type: "string", columnName: "other_require" },
-    limitCharaters: { type: "number", columnName: "limit_code_characters" },
     like: { type: "number", defaultsTo: 0 },
     dislike: { type: "number", defaultsTo: 0 },
     content: { type: "string" },
     title: { type: "string" },
-    createdBy: { model : "User" , columnName: "created_by"},
-    categories: {
-      collection: "Category",
-      via: "questionId",
-      through: "QuestionCategory",
+    createdBy: { type: "number", columnName: "created_by" },
+    tags: {
+      collection: "Tag",
+      via: "exerciseId",
+      through: "ExerciseTag",
     },
     comments: {
       collection: "Comment",
-      via: "questionId",
+      via: "exerciseId",
     },
     trainingHistories: {
       collection: "TrainingHistory",
-      via: "questionId",
+      via: "exerciseId",
     },
     testCases: {
       collection: "TestCase",
-      via: "questionId",
+      via: "exerciseId",
     },
     codeSnippets: {
       collection: "CodeSnippet",
-      via: "questionId",
+      via: "exerciseId",
     },
     wishListBy: {
       collection: "User",
-      via: "questionId",
+      via: "exerciseId",
       through: "WishList",
     },
   },

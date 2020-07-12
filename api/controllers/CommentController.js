@@ -25,7 +25,7 @@ module.exports = {
     //create
     let comment = {
       'content' : content ,
-      'questionId' : questionId,
+      'exerciseId' : questionId,
       'senderId' : userId ,
       'parentId' : parentId,
       'title' : title
@@ -110,9 +110,9 @@ module.exports = {
       if(sortBy == 1 ) {
          sortText = 'ASC'
       }
-      let listComment = await Comment.find({ where : {questionId : questionId , parentId : -1 , isDeleted : 0} , 
-        skip: (page -1) * 10,
-        limit: 10,
+      let listComment = await Comment.find({ where : { exerciseId : questionId , parentId : -1 , isDeleted : 0} , 
+        skip: (page -1) * 2,
+        limit: 2,
         sort: `createdAt ${sortText}` }).populate('senderId')
 
     
@@ -121,9 +121,14 @@ module.exports = {
            listComment[i]['totalReply'] = totalReply
         }
 
+        let totalCmts = await Comment.count({ where : { exerciseId : questionId , parentId : -1 , isDeleted : 0}} )
+
         return res.send({
           success : true,
-          data : listComment
+          data : {
+            comments :listComment,
+            total : totalCmts
+          }
         })
     } catch (error) {
 

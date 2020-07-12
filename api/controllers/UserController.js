@@ -166,8 +166,35 @@ module.exports = {
     passport.authenticate('jwt', async function (err, user, message) {
 
 
-      res.send({ success: true, message: 'GET SUCCESS', 'user': user });
+      res.send({ success: true, message: message, 'user': user });
     })(req, res, next);
+  }
+  ,
+  getUserById : async function ( req,res) {
+    try {
+      let  userId  = req.params.userId;
+
+      let user = await User.findOne({id : userId})
+  
+      if(!user) {
+        return res.send({
+          success : false,
+          data : {},
+          error : CONSTANTS.NOT_FOUND_USER
+        })
+      }
+  
+      return res.send({
+        success : true , 
+        data : user
+      })
+    } catch (error) {
+      return res.send({
+        success : false,
+        data : {},
+        error : CONSTANTS.API_ERROR
+      })
+    }
   }
 };
 

@@ -48,7 +48,10 @@ module.exports.custom = {
   ERROR_VOTED : 4,
 
   //DELETE A COMMENT :
-  UN_AUTH_TO_DELETE :5
+  UN_AUTH_TO_DELETE :5,
+
+  // NOT FOUND USER
+  NOT_FOUND_USER : 6
 
 
 };
