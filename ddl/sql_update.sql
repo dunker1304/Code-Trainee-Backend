@@ -30,3 +30,7 @@ alter table `TestCase` rename column `question_id` to `exercise_id`;
 alter table `ExerciseTag` rename column `question_id` to `exercise_id`;
 alter table `ExerciseTag` rename column `category_id` to `tag_id`;
 alter table `Comment` rename column `question_id` to `exercise_id`;
+
+-- 09/07/2020 dunk
+alter table `TrainingHistory` rename column `points` to `status` 
+alter table `TrainingHistory` modify column `status` varchar(255)

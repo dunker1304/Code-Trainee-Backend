@@ -2,9 +2,9 @@ module.exports = {
   tableName: "TrainingHistory",
   attributes: {
     timeNeeded: { type: "number", columnName: "time_needed" },
-    points: { type: "number", defaultsTo: 0 },
+    status: { type: "string", defaultsTo: "" },
     answer: { type: "string" },
-    idFinished: {
+    isFinished: {
       type: "boolean",
       columnName: "is_finished",
       defaultsTo: false,
