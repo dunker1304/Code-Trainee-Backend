@@ -24,7 +24,6 @@ module.exports = {
         config
       );
       let reTry = 0;
-      console.log(response, "response judge");
       let resultRes = {};
       if (response.data.token) {
         do {

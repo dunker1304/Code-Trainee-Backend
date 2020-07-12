@@ -63,7 +63,7 @@ module.exports = {
 
         // một testcase xảy ra lỗi runtime or compile thì dừng lại ctr và trả ra lỗi
         if (submitResult.success === false) {
-          return res.send(submitResult);
+          return res.send([submitResult]);
         }
 
         testCaseResult.push(submitResult);
@@ -80,8 +80,6 @@ module.exports = {
     //let l = await ProgramLanguage.create({ name: 'C', code: 53, createdBy: 3 })
     //let s = await CodeSnippet.create({ sampleCode: 'System.out.println("asd")', exerciseId: '1', programLanguageId: 2, createdBy: 3 })
     try {
-      console.log("ashdkja");
-
       let id = req.query.id;
       id = Number.parseInt(id);
       if (!id || !Number.isInteger(id)) {
@@ -100,6 +98,31 @@ module.exports = {
     }
   },
 
+  submitSolution: async (req, res) => {
+    try {
+      let { question, testcases, answer, language } = req.body
+      console.log(req.body, 'solution')
+      let status = "Accepted"
+      testcases.forEach(testcase => {
+        if (testcase.data.description != "Accepted") {
+          status = testcase.data.status.description
+          return;
+        }
+      })
+      let history = await TrainingHistory.create({
+        userId: 3,
+        exerciseId: question.id,
+        status: status,
+        answer: answer,
+        programLanguageId: language,
+        isFinished: status == "Accepted" ? true : false
+      })
+
+      res.send({ success: true, solution: history })
+    } catch (error) {
+      res.send({ success: false, message: error, code: 500 });
+    }
+  },
   // get basic information
   getBasicInfoById: async (req, res) => {
     try {

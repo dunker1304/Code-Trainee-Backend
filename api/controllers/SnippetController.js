@@ -102,9 +102,6 @@ module.exports = {
       exerciseID, 
       languageID
     } = req.query
-    console.log(userID,
-      exerciseID, 
-      languageID, 'get snippet')
     CodeSnippet.findOne({ exerciseId: exerciseID, programLanguageId: languageID})
   }
 };
