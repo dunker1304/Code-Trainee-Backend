@@ -1,8 +1,12 @@
 module.exports = {
-  tableName: "Exercise",
+  tableName: "exercise",
   attributes: {
     points: { type: "number" },
-    level: { type: "string", isIn: ["Easy", "Medium", "Hard"] },
+    level: {
+      type: "string",
+      isIn: ["easy", "medium", "hard"],
+      defaultsTo: "easy",
+    },
     isDeleted: {
       type: "boolean",
       columnName: "is_deleted",

@@ -18,18 +18,6 @@ module.exports.routes = {
   "get /api/current_user": "UserController.currentUser",
   "get /api/profile/:userId" : "UserController.getUserById",
 
-  // TestController
-  'post /api/test': 'TestController.post',
-  'get /api/find': 'TestController.get',
-
-  //QuestionController
-  // 'post /api/submissions': 'QuestionController.submitQuestion',
-  // 'get /api/question': 'QuestionController.get',
-  // 'post /api/search-question' : 'QuestionController.searchQuestion',
-  // 'post /api/add-wishList'  : 'QuestionController.addWishList',
-  // 'get /api/get-category'  : 'QuestionController.getCategory',
-  // 'post /api/remove-wishList' : 'QuestionController.removeWishList',
-
   //CommentController : 
   'post /api/create-comment' : 'CommentController.createAComment',
   'post /api/create-vote-comment' : 'CommentController.voteAComment',
@@ -37,13 +25,27 @@ module.exports.routes = {
   'post /api/get-comment-comment-id' : 'CommentController.getCommentByCommentId',
   'post /api/delete-a-comment' : 'CommentController.deleteAComment',
  
+  
+  // TestcaseController
+  "get /api/testcase": "TestCaseController.getById",
+  "post /api/save-testcase": "TestCaseController.saveTestCase",
+  "post /api/update-tescase": "TestCaseController.updateTestCase",
+
+  // TestController
+  "post /api/test": "TestController.post",
+  "get /api/find": "TestController.find",
 
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
+  "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise": "ExerciseController.getExerciseById",
-  'get /api/exercise/random': 'ExerciseController.getRandom',
-  "post /api/save-exercise": "ExerciseController.saveExercise",
-  "post /api/update-exercise": "ExerciseController.updateExercise",
+  "get /api/exercise/random": "ExerciseController.getRandom",
+  "get /api/exercise/basic-info": "ExerciseController.getBasicInfoById",
+  "post /api/exercise/create": "ExerciseController.createExercise",
+  "post /api/exercise/update": "ExerciseController.updateExercise",
+  "get /api/exercise/get-by-owner": "ExerciseController.getByOwner",
+  "post /api/exercise/delete": "ExerciseController.deleteExercise",
+      //quynhkt-exerciseController
   'post /api/search-exercise' : 'ExerciseController.searchExercise',
   'post /api/add-wishList'  : 'ExerciseController.addWishList',
   'get /api/get-tag'  : 'ExerciseController.getTag',
@@ -54,9 +56,19 @@ module.exports.routes = {
   'get /api/wish-list/:type':'ExerciseController.getWishListByType',
   'get /api/type-wish-list' : 'ExerciseController.getTypeWishList',
 
-  
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
-  "post /api/save-testcase": "TestCaseController.saveTestCase",
-  "post /api/update-tescase": "TestCaseController.updateTestCase"
+  "post /api/testcase/create": "TestCaseController.createTestCase",
+  "post /api/testcase/update": "TestCaseController.updateTestCase",
+  "post /api/testcase/delete": "TestCaseController.deleteTestcase",
+  "get /api/testcase/get-by-exercise": "TestCaseController.getByExercise",
+
+  // SnippetController
+  "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",
+  "post /api/snippet/supported-language/update":
+    "SnippetController.updateOrCreateSupportedLanguage",
+  "get /api/snippet-code": "SnippetController.getSnippetCode",
+
+  // ProgramLanguageController
+  "get /api/program-language/all": "ProgramLanguageController.getAllByExercise",
 };

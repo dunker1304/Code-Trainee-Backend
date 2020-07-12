@@ -29,10 +29,6 @@ module.exports = {
     //get testcase of exercise
     let testCase = await TestCase.find({ exerciseId: 1 });
 
-    //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
-    //let a = await TestCase.create({ input: '1\n10', expectedOutput: '10', exerciseId: '1' }).fetch();
-    //console.log(a, 'create testcase')
-
     if (testCase.length == 0) {
       console.log(testCase, "k co testcase");
       let submitData = {
@@ -69,7 +65,7 @@ module.exports = {
 
         // một testcase xảy ra lỗi runtime or compile thì dừng lại ctr và trả ra lỗi
         if (submitResult.success === false) {
-          return res.send(submitResult);
+          return res.send([submitResult]);
         }
 
         testCaseResult.push(submitResult);
@@ -81,6 +77,10 @@ module.exports = {
 
   // get exercise by id
   getExerciseById: async (req, res) => {
+    //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
+    //let a = await TestCase.create({ input: '6\n1 2 3 4 5 6', expectedOutput: '21', exerciseId: '1', isHidden: true }).fetch();
+    //let l = await ProgramLanguage.create({ name: 'C', code: 53, createdBy: 3 })
+    //let s = await CodeSnippet.create({ sampleCode: 'System.out.println("asd")', exerciseId: '1', programLanguageId: 2, createdBy: 3 })
     try {
       let id = req.query.id;
       id = Number.parseInt(id);
@@ -88,15 +88,57 @@ module.exports = {
         res.send({ message: "Invalid exercise id!" });
         return;
       }
-      //let count = await Exercise.count();
+      let count = await Exercise.count();
       let exercise = await Exercise.findOne({ id: id });
       let testCases;
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({ question: exercise, testCases: testCases, total: 0 });
+      res.send({ question: exercise, testCases: testCases, total: count });
     } catch (e) {
-      res.send({ message: e });
+      res.send({ success: false, message: "Error!", code: 500 });
+    }
+  },
+
+  submitSolution: async (req, res) => {
+    try {
+      let { question, testcases, answer, language } = req.body
+      console.log(req.body, 'solution')
+      let status = "Accepted"
+      testcases.forEach(testcase => {
+        if (testcase.data.description != "Accepted") {
+          status = testcase.data.status.description
+          return;
+        }
+      })
+      let history = await TrainingHistory.create({
+        userId: 3,
+        exerciseId: question.id,
+        status: status,
+        answer: answer,
+        programLanguageId: language,
+        isFinished: status == "Accepted" ? true : false
+      })
+
+      res.send({ success: true, solution: history })
+    } catch (error) {
+      res.send({ success: false, message: error, code: 500 });
+    }
+  },
+  // get basic information
+  getBasicInfoById: async (req, res) => {
+    try {
+      let { id } = req.query;
+      let exercise = await Exercise.findOne({ id: id });
+      res.json({
+        success: true,
+        data: { ...exercise },
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
     }
   },
 
@@ -109,18 +151,18 @@ module.exports = {
     console.log(exercise);
   },
 
-  // save exercise
-  saveExercise: async (req, res) => {
+  // create exercise
+  createExercise: async (req, res) => {
     try {
       let { content, title, points, level } = req.body;
-      if (!content || !title || !level || !Number.isInteger(points)) {
-        res.json({
-          success: false,
-          data: {},
-          code: 1,
-        });
-        return;
-      }
+      // if (!content || !title || !level || !Number.isInteger(points)) {
+      //   res.json({
+      //     success: false,
+      //     data: {},
+      //     code: 1,
+      //   });
+      //   return;
+      // }
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -138,9 +180,8 @@ module.exports = {
     } catch (e) {
       res.json({
         success: false,
-        data: {},
-        code: 1,
       });
+      console.log(e);
     }
   },
 
@@ -150,20 +191,20 @@ module.exports = {
       let { id, content, title, points, level } = req.body;
       id = Number(id);
       points = Number(points);
-      if (
-        !content ||
-        !title ||
-        !level ||
-        !Number.isInteger(points) ||
-        !Number.isInteger(id)
-      ) {
-        res.json({
-          success: false,
-          data: {},
-          code: 1,
-        });
-        return;
-      }
+      // if (
+      //   !content ||
+      //   !title ||
+      //   !level ||
+      //   !Number.isInteger(points) ||
+      //   !Number.isInteger(id)
+      // ) {
+      //   res.json({
+      //     success: false,
+      //     data: {},
+      //     code: 1,
+      //   });
+      //   return;
+      // }
       content = purifier.purify(content);
       let updatedExercise = await Exercise.updateOne({ id: id }).set({
         points: points,
@@ -173,7 +214,9 @@ module.exports = {
       });
       res.json({
         success: true,
-        data: {},
+        data: {
+          id: updatedExercise.id,
+        },
       });
     } catch (e) {
       res.json({
@@ -511,6 +554,51 @@ module.exports = {
         error : CONSTANTS.API_ERROR
       })
     }
-  }
+  },
+  
+  // get list exercise by owner
+  getByOwner: async (req, res) => {
+    try {
+      let { ownerId } = req.query;
+      let exercises = await Exercise.find({
+        where: {
+          createdBy: ownerId,
+          isDeleted: false,
+        },
+        sort: "updatedAt DESC",
+      });
+      res.json({
+        success: true,
+        data: exercises,
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
 
+  // delete exercise
+  deleteExercise: async (req, res) => {
+    try {
+      let { id } = req.body;
+      let deletedExercise = await Exercise.updateOne({
+        id: id,
+      }).set({
+        isDeleted: true,
+      });
+      res.json({
+        success: true,
+        data: {
+          id: deletedExercise.id,
+        },
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
 };
