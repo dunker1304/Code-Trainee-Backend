@@ -17,6 +17,7 @@ module.exports.routes = {
   "get /oauth/google/callback": "UserController.googleCallback",
   "get /api/current_user": "UserController.currentUser",
   "get /api/profile/:userId" : "UserController.getUserById",
+  "get /api/user/exercise":"UserController.getExerciseOfAUser",
 
   //CommentController : 
   'post /api/create-comment' : 'CommentController.createAComment',

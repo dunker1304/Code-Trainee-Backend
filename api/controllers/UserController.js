@@ -195,6 +195,39 @@ module.exports = {
         error : CONSTANTS.API_ERROR
       })
     }
+  },
+
+  getExerciseOfAUser : async function ( req ,res){
+    try {
+      let userId = req.user && req.user['id'] ? req.user['id']  :5;
+
+      //count All exercise
+      let allExercise = await Exercise.count({});
+
+      //count specific level if question
+      let easyE  = await Exercise.count({level:'Easy'})
+      let mediumE  = await Exercise.count({level :'Medium'})
+      let hardE    = await Exercise.count({level :'Hard'})
+      
+      return res.send({
+        success : true,
+        data : {
+          total : allExercise,
+          easy : easyE,
+          medium : mediumE,
+          hard : hardE
+        }
+      })
+      
+    } catch (error) {
+      console.log(error)
+      return res.send({
+        success : false,
+        error : CONSTANTS.API_ERROR,
+        data : []
+      });
+    }
   }
+  
 };
 

@@ -61,7 +61,7 @@ module.exports = {
     }
   },
   createQuery : async function(selectSQL , typeJoin) {
-    return `Select ${selectSQL} from Exercise as a 
+    return `Select ${selectSQL} from exercise as a 
     inner join ExerciseTag as b
     on a.id = b.exercise_id 
     ${typeJoin} join TrainingHistory as c

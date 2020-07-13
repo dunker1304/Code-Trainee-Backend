@@ -148,7 +148,10 @@ module.exports = {
         .limit(1)
         .skip(parseInt(Math.random() * count))
     );
-    console.log(exercise);
+    return res.send({
+      success : true , 
+      data   :exercise[0]
+    })
   },
 
   // create exercise
@@ -252,7 +255,7 @@ module.exports = {
           if(data.tag && data.tag.length > 0) {
              const tagIds = data.tag.map(value => value.id)
              conditionTag = { id : { in : tagIds}}
-             conditiontTagSQL = `b.category_id in (${tagIds.toString()})`
+             conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`
           }
 
           //filter by status
@@ -555,7 +558,7 @@ module.exports = {
       })
     }
   },
-  
+
   // get list exercise by owner
   getByOwner: async (req, res) => {
     try {
