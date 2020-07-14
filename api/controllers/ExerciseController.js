@@ -94,7 +94,7 @@ module.exports = {
       }
       res.send({ question: exercise, testCases: testCases, total: count });
     } catch (e) {
-      res.send({ success: false, message: "Error!", code: 500 });
+      res.send({ success: false, message: e, code: 500 });
     }
   },
 
