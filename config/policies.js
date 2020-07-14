@@ -18,10 +18,10 @@ module.exports.policies = {
   ***************************************************************************/
 
   // '*': true,
-  TestController: {
+  // TestController: {
 
-   '*': 'isAuthenticate'
-  },
+  //  '*': 'isAuthenticate'
+  // },
 
   // UserController : {
   //   'getUserById' : 'isAuthenticate'

@@ -143,17 +143,26 @@ module.exports = {
   },
 
   verifyAccount: async function (req, res) {
-    const secret = req.params.secret;
+    try {
+      const secret = req.params.secret;
 
-    const user = await User.findOne({ 'secret': secret });
-
-
-    if (!user)
-      return res.status(200).json({ 'success': false, 'message': 'invalid token secret' })
-
-    else {
-      await User.update({ 'id': user.id }).set({ 'status': 1, 'secret': '' })
-      return res.status(200).json({ 'success': true, 'message': 'confirm email success' });
+      const user = await User.findOne({ 'secret': secret });
+  
+  
+      if (!user)
+        return res.status(200).json({ 'success': false, 'message': 'invalid token secret' })
+  
+      else {
+        await User.update({ 'id': user.id }).set({ 'status': 1, 'secret': '' })
+        return res.status(200).json({ 'success': true, 'message': 'confirm email success' });
+      }
+    } catch (error) {
+      console.log(error)
+       return res.send({
+         success : false,
+         error : CONSTANTS.API_ERROR,
+         data : {}
+       })
     }
 
 

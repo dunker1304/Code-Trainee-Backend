@@ -34,7 +34,7 @@ module.exports.routes = {
 
   // TestController
   "post /api/test": "TestController.post",
-  "get /api/find": "TestController.find",
+  "get /api/get": "TestController.get",
 
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
