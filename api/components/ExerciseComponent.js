@@ -31,14 +31,16 @@ module.exports = {
             `${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?fields=stdout,stdin,time,memory,stderr,token,compile_output,message,status,expected_output`,
             config
           );
+          console.log(resultRes.data, 'token jask')
+
           status = resultRes.data.status.id;
           reTry = reTry + 1;
 
-          if (reTry == 6) {
-            result["success"] = false;
-            result["message"] = "Internal Server Error!";
-            return result;
-          }
+          // if (reTry == 6) {
+          //   result["success"] = false;
+          //   result["message"] = "Internal Server Error!";
+          //   return result;
+          // }
         } while (
           status == CONSTANTS.STATUS_SUBMIT.IN_QUEUE ||
           status == CONSTANTS.STATUS_SUBMIT.PROCESSING
@@ -48,6 +50,8 @@ module.exports = {
         if (CONSTANTS.ERROR_STATUS.indexOf(status) !== -1) {
           result["success"] = false;
         }
+        console.log(result, 'first response')
+
         return result;
       }
       return response.data;
