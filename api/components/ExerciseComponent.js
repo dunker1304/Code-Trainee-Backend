@@ -13,7 +13,7 @@ module.exports = {
       let config = {
         headers: {
           "Content-Type": "application/json",
-          "x-rapidapi-key": CONSTANTS.RAPIDAPI_KEY,
+          //"x-rapidapi-key": CONSTANTS.RAPIDAPI_KEY,
           useQueryString: true,
         },
       };
