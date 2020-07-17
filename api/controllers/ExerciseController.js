@@ -241,6 +241,7 @@ module.exports = {
           let conditionLevelSQL = ``
           let conditiontTagSQL = ``
           let conditiontStatusSQL = ``
+          let conditionKeySearch = ``
           let typeJoin = `left`
           let selectSQL = `Count(DISTINCT a.id) as total`
           let userId = req.user ? req.user : 5
@@ -265,31 +266,41 @@ module.exports = {
              typeJoin = `inner`   
           }
 
+          //filter by key_Search
+          if(data.term && data.term.name) {
+            conditionKeySearch = ` MATCH (title,content) AGAINST ('${data.term.name}' IN NATURAL LANGUAGE MODE)`
+          }
+
           let SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin)
           //condition
           if(conditionLevelSQL) {
-             if(condition1) {
+            // if(condition1) {
                 condition1 += ` AND ${conditionLevelSQL}`
-             }
-             else 
-                condition1 = ` WHERE ${conditionLevelSQL}`
+            //  }
+            //  else 
+            //     condition1 = ` WHERE ${conditionLevelSQL}`
           }
 
           if(conditiontTagSQL) {
-            if(condition1) {
+          //  if(condition1) {
                condition1 += ` AND ${conditiontTagSQL}`
-            }
-            else 
-               condition1 = ` WHERE ${conditiontTagSQL}`
+            // }
+            // else 
+            //    condition1 = ` WHERE ${conditiontTagSQL}`
          }
 
          if(conditiontStatusSQL) {
-          if(condition1) {
+         // if(condition1) {
              condition1 += ` AND ${conditiontStatusSQL}`
-          }
-          else 
-             condition1 = ` WHERE ${conditiontStatusSQL}`
-       }
+          // }
+          // else 
+          //    condition1 = ` WHERE ${conditiontStatusSQL}`
+        }
+
+        if(conditionKeySearch) {
+          condition1 += ` AND ${conditionKeySearch}`
+        }
+
        let pagging = ` ORDER BY a.ID ASC LIMIT ${(page-1)*limit},${limit}`
       
        //count
@@ -313,6 +324,7 @@ module.exports = {
                   })
              let isWishList = await WishList.findOne({userId : userId,exerciseId:questionId}) 
              let author = await User.findOne({where : {id : createdBy} ,select : ['id','displayName']})
+             let countComment = await Comment.count({where :  {exerciseId : resultSQL[i]['id'] }})
               let tmp = {...resultSQL[i]}
                   tmp['categories'] = category
                   if(isWishList) {
@@ -323,6 +335,7 @@ module.exports = {
 
                   if(author)
                     tmp['author'] =   author
+                    tmp['countComment'] = countComment;
               resultFormated.push(tmp)
                
            }
@@ -330,7 +343,8 @@ module.exports = {
           return res.send({
             success : true ,
             data : resultFormated,
-            total : count['rows'][0] && count['rows'][0]['total'] ? count['rows'][0]['total']:0
+            total : count['rows'][0] && count['rows'][0]['total'] ? count['rows'][0]['total']:0,
+            
           })
     } catch (error) {
          console.log(error)
@@ -349,7 +363,7 @@ module.exports = {
     try {
       let {userId , questionId } = req.body
        userId = 5;
-       WishList.findOrCreate({userId , exerciseId },{userId , exerciseId })
+       WishList.findOrCreate({userId : userId , exerciseId : questionId},{userId : userId , exerciseId : questionId})
       .exec(async(err, wishList, wasCreated)=> {
         if (err) { return res.serverError(err); }
       
@@ -369,6 +383,7 @@ module.exports = {
       })
       
     } catch (error) {
+      console.log(error)
       res.send({
         success : false,
         message :error
@@ -493,38 +508,12 @@ module.exports = {
      }
     },
 
-  addTypeWishList : async (req,res )=> {
-    try {
-      let { name } = req.body
-      let  userId = req.user && req.user['id'] ?  req.user['id'] : 5
-
-      let type = {
-        name : name,
-        createdBy : userId
-      }
-
-      let result = await TypeWishList.create(type).fetch()
-      return res.send({
-        success : true , 
-        data : result ,
-      })
-    } catch (error) {
-      console.log(error)
-      return res.send({
-        success : false,
-        data : {},
-        message : error
-      })
-    }
-  },
-
-  getWishListByType : async ( req,res )=> {
+  getWishList : async ( req,res )=> {
      try {
-      let { type} = req.params
-
+    
       let userId = req.user && req.user['id'] ? req.user['id']: 5
 
-      let listWishList = await WishList.find({type : type , userId : userId}).populate('exerciseId')
+      let listWishList = await WishList.find({ userId : userId}).populate('exerciseId')
 
       return res.send({
         success : true,
@@ -540,25 +529,6 @@ module.exports = {
        })
      }
   },
-
-  getTypeWishList : async ( req,res) => {
-    try {
-      let userId = req.user && req.user['id'] ? req.user['id'] : 5;
-      let listTypeWishList = await TypeWishList.find({ createdBy : userId})
-
-      return res.send({
-        success : true , 
-        data : listTypeWishList
-      })
-    } catch (error) {
-      return res.send({
-        success: false ,
-        data : [],
-        error : CONSTANTS.API_ERROR
-      })
-    }
-  },
-
   // get list exercise by owner
   getByOwner: async (req, res) => {
     try {
@@ -581,7 +551,7 @@ module.exports = {
       console.log(e);
     }
   },
-
+ 
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
@@ -604,4 +574,45 @@ module.exports = {
       console.log(e);
     }
   },
+
+  // get all submission
+
+  getAllSubmission : async(req,res)=> {
+    try {
+      let userId = req.user && req.user['id'] ? req.user['id']: 5;
+
+      let listSubmission = await TrainingHistory.find({ where : {userId : userId ,  isFinished : 1}}).populate('programLanguageId').populate('exerciseId')
+      let totalSub = await TrainingHistory.count({ where : {userId : userId , isFinished : 1}})
+      let result = []
+      listSubmission.forEach(ele => {
+         let item = {
+           time : ele['createdAt'],
+           exercise : ele['exerciseId']['title'],
+           status : ele['status'],
+           runtime : ele['timeNeeded'],
+           language : ele['programLanguageId']['name']
+         }
+         result.push(item)
+      });
+     
+
+      return res.send({
+        success : true,
+        data : {
+          submission : result,
+          total : totalSub
+        }
+      })
+    } catch (error) {
+      console.log(error)
+      return res.send({
+        success : false,
+        data : {
+          submission : [],
+          total : 0
+        },
+        error: CONSTANTS.API_ERROR
+      })
+    }
+  }
 };

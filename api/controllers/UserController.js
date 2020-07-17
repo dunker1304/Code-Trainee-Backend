@@ -214,17 +214,37 @@ module.exports = {
       let allExercise = await Exercise.count({});
 
       //count specific level if question
-      let easyE  = await Exercise.count({level:'Easy'})
-      let mediumE  = await Exercise.count({level :'Medium'})
-      let hardE    = await Exercise.count({level :'Hard'})
+      // let easyE  = await Exercise.count({level:'Easy'})
+      // let mediumE  = await Exercise.count({level :'Medium'})
+      // let hardE    = await Exercise.count({level :'Hard'})
+      let easyE = 0;
+      let mediumE = 0;
+      let hardE = 0;
       
+
+      let rawResult = await sails.sendNativeQuery(`SELECT * FROM exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
+
+      rawResult['rows'].forEach(ele => {
+         if(ele['level'] == 'Easy') easyE++;
+         if(ele['level'] == 'Medium') mediumE++;
+         if(ele['level'] == 'Hard') hardE++;
+      });
+
+      let  solved = easyE + mediumE + hardE; 
+
+      let attempted = await sails.sendNativeQuery('SELECT COUNT(DISTINCT `exercise_id`) AS attempted FROM `TrainingHistory` AS a WHERE `is_finished` = 1 ')
+  
       return res.send({
         success : true,
         data : {
-          total : allExercise,
-          easy : easyE,
-          medium : mediumE,
-          hard : hardE
+
+          total : allExercise, //tổng câu hỏi
+          easy : easyE, // tổng câu easy- submit success
+          medium : mediumE,// tổng câu medium- submit success
+          hard : hardE,// tổng câu hard- submit success
+          solved : solved, //tổng câu  submit success
+          todo : allExercise - solved,
+          attempted : attempted['rows'] && attempted['rows'][0] ? attempted['rows'][0]['attempted']: 0
         }
       })
       
@@ -233,7 +253,15 @@ module.exports = {
       return res.send({
         success : false,
         error : CONSTANTS.API_ERROR,
-        data : []
+        data : {
+          total : 0, 
+          easy : 0,
+          medium : 0,
+          hard : 0,
+          solved : 0, 
+          todo : 0 ,
+          attempted :  0
+        }
       });
     }
   }
