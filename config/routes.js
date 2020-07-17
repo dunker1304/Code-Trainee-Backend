@@ -55,7 +55,8 @@ module.exports.routes = {
   'get /api/get-most-recent-sub/:userId': 'ExerciseController.getMostRecentSubmission',
   'post /api/add-type-wish-list':'ExerciseController.addTypeWishList',
   'get /api/wish-list/:type':'ExerciseController.getWishListByType',
-  'get /api/type-wish-list' : 'ExerciseController.getTypeWishList',
+  'get /api/wish-list' : 'ExerciseController.getWishList',
+  'get /api/all-submission' : 'ExerciseController.getAllSubmission',
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
