@@ -21,7 +21,7 @@ module.exports.custom = {
   CLIENT_ID :'1034737051172-tt6rkd713lmdub59e7qakoi3o5o0b15s.apps.googleusercontent.com',
   CLIENT_SECRET : 'BVE0XLGOpyCFK77QgK4B1wx0',
   JWT_SECRET: 'codetraineeauthentication',
-  DOMAIN_JUDGE : 'https://judge0.p.rapidapi.com',
+  DOMAIN_JUDGE : 'http://codetrainee.codes:8080',
   RAPIDAPI_KEY : '42413616ffmshacd96f052fdb599p114173jsn116e7210cfd4',
   STATUS_SUBMIT : {
     'IN_QUEUE' : 1,

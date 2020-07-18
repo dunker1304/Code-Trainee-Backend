@@ -71,7 +71,13 @@ module.exports = {
       *                                                                           *
       ****************************************************************************/
       // ssl: true,
-
+      adapter: "sails-mysql",
+      host: "localhost",
+      port: "3306",
+      user: "root",
+      password: "codetrainee",
+      database: "CodeTrainee",
+      timezone: "utc"
     },
 
   },
@@ -250,10 +256,10 @@ module.exports = {
     * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
     *                                                                          *
     ***************************************************************************/
-    // onlyAllowOrigins: [
-    //   'https://example.com',
+     onlyAllowOrigins: [
+       'https://api.codetrainee.codes',
     //   'https://staging.example.com',
-    // ],
+     ],
 
 
     /***************************************************************************

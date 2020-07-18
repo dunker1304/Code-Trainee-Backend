@@ -8,10 +8,10 @@ const bcrypt = require("bcryptjs");
 module.exports = {
   tableName: "User",
   attributes: {
-    username: { type: "string", unique: true },
+    username: { type: "string", unique: true, required: true },
     password: { type: "string" },
     displayName: { type: "string", columnName: "display_name" },
-    email: { type: "string", unique: true },
+    email: { type: "string", unique: true, required: true },
     phone: { type: "string" },
     imageLink: { type: "string", columnName: "image_link" },
     dateOfBirth: { type: "ref", columnName: "DoB", columnType: "datetime" },
