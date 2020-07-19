@@ -23,6 +23,7 @@ module.exports.routes = {
 
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
+  "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
