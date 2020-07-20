@@ -39,6 +39,22 @@ module.exports.custom = {
     'INTERNAL_ERROR' : 13,
     'EXEC_FORMAT_ERROR' : 14,
   },
-  ERROR_STATUS : [6,7,8,9,10,11,12,13,14]
+  ERROR_STATUS : [6,7,8,9,10,11,12,13,14],
+  API_ERROR : 1, // hệ thống đã có lỗi xảy ra
+  VALIDATE_COMMENT_CONTENT : 2, // Content of comment may not empty!
+  VALIDATE_COMMENT_CONTENT_LENGTH : 3, // Content of comment too long!
+
+  //VOTE A COMMENT : 
+  ERROR_VOTED : 4,
+
+  //DELETE A COMMENT :
+  UN_AUTH_TO_DELETE :5,
+
+  // NOT FOUND USER
+  NOT_FOUND_USER : 6,
+
+  //EDIT SUCCESS ACCOUNT
+  EDIT_ACCOUNT_SUCCESS : true
+
 
 };

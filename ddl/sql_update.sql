@@ -31,6 +31,22 @@ alter table `ExerciseTag` rename column `question_id` to `exercise_id`;
 alter table `ExerciseTag` rename column `category_id` to `tag_id`;
 alter table `Comment` rename column `question_id` to `exercise_id`;
 
+-- 4/7/2020 quynhkt
+ALTER TABLE TestCase CHANGE `question_id` `exercise_id` INT
+
+-- 8/7/2020 quynhkt
+CREATE TABLE TypeWishList (
+id INT AUTO_INCREMENT PRIMARY KEY ,
+`name` VARCHAR(300) NOT NULL ,
+`created_by` INT ,
+FOREIGN KEY (created_by) REFERENCES `User`(id)
+
+)
+
 -- 09/07/2020 dunk
 alter table `TrainingHistory` rename column `points` to `status` 
 alter table `TrainingHistory` modify column `status` varchar(255)
+
+-- 15/7/2020
+ALTER TABLE `Comment` MODIFY content VARCHAR(10000)  CHARACTER SET utf8;
+ALTER TABLE `Comment` MODIFY title VARCHAR(300)  CHARACTER SET utf8;

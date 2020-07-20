@@ -143,17 +143,26 @@ module.exports = {
   },
 
   verifyAccount: async function (req, res) {
-    const secret = req.params.secret;
+    try {
+      const secret = req.params.secret;
 
-    const user = await User.findOne({ 'secret': secret });
-
-
-    if (!user)
-      return res.status(200).json({ 'success': false, 'message': 'invalid token secret' })
-
-    else {
-      await User.update({ 'id': user.id }).set({ 'status': 1, 'secret': '' })
-      return res.status(200).json({ 'success': true, 'message': 'confirm email success' });
+      const user = await User.findOne({ 'secret': secret });
+  
+  
+      if (!user)
+        return res.status(200).json({ 'success': false, 'message': 'invalid token secret' })
+  
+      else {
+        await User.update({ 'id': user.id }).set({ 'status': 1, 'secret': '' })
+        return res.status(200).json({ 'success': true, 'message': 'confirm email success' });
+      }
+    } catch (error) {
+      console.log(error)
+       return res.send({
+         success : false,
+         error : CONSTANTS.API_ERROR,
+         data : {}
+       })
     }
 
 
@@ -165,9 +174,126 @@ module.exports = {
   currentUser: function (req, res, next) {
     passport.authenticate('jwt', async function (err, user, message) {
 
+      if(err) 
+       return res.send({
+        success: false,
+        message : 'Đã có lỗi xảy ra'
+      })
+   
+      if(!user) {
+        return res.status(403).json({
+          success : false,
+          message : message ? message :'Token Is Invalid'
+        })
+      }
 
-      res.send({ success: true, message: 'GET SUCCESS', 'user': user });
-    })(req, res, next);
+      return res.status(200).json({
+        success : true,
+        user : user
+      })
+    
+     
+     })(req, res);
   }
+  ,
+  getUserById : async function ( req,res) {
+    try {
+      let  userId  = req.params.userId;
+
+      let user = await User.findOne({id : userId})
+  
+      if(!user) {
+        return res.send({
+          success : false,
+          data : {},
+          error : CONSTANTS.NOT_FOUND_USER
+        })
+      }
+  
+      return res.send({
+        success : true , 
+        data : user
+      })
+    } catch (error) {
+      return res.send({
+        success : false,
+        data : {},
+        error : CONSTANTS.API_ERROR
+      })
+    }
+  },
+
+  getExerciseOfAUser : async function ( req ,res){
+    try {
+      let userId = req.user && req.user['id'] ? req.user['id']  :5;
+
+      //count All exercise
+      let allExercise = await Exercise.count({});
+
+      //count specific level if question
+      // let easyE  = await Exercise.count({level:'Easy'})
+      // let mediumE  = await Exercise.count({level :'Medium'})
+      // let hardE    = await Exercise.count({level :'Hard'})
+      let easyE = 0;
+      let mediumE = 0;
+      let hardE = 0;
+      
+
+      let rawResult = await sails.sendNativeQuery(`SELECT * FROM exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
+
+      rawResult['rows'].forEach(ele => {
+         if(ele['level'] == 'Easy') easyE++;
+         if(ele['level'] == 'Medium') mediumE++;
+         if(ele['level'] == 'Hard') hardE++;
+      });
+
+      let  solved = easyE + mediumE + hardE; 
+
+      let attempted = await sails.sendNativeQuery('SELECT COUNT(DISTINCT `exercise_id`) AS attempted FROM `TrainingHistory` AS a WHERE `is_finished` = 1 ')
+
+      let acceptedSubmissions = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Correct Answer'}})
+      
+      let wrongAnswer = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Wrong Answer'}})
+
+      let runtimeError = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Runtime Error'}})
+
+      let totalSubmission = await TrainingHistory.count({})
+      return res.send({
+        success : true,
+        data : {
+
+          total : allExercise, //tổng câu hỏi
+          easy : easyE, // tổng câu easy- submit success
+          medium : mediumE,// tổng câu medium- submit success
+          hard : hardE,// tổng câu hard- submit success
+          solved : solved, //tổng câu  submit success
+          todo : allExercise - solved,
+          attempted : attempted['rows'] && attempted['rows'][0] ? attempted['rows'][0]['attempted']: 0, //sô câu hỏi đã submit
+          acceptedSubmissions : acceptedSubmissions ,// số lần submiss success,
+          wrongAnswer : wrongAnswer,
+          runtimeError : runtimeError,
+          other : totalSubmission - (wrongAnswer + runtimeError + acceptedSubmissions ),
+          rateAcceptedSubmissions : (acceptedSubmissions/totalSubmission).toFixed(2)*(100) 
+        }
+      })
+      
+    } catch (error) {
+      console.log(error)
+      return res.send({
+        success : false,
+        error : CONSTANTS.API_ERROR,
+        data : {
+          total : 0, 
+          easy : 0,
+          medium : 0,
+          hard : 0,
+          solved : 0, 
+          todo : 0 ,
+          attempted :  0
+        }
+      });
+    }
+  }
+  
 };
 

@@ -64,4 +64,19 @@ module.exports = {
       return result;
     }
   },
+  createQuery : async function(selectSQL , typeJoin) {
+    return `Select ${selectSQL} from exercise as a 
+    inner join ExerciseTag as b
+    on a.id = b.exercise_id 
+    ${typeJoin} join TrainingHistory as c
+    on a.id = c.exercise_id
+    inner join Tag as d
+    on b.tag_id = d.id WHERE a.is_deleted = 0      
+     `
+  },
+
+  getRange : (count)=> {
+    return Array.from({ length: count }, (_, i) => i);
+  }
+
 };

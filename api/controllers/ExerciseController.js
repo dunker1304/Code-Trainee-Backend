@@ -7,6 +7,8 @@
 const ExerciseComponent = require("../components/ExerciseComponent");
 var Purifier = require("html-purify");
 var purifier = new Purifier();
+const moment = require('moment');
+const CONSTANTS = require("../../config/custom").custom
 module.exports = {
   submitExercise: async (req, res) => {
     // call thirty system
@@ -146,7 +148,10 @@ module.exports = {
         .limit(1)
         .skip(parseInt(Math.random() * count))
     );
-    console.log(exercise);
+    return res.send({
+      success : true , 
+      data   :exercise[0]
+    })
   },
 
   // create exercise
@@ -219,11 +224,311 @@ module.exports = {
     } catch (e) {
       res.json({
         success: false,
+        data: {},
+        code: 1,
       });
-      console.log(e);
     }
   },
 
+   //search exercise
+   searchExercise :  async (req,res) => {
+    try {
+          let data  = req.body ? req.body : {}
+          let condition = {}
+          let condition1 = ``
+          let limit = data.limit ? 10 : 10
+          let page = data.page ? data.page :1
+          let conditionLevelSQL = ``
+          let conditiontTagSQL = ``
+          let conditiontStatusSQL = ``
+          let conditionKeySearch = ``
+          let typeJoin = `left`
+          let selectSQL = `Count(DISTINCT a.id) as total`
+          let userId = req.user ? req.user : 5
+        
+          //filter by level
+          if(data.level){
+             condition = { 'level' : data.level.name}
+             conditionLevelSQL = `a.level = '${data.level.name}'`
+          }
+
+          //filter by tag
+          if(data.tag && data.tag.length > 0) {
+             const tagIds = data.tag.map(value => value.id)
+             conditionTag = { id : { in : tagIds}}
+             conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`
+          }
+
+          //filter by status
+          if(data.status && data.status.id != -1) {
+             conditionStatus = { 'idFinished' : data.status.id }     
+             conditiontStatusSQL = `c.is_finished = ${data.status.id}`   
+             typeJoin = `inner`   
+          }
+
+          //filter by key_Search
+          if(data.term && data.term.name) {
+            conditionKeySearch = ` MATCH (title,content) AGAINST ('${data.term.name}' IN NATURAL LANGUAGE MODE)`
+          }
+
+          let SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin)
+          //condition
+          if(conditionLevelSQL) {
+            // if(condition1) {
+                condition1 += ` AND ${conditionLevelSQL}`
+            //  }
+            //  else 
+            //     condition1 = ` WHERE ${conditionLevelSQL}`
+          }
+
+          if(conditiontTagSQL) {
+          //  if(condition1) {
+               condition1 += ` AND ${conditiontTagSQL}`
+            // }
+            // else 
+            //    condition1 = ` WHERE ${conditiontTagSQL}`
+         }
+
+         if(conditiontStatusSQL) {
+         // if(condition1) {
+             condition1 += ` AND ${conditiontStatusSQL}`
+          // }
+          // else 
+          //    condition1 = ` WHERE ${conditiontStatusSQL}`
+        }
+
+        if(conditionKeySearch) {
+          condition1 += ` AND ${conditionKeySearch}`
+        }
+
+       let pagging = ` ORDER BY a.ID ASC LIMIT ${(page-1)*limit},${limit}`
+      
+       //count
+       let SQLCount = SQL + condition1;
+
+       let count = await sails.sendNativeQuery(SQLCount);
+       //select 
+       selectSQL = `DISTINCT a.*`
+      
+       SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin) + condition1 + pagging
+       console.log(SQL)
+       let resultSQL = await sails.sendNativeQuery(SQL);
+           resultSQL = resultSQL['rows']
+       let resultFormated = []
+           for(let i=0 ;i < resultSQL.length ; i++){
+              let questionId = resultSQL[i]['id']
+              let createdBy =  resultSQL[i]['created_by']
+              let category = await ExerciseTag.find({exerciseId : questionId}).populate('tagId')
+                  category = category.map(value => {
+                    return {id : value['tagId']['id'],name:value['tagId']['name']}
+                  })
+             let isWishList = await WishList.findOne({userId : userId,exerciseId:questionId}) 
+             let author = await User.findOne({where : {id : createdBy} ,select : ['id','displayName']})
+             let countComment = await Comment.count({where :  {exerciseId : resultSQL[i]['id'] }})
+              let tmp = {...resultSQL[i]}
+                  tmp['categories'] = category
+                  if(isWishList) {
+                    tmp['isWishList'] = true
+                  }
+                  else 
+                    tmp['isWishList'] = false
+
+                  if(author)
+                    tmp['author'] =   author
+                    tmp['countComment'] = countComment;
+              resultFormated.push(tmp)
+               
+           }
+          
+          return res.send({
+            success : true ,
+            data : resultFormated,
+            total : count['rows'][0] && count['rows'][0]['total'] ? count['rows'][0]['total']:0,
+            
+          })
+    } catch (error) {
+         console.log(error)
+         return res.send({
+           success : false,
+           message : error.message
+         })
+    }
+   
+
+  },
+
+  //add question to wishList
+  addWishList : async (req,res) => {
+
+    try {
+      let {userId , questionId } = req.body
+       userId = 5;
+       WishList.findOrCreate({userId : userId , exerciseId : questionId},{userId : userId , exerciseId : questionId})
+      .exec(async(err, wishList, wasCreated)=> {
+        if (err) { return res.serverError(err); }
+      
+        if(wasCreated) {
+          res.send({
+            success : true,
+            message : 'Add To WishList Success!',
+            data : wishList
+         })
+        }
+        else {
+          res.send({
+            success : false,
+            message : 'This Question already exist in WishList'
+         })
+        }
+      })
+      
+    } catch (error) {
+      console.log(error)
+      res.send({
+        success : false,
+        message :error
+     })
+     
+    }
+     
+  },
+
+  //remove question to wishlist
+
+  removeWishList : async (req,res) => {
+     try {
+       let { exerciseId ,typeWishList } = req.body
+       let userId = req.user ? req.user : 5
+
+      let wishlist =  await WishList.destroyOne({exerciseId:exerciseId , userId : userId, type : typeWishList})
+
+       return res.send({
+         success : true,
+         message : 'Remove Successfully!',
+         data : wishlist
+       })
+ 
+       
+     } catch (error) {
+       console.log(error)
+       return res.send({
+         success : false,
+         message : 'Remove Fail!'
+       })
+     }
+  },
+
+  //get category
+  getTag : async (req,res) => {
+     try {
+      let listCategory = await Tag.find();
+      return res.send({
+        success : true,
+        data : listCategory
+      })
+     } catch (error) {
+        return res.send({
+          success : false,
+          message : error.message
+        })
+     }
+
+  },
+
+  //get submition by userId 
+  getSubmmitionByUserId : async ( req,res)=> {
+    try {
+      let { userId } =  req.params
+
+      // limit time
+      let endDate  = moment().format('YYYY-MM-DD')
+      let startDate =  moment().subtract(270,'d').format('YYYY-MM-DD') // 9 tháng
+ 
+       let submitions =  await TrainingHistory.find({ where : { 'userId' : userId , 'createdAt' :  { '<=' : endDate , '>=' : startDate}}
+       })
+
+      
+       let results = ExerciseComponent.getRange(270).map(index => {
+          return {
+            date: moment().subtract(index ,'d').format('YYYY-MM-DD'),
+            count: 0
+          };
+      });
+ 
+       submitions.forEach(element => {
+         let date =  moment(element.createdAt).format('YYYY-MM-DD')
+             let index = results.findIndex(x => x.date == date);
+ 
+             if(index == -1) {
+               results.push({ date : date , count : 1})
+             }
+             else {
+               results[index].count ++;
+             }
+       });
+ 
+      return res.send({
+        success : true,
+        data : results
+      })
+    } catch (error) {
+      return res.send({
+        success : false,
+        data : [],
+        error :CONSTANTS.API_ERROR
+      })
+    }
+  },
+
+  //get 5 Most recent submissions
+  getMostRecentSubmission : async (req,res )=> {
+     try {
+      let { userId } = req.params
+
+      let submissions = await TrainingHistory.find({ where : { userId : userId } , sort : 'createdAt DESC', limit : 5 }).populate('programLanguageId').populate("exerciseId")
+      let results = []
+      submissions.forEach((ele) => {
+         results.push({
+           key : ele.id ,
+           name : ele['exerciseId']['title'],
+           language : ele['programLanguageId']['name'],
+           status : ele['status'] ?  ele['status']  : 'Wrong Answers'
+         })
+      });
+      return res.send ( {
+        success : true,
+        data : results
+      })
+     } catch (error) {
+       return res.send({
+         success : false,
+         data : [],
+         error : CONSTANTS.API_ERROR
+       })
+     }
+    },
+
+  getWishList : async ( req,res )=> {
+     try {
+    
+      let userId = req.user && req.user['id'] ? req.user['id']: 5
+
+      let listWishList = await WishList.find({ userId : userId}).populate('exerciseId')
+
+      return res.send({
+        success : true,
+        data : listWishList
+      })
+
+     } catch (error) {
+        console.log(error)
+       return res.send({
+         success : false,
+         error: CONSTANTS.API_ERROR,
+         data : []
+       })
+     }
+  },
   // get list exercise by owner
   getByOwner: async (req, res) => {
     try {
@@ -246,7 +551,7 @@ module.exports = {
       console.log(e);
     }
   },
-
+ 
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
@@ -269,4 +574,45 @@ module.exports = {
       console.log(e);
     }
   },
+
+  // get all submission
+
+  getAllSubmission : async(req,res)=> {
+    try {
+      let userId = req.user && req.user['id'] ? req.user['id']: 5;
+
+      let listSubmission = await TrainingHistory.find({ where : {userId : userId ,  isFinished : 1}}).populate('programLanguageId').populate('exerciseId')
+      let totalSub = await TrainingHistory.count({ where : {userId : userId , isFinished : 1}})
+      let result = []
+      listSubmission.forEach(ele => {
+         let item = {
+           time : ele['createdAt'],
+           exercise : ele['exerciseId']['title'],
+           status : ele['status'],
+           runtime : ele['timeNeeded'],
+           language : ele['programLanguageId']['name']
+         }
+         result.push(item)
+      });
+     
+
+      return res.send({
+        success : true,
+        data : {
+          submission : result,
+          total : totalSub
+        }
+      })
+    } catch (error) {
+      console.log(error)
+      return res.send({
+        success : false,
+        data : {
+          submission : [],
+          total : 0
+        },
+        error: CONSTANTS.API_ERROR
+      })
+    }
+  }
 };
