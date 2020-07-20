@@ -7,8 +7,8 @@
 const ExerciseComponent = require("../components/ExerciseComponent");
 var Purifier = require("html-purify");
 var purifier = new Purifier();
-const moment = require('moment');
-const CONSTANTS = require("../../config/custom").custom
+const moment = require("moment");
+const CONSTANTS = require("../../config/custom").custom;
 module.exports = {
   submitExercise: async (req, res) => {
     // call thirty system
@@ -85,7 +85,7 @@ module.exports = {
       let id = req.query.id;
       id = Number.parseInt(id);
       if (!id || !Number.isInteger(id)) {
-        res.send({ message: "Invalid exercise id!" });
+        res.send({ success: false, message: "Invalid exercise id!" });
         return;
       }
       let count = await Exercise.count();
@@ -94,33 +94,49 @@ module.exports = {
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({ question: exercise, testCases: testCases, total: count });
+      res.send({success: true, question: exercise, testCases: testCases, total: count });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
     }
   },
 
+  getAllSubmissions: async (req, res) => {
+    try {
+      let userID = parseInt(req.query.userID);
+      let exerciseID = parseInt(req.query.exerciseID)
+      if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
+        res.send({ success: false, message: "Invalid ID" })
+      } else {
+        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID })
+        console.log(submissions, 'all submissions')
+        res.send({ success: true, submissions: submissions })
+      }
+    } catch (error) {
+      res.send({ success: false, message: error.message, code: 500 })
+    }
+  },
+
   submitSolution: async (req, res) => {
     try {
-      let { question, testcases, answer, language } = req.body
-      console.log(req.body, 'solution')
-      let status = "Accepted"
-      testcases.forEach(testcase => {
+      let { question, testcases, answer, language } = req.body;
+      console.log(req.body, "solution");
+      let status = "Accepted";
+      testcases.forEach((testcase) => {
         if (testcase.data.description != "Accepted") {
-          status = testcase.data.status.description
+          status = testcase.data.status.description;
           return;
         }
-      })
+      });
       let history = await TrainingHistory.create({
         userId: 3,
         exerciseId: question.id,
         status: status,
         answer: answer,
         programLanguageId: language,
-        isFinished: status == "Accepted" ? true : false
-      })
+        isFinished: status == "Accepted" ? true : false,
+      });
 
-      res.send({ success: true, solution: history })
+      res.send({ success: true, solution: history });
     } catch (error) {
       res.send({ success: false, message: error, code: 500 });
     }
@@ -128,8 +144,10 @@ module.exports = {
   // get basic information
   getBasicInfoById: async (req, res) => {
     try {
-      let { id } = req.query;
-      let exercise = await Exercise.findOne({ id: id });
+      let { exerciseId } = req.params;
+      let exercise = await Exercise.findOne({ id: exerciseId }).populate(
+        "tags"
+      );
       res.json({
         success: true,
         data: { ...exercise },
@@ -149,23 +167,30 @@ module.exports = {
         .skip(parseInt(Math.random() * count))
     );
     return res.send({
-      success : true , 
-      data   :exercise[0]
-    })
+      success: true,
+      data: exercise[0],
+    });
   },
 
   // create exercise
   createExercise: async (req, res) => {
     try {
-      let { content, title, points, level } = req.body;
-      // if (!content || !title || !level || !Number.isInteger(points)) {
-      //   res.json({
-      //     success: false,
-      //     data: {},
-      //     code: 1,
-      //   });
-      //   return;
-      // }
+      let { content, title, points, level, tags } = req.body;
+      console.log("tags", tags);
+      tags.push("#"); // default 1 tags
+      let mappingTags = await Promise.all(
+        tags.map(async (e) => {
+          return Tag.findOrCreate(
+            {
+              name: e,
+            },
+            {
+              name: e,
+            }
+          );
+        })
+      );
+      let mappingTagIds = [...mappingTags].map((e) => e.id);
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -173,7 +198,9 @@ module.exports = {
         content,
         title,
       }).fetch();
-
+      await Exercise.addToCollection(exercise.id, "tags").members(
+        mappingTagIds
+      );
       res.json({
         success: true,
         data: {
@@ -191,23 +218,24 @@ module.exports = {
   // save exercise basic information
   updateExercise: async (req, res) => {
     try {
-      let { id, content, title, points, level } = req.body;
+      let { id, content, title, points, level, tags } = req.body;
+      console.log("tags", tags);
+      tags.push("#"); // default 1 tags
+      let mappingTags = await Promise.all(
+        tags.map(async (e) => {
+          return Tag.findOrCreate(
+            {
+              name: e,
+            },
+            {
+              name: e,
+            }
+          );
+        })
+      );
+      let mappingTagIds = [...mappingTags].map((e) => e.id);
       id = Number(id);
       points = Number(points);
-      // if (
-      //   !content ||
-      //   !title ||
-      //   !level ||
-      //   !Number.isInteger(points) ||
-      //   !Number.isInteger(id)
-      // ) {
-      //   res.json({
-      //     success: false,
-      //     data: {},
-      //     code: 1,
-      //   });
-      //   return;
-      // }
       content = purifier.purify(content);
       let updatedExercise = await Exercise.updateOne({ id: id }).set({
         points: points,
@@ -215,6 +243,7 @@ module.exports = {
         content: content,
         title: title,
       });
+      await Exercise.replaceCollection(id, "tags").members(mappingTagIds);
       res.json({
         success: true,
         data: {
@@ -230,8 +259,8 @@ module.exports = {
     }
   },
 
-   //search exercise
-   searchExercise :  async (req,res) => {
+  //search exercise
+  searchExercise: async (req, res) => {
     try {
           let data  = req.body ? req.body : {}
           let condition = {}
@@ -347,19 +376,16 @@ module.exports = {
             
           })
     } catch (error) {
-         console.log(error)
-         return res.send({
-           success : false,
-           message : error.message
-         })
+      console.log(error);
+      return res.send({
+        success: false,
+        message: error.message,
+      });
     }
-   
-
   },
 
   //add question to wishList
-  addWishList : async (req,res) => {
-
+  addWishList: async (req, res) => {
     try {
       let {userId , questionId } = req.body
        userId = 5;
@@ -374,130 +400,128 @@ module.exports = {
             data : wishList
          })
         }
-        else {
+
+        if (wasCreated) {
           res.send({
-            success : false,
-            message : 'This Question already exist in WishList'
-         })
+            success: true,
+            message: "Add To WishList Success!",
+            data: wishList,
+          });
+        } else {
+          res.send({
+            success: false,
+            message: "This Question already exist in WishList",
+          });
         }
-      })
-      
+      });
     } catch (error) {
       console.log(error)
       res.send({
-        success : false,
-        message :error
-     })
-     
+        success: false,
+        message: error,
+      });
     }
-     
   },
 
   //remove question to wishlist
 
-  removeWishList : async (req,res) => {
-     try {
-       let { exerciseId ,typeWishList } = req.body
-       let userId = req.user ? req.user : 5
+  removeWishList: async (req, res) => {
+    try {
+      let { exerciseId, typeWishList } = req.body;
+      let userId = req.user ? req.user : 5;
 
-      let wishlist =  await WishList.destroyOne({exerciseId:exerciseId , userId : userId, type : typeWishList})
+      let wishlist = await WishList.destroyOne({
+        exerciseId: exerciseId,
+        userId: userId,
+        type: typeWishList,
+      });
 
-       return res.send({
-         success : true,
-         message : 'Remove Successfully!',
-         data : wishlist
-       })
- 
-       
-     } catch (error) {
-       console.log(error)
-       return res.send({
-         success : false,
-         message : 'Remove Fail!'
-       })
-     }
+      return res.send({
+        success: true,
+        message: "Remove Successfully!",
+        data: wishlist,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.send({
+        success: false,
+        message: "Remove Fail!",
+      });
+    }
   },
 
   //get category
-  getTag : async (req,res) => {
-     try {
+  getTag: async (req, res) => {
+    try {
       let listCategory = await Tag.find();
       return res.send({
-        success : true,
-        data : listCategory
-      })
-     } catch (error) {
-        return res.send({
-          success : false,
-          message : error.message
-        })
-     }
-
-  },
-
-  //get submition by userId 
-  getSubmmitionByUserId : async ( req,res)=> {
-    try {
-      let { userId } =  req.params
-
-      // limit time
-      let endDate  = moment().format('YYYY-MM-DD')
-      let startDate =  moment().subtract(270,'d').format('YYYY-MM-DD') // 9 tháng
- 
-       let submitions =  await TrainingHistory.find({ where : { 'userId' : userId , 'createdAt' :  { '<=' : endDate , '>=' : startDate}}
-       })
-
-      
-       let results = ExerciseComponent.getRange(270).map(index => {
-          return {
-            date: moment().subtract(index ,'d').format('YYYY-MM-DD'),
-            count: 0
-          };
+        success: true,
+        data: listCategory,
       });
- 
-       submitions.forEach(element => {
-         let date =  moment(element.createdAt).format('YYYY-MM-DD')
-             let index = results.findIndex(x => x.date == date);
- 
-             if(index == -1) {
-               results.push({ date : date , count : 1})
-             }
-             else {
-               results[index].count ++;
-             }
-       });
- 
-      return res.send({
-        success : true,
-        data : results
-      })
     } catch (error) {
       return res.send({
-        success : false,
-        data : [],
-        error :CONSTANTS.API_ERROR
-      })
+        success: false,
+        message: error.message,
+      });
+    }
+  },
+
+  //get submition by userId
+  getSubmmitionByUserId: async (req, res) => {
+    try {
+      let { userId } = req.params;
+
+      // limit time
+      let endDate = moment().format("YYYY-MM-DD");
+      let startDate = moment().subtract(270, "d").format("YYYY-MM-DD"); // 9 tháng
+
+      let submitions = await TrainingHistory.find({
+        where: {
+          userId: userId,
+          createdAt: { "<=": endDate, ">=": startDate },
+        },
+      });
+
+      let results = ExerciseComponent.getRange(270).map((index) => {
+        return {
+          date: moment().subtract(index, "d").format("YYYY-MM-DD"),
+          count: 0,
+        };
+      });
+
+      submitions.forEach((element) => {
+        let date = moment(element.createdAt).format("YYYY-MM-DD");
+        let index = results.findIndex((x) => x.date == date);
+
+        if (index == -1) {
+          results.push({ date: date, count: 1 });
+        } else {
+          results[index].count++;
+        }
+      });
+
+      return res.send({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      return res.send({
+        success: false,
+        data: [],
+        error: CONSTANTS.API_ERROR,
+      });
     }
   },
 
   //get 5 Most recent submissions
-  getMostRecentSubmission : async (req,res )=> {
-     try {
-      let { userId } = req.params
+  getMostRecentSubmission: async (req, res) => {
+    try {
+      let { userId } = req.params;
 
-      let submissions = await TrainingHistory.find({ where : { userId : userId } , sort : 'createdAt DESC', limit : 5 }).populate('programLanguageId').populate("exerciseId")
-      let results = []
-      submissions.forEach((ele) => {
-         results.push({
-           key : ele.id ,
-           name : ele['exerciseId']['title'],
-           language : ele['programLanguageId']['name'],
-           status : ele['status'] ?  ele['status']  : 'Wrong Answers'
-         })
-      });
-      return res.send ( {
-        success : true,
-        data : results
+      let submissions = await TrainingHistory.find({
+        where: { userId: userId },
+        sort: "createdAt DESC",
+        limit: 5,
       })
      } catch (error) {
        return res.send({
@@ -516,18 +540,17 @@ module.exports = {
       let listWishList = await WishList.find({ userId : userId}).populate('exerciseId')
 
       return res.send({
-        success : true,
-        data : listWishList
-      })
-
-     } catch (error) {
-        console.log(error)
-       return res.send({
-         success : false,
-         error: CONSTANTS.API_ERROR,
-         data : []
-       })
-     }
+        success: true,
+        data: listWishList,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.send({
+        success: false,
+        error: CONSTANTS.API_ERROR,
+        data: [],
+      });
+    }
   },
   // get list exercise by owner
   getByOwner: async (req, res) => {
