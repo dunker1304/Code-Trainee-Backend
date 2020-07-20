@@ -46,3 +46,7 @@ FOREIGN KEY (created_by) REFERENCES `User`(id)
 -- 09/07/2020 dunk
 alter table `TrainingHistory` rename column `points` to `status` 
 alter table `TrainingHistory` modify column `status` varchar(255)
+
+-- 15/7/2020
+ALTER TABLE `Comment` MODIFY content VARCHAR(10000)  CHARACTER SET utf8;
+ALTER TABLE `Comment` MODIFY title VARCHAR(300)  CHARACTER SET utf8;

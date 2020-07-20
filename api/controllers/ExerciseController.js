@@ -85,7 +85,7 @@ module.exports = {
       let id = req.query.id;
       id = Number.parseInt(id);
       if (!id || !Number.isInteger(id)) {
-        res.send({ message: "Invalid exercise id!" });
+        res.send({ success: false, message: "Invalid exercise id!" });
         return;
       }
       let count = await Exercise.count();
@@ -94,9 +94,25 @@ module.exports = {
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({ question: exercise, testCases: testCases, total: count });
+      res.send({success: true, question: exercise, testCases: testCases, total: count });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
+    }
+  },
+
+  getAllSubmissions: async (req, res) => {
+    try {
+      let userID = parseInt(req.query.userID);
+      let exerciseID = parseInt(req.query.exerciseID)
+      if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
+        res.send({ success: false, message: "Invalid ID" })
+      } else {
+        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID })
+        console.log(submissions, 'all submissions')
+        res.send({ success: true, submissions: submissions })
+      }
+    } catch (error) {
+      res.send({ success: false, message: error.message, code: 500 })
     }
   },
 
@@ -246,109 +262,119 @@ module.exports = {
   //search exercise
   searchExercise: async (req, res) => {
     try {
-      let data = req.body ? req.body : {};
-      let condition = {};
-      let condition1 = ``;
-      let limit = data.limit ? 10 : 10;
-      let page = data.page ? data.page : 1;
-      let conditionLevelSQL = ``;
-      let conditiontTagSQL = ``;
-      let conditiontStatusSQL = ``;
-      let typeJoin = `left`;
-      let selectSQL = `Count(DISTINCT a.id) as total`;
-      let userId = req.user ? req.user : 5;
+          let data  = req.body ? req.body : {}
+          let condition = {}
+          let condition1 = ``
+          let limit = data.limit ? 10 : 10
+          let page = data.page ? data.page :1
+          let conditionLevelSQL = ``
+          let conditiontTagSQL = ``
+          let conditiontStatusSQL = ``
+          let conditionKeySearch = ``
+          let typeJoin = `left`
+          let selectSQL = `Count(DISTINCT a.id) as total`
+          let userId = req.user ? req.user : 5
+        
+          //filter by level
+          if(data.level){
+             condition = { 'level' : data.level.name}
+             conditionLevelSQL = `a.level = '${data.level.name}'`
+          }
 
-      //filter by level
-      if (data.level) {
-        condition = { level: data.level.name };
-        conditionLevelSQL = `a.level = '${data.level.name}'`;
-      }
+          //filter by tag
+          if(data.tag && data.tag.length > 0) {
+             const tagIds = data.tag.map(value => value.id)
+             conditionTag = { id : { in : tagIds}}
+             conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`
+          }
 
-      //filter by tag
-      if (data.tag && data.tag.length > 0) {
-        const tagIds = data.tag.map((value) => value.id);
-        conditionTag = { id: { in: tagIds } };
-        conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`;
-      }
+          //filter by status
+          if(data.status && data.status.id != -1) {
+             conditionStatus = { 'idFinished' : data.status.id }     
+             conditiontStatusSQL = `c.is_finished = ${data.status.id}`   
+             typeJoin = `inner`   
+          }
 
-      //filter by status
-      if (data.status && data.status.id != -1) {
-        conditionStatus = { idFinished: data.status.id };
-        conditiontStatusSQL = `c.is_finished = ${data.status.id}`;
-        typeJoin = `inner`;
-      }
+          //filter by key_Search
+          if(data.term && data.term.name) {
+            conditionKeySearch = ` MATCH (title,content) AGAINST ('${data.term.name}' IN NATURAL LANGUAGE MODE)`
+          }
 
-      let SQL = await ExerciseComponent.createQuery(selectSQL, typeJoin);
-      //condition
-      if (conditionLevelSQL) {
-        if (condition1) {
-          condition1 += ` AND ${conditionLevelSQL}`;
-        } else condition1 = ` WHERE ${conditionLevelSQL}`;
-      }
+          let SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin)
+          //condition
+          if(conditionLevelSQL) {
+            // if(condition1) {
+                condition1 += ` AND ${conditionLevelSQL}`
+            //  }
+            //  else 
+            //     condition1 = ` WHERE ${conditionLevelSQL}`
+          }
 
-      if (conditiontTagSQL) {
-        if (condition1) {
-          condition1 += ` AND ${conditiontTagSQL}`;
-        } else condition1 = ` WHERE ${conditiontTagSQL}`;
-      }
+          if(conditiontTagSQL) {
+          //  if(condition1) {
+               condition1 += ` AND ${conditiontTagSQL}`
+            // }
+            // else 
+            //    condition1 = ` WHERE ${conditiontTagSQL}`
+         }
 
-      if (conditiontStatusSQL) {
-        if (condition1) {
-          condition1 += ` AND ${conditiontStatusSQL}`;
-        } else condition1 = ` WHERE ${conditiontStatusSQL}`;
-      }
-      let pagging = ` ORDER BY a.ID ASC LIMIT ${(page - 1) * limit},${limit}`;
+         if(conditiontStatusSQL) {
+         // if(condition1) {
+             condition1 += ` AND ${conditiontStatusSQL}`
+          // }
+          // else 
+          //    condition1 = ` WHERE ${conditiontStatusSQL}`
+        }
 
-      //count
-      let SQLCount = SQL + condition1;
+        if(conditionKeySearch) {
+          condition1 += ` AND ${conditionKeySearch}`
+        }
 
-      let count = await sails.sendNativeQuery(SQLCount);
-      //select
-      selectSQL = `DISTINCT a.*`;
+       let pagging = ` ORDER BY a.ID ASC LIMIT ${(page-1)*limit},${limit}`
+      
+       //count
+       let SQLCount = SQL + condition1;
 
-      SQL =
-        (await ExerciseComponent.createQuery(selectSQL, typeJoin)) +
-        condition1 +
-        pagging;
-      console.log(SQL);
-      let resultSQL = await sails.sendNativeQuery(SQL);
-      resultSQL = resultSQL["rows"];
-      let resultFormated = [];
-      for (let i = 0; i < resultSQL.length; i++) {
-        let questionId = resultSQL[i]["id"];
-        let createdBy = resultSQL[i]["created_by"];
-        let category = await ExerciseTag.find({
-          exerciseId: questionId,
-        }).populate("tagId");
-        category = category.map((value) => {
-          return { id: value["tagId"]["id"], name: value["tagId"]["name"] };
-        });
-        let isWishList = await WishList.findOne({
-          userId: userId,
-          exerciseId: questionId,
-        });
-        let author = await User.findOne({
-          where: { id: createdBy },
-          select: ["id", "displayName"],
-        });
-        let tmp = { ...resultSQL[i] };
-        tmp["categories"] = category;
-        if (isWishList) {
-          tmp["isWishList"] = true;
-        } else tmp["isWishList"] = false;
+       let count = await sails.sendNativeQuery(SQLCount);
+       //select 
+       selectSQL = `DISTINCT a.*`
+      
+       SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin) + condition1 + pagging
+       console.log(SQL)
+       let resultSQL = await sails.sendNativeQuery(SQL);
+           resultSQL = resultSQL['rows']
+       let resultFormated = []
+           for(let i=0 ;i < resultSQL.length ; i++){
+              let questionId = resultSQL[i]['id']
+              let createdBy =  resultSQL[i]['created_by']
+              let category = await ExerciseTag.find({exerciseId : questionId}).populate('tagId')
+                  category = category.map(value => {
+                    return {id : value['tagId']['id'],name:value['tagId']['name']}
+                  })
+             let isWishList = await WishList.findOne({userId : userId,exerciseId:questionId}) 
+             let author = await User.findOne({where : {id : createdBy} ,select : ['id','displayName']})
+             let countComment = await Comment.count({where :  {exerciseId : resultSQL[i]['id'] }})
+              let tmp = {...resultSQL[i]}
+                  tmp['categories'] = category
+                  if(isWishList) {
+                    tmp['isWishList'] = true
+                  }
+                  else 
+                    tmp['isWishList'] = false
 
-        if (author) tmp["author"] = author;
-        resultFormated.push(tmp);
-      }
-
-      return res.send({
-        success: true,
-        data: resultFormated,
-        total:
-          count["rows"][0] && count["rows"][0]["total"]
-            ? count["rows"][0]["total"]
-            : 0,
-      });
+                  if(author)
+                    tmp['author'] =   author
+                    tmp['countComment'] = countComment;
+              resultFormated.push(tmp)
+               
+           }
+          
+          return res.send({
+            success : true ,
+            data : resultFormated,
+            total : count['rows'][0] && count['rows'][0]['total'] ? count['rows'][0]['total']:0,
+            
+          })
     } catch (error) {
       console.log(error);
       return res.send({
@@ -361,14 +387,18 @@ module.exports = {
   //add question to wishList
   addWishList: async (req, res) => {
     try {
-      let { userId, questionId } = req.body;
-      userId = 5;
-      WishList.findOrCreate(
-        { userId, exerciseId },
-        { userId, exerciseId }
-      ).exec(async (err, wishList, wasCreated) => {
-        if (err) {
-          return res.serverError(err);
+      let {userId , questionId } = req.body
+       userId = 5;
+       WishList.findOrCreate({userId : userId , exerciseId : questionId},{userId : userId , exerciseId : questionId})
+      .exec(async(err, wishList, wasCreated)=> {
+        if (err) { return res.serverError(err); }
+      
+        if(wasCreated) {
+          res.send({
+            success : true,
+            message : 'Add To WishList Success!',
+            data : wishList
+         })
         }
 
         if (wasCreated) {
@@ -385,6 +415,7 @@ module.exports = {
         }
       });
     } catch (error) {
+      console.log(error)
       res.send({
         success: false,
         message: error,
@@ -492,65 +523,21 @@ module.exports = {
         sort: "createdAt DESC",
         limit: 5,
       })
-        .populate("programLanguageId")
-        .populate("exerciseId");
-      let results = [];
-      submissions.forEach((ele) => {
-        results.push({
-          key: ele.id,
-          name: ele["exerciseId"]["title"],
-          language: ele["programLanguageId"]["name"],
-          status: ele["status"] ? ele["status"] : "Wrong Answers",
-        });
-      });
-      return res.send({
-        success: true,
-        data: results,
-      });
-    } catch (error) {
-      return res.send({
-        success: false,
-        data: [],
-        error: CONSTANTS.API_ERROR,
-      });
-    }
-  },
+     } catch (error) {
+       return res.send({
+         success : false,
+         data : [],
+         error : CONSTANTS.API_ERROR
+       })
+     }
+    },
 
-  addTypeWishList: async (req, res) => {
-    try {
-      let { name } = req.body;
-      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
+  getWishList : async ( req,res )=> {
+     try {
+    
+      let userId = req.user && req.user['id'] ? req.user['id']: 5
 
-      let type = {
-        name: name,
-        createdBy: userId,
-      };
-
-      let result = await TypeWishList.create(type).fetch();
-      return res.send({
-        success: true,
-        data: result,
-      });
-    } catch (error) {
-      console.log(error);
-      return res.send({
-        success: false,
-        data: {},
-        message: error,
-      });
-    }
-  },
-
-  getWishListByType: async (req, res) => {
-    try {
-      let { type } = req.params;
-
-      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
-
-      let listWishList = await WishList.find({
-        type: type,
-        userId: userId,
-      }).populate("exerciseId");
+      let listWishList = await WishList.find({ userId : userId}).populate('exerciseId')
 
       return res.send({
         success: true,
@@ -565,25 +552,6 @@ module.exports = {
       });
     }
   },
-
-  getTypeWishList: async (req, res) => {
-    try {
-      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
-      let listTypeWishList = await TypeWishList.find({ createdBy: userId });
-
-      return res.send({
-        success: true,
-        data: listTypeWishList,
-      });
-    } catch (error) {
-      return res.send({
-        success: false,
-        data: [],
-        error: CONSTANTS.API_ERROR,
-      });
-    }
-  },
-
   // get list exercise by owner
   getByOwner: async (req, res) => {
     try {
@@ -606,7 +574,7 @@ module.exports = {
       console.log(e);
     }
   },
-
+ 
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
@@ -629,4 +597,45 @@ module.exports = {
       console.log(e);
     }
   },
+
+  // get all submission
+
+  getAllSubmission : async(req,res)=> {
+    try {
+      let userId = req.user && req.user['id'] ? req.user['id']: 5;
+
+      let listSubmission = await TrainingHistory.find({ where : {userId : userId ,  isFinished : 1}}).populate('programLanguageId').populate('exerciseId')
+      let totalSub = await TrainingHistory.count({ where : {userId : userId , isFinished : 1}})
+      let result = []
+      listSubmission.forEach(ele => {
+         let item = {
+           time : ele['createdAt'],
+           exercise : ele['exerciseId']['title'],
+           status : ele['status'],
+           runtime : ele['timeNeeded'],
+           language : ele['programLanguageId']['name']
+         }
+         result.push(item)
+      });
+     
+
+      return res.send({
+        success : true,
+        data : {
+          submission : result,
+          total : totalSub
+        }
+      })
+    } catch (error) {
+      console.log(error)
+      return res.send({
+        success : false,
+        data : {
+          submission : [],
+          total : 0
+        },
+        error: CONSTANTS.API_ERROR
+      })
+    }
+  }
 };

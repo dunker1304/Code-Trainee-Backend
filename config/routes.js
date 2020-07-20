@@ -38,6 +38,7 @@ module.exports.routes = {
 
   // ExerciseController
   "post /api/submissions": "ExerciseController.submitExercise",
+  "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
@@ -58,7 +59,8 @@ module.exports.routes = {
     "ExerciseController.getMostRecentSubmission",
   "post /api/add-type-wish-list": "ExerciseController.addTypeWishList",
   "get /api/wish-list/:type": "ExerciseController.getWishListByType",
-  "get /api/type-wish-list": "ExerciseController.getTypeWishList",
+  "get /api/wish-list": "ExerciseController.getWishList",
+  "get /api/all-submission": "ExerciseController.getAllSubmission",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
@@ -79,4 +81,12 @@ module.exports.routes = {
   // TagController
   "get /api/tags/exercise/:exerciseId": "TagController.getTagsByExerciseId",
   "get /api/tags/all": "TagController.getAllTags",
+
+  //AdminController
+  "post /api/admin/get-user-by-role": "AdminController.getUserByRole",
+  "post /api/admin/get-user-by-id": "AdminController.getUserById",
+  "post /api/admin/edit-an-account": "AdminController.editAnAccount",
+  "post /api/admin/create-an-account": "AdminController.createAnAccount",
+  "post /api/admin/search-fuzzy-account":
+    "AdminController.getUserByRoleWithKeySearch",
 };
