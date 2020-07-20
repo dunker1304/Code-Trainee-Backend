@@ -174,9 +174,26 @@ module.exports = {
   currentUser: function (req, res, next) {
     passport.authenticate('jwt', async function (err, user, message) {
 
+      if(err) 
+       return res.send({
+        success: false,
+        message : 'Đã có lỗi xảy ra'
+      })
+   
+      if(!user) {
+        return res.status(403).json({
+          success : false,
+          message : message ? message :'Token Is Invalid'
+        })
+      }
 
-      res.send({ success: true, message: message, 'user': user });
-    })(req, res, next);
+      return res.status(200).json({
+        success : true,
+        user : user
+      })
+    
+     
+     })(req, res);
   }
   ,
   getUserById : async function ( req,res) {
@@ -233,7 +250,14 @@ module.exports = {
       let  solved = easyE + mediumE + hardE; 
 
       let attempted = await sails.sendNativeQuery('SELECT COUNT(DISTINCT `exercise_id`) AS attempted FROM `TrainingHistory` AS a WHERE `is_finished` = 1 ')
-  
+
+      let acceptedSubmissions = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Correct Answer'}})
+      
+      let wrongAnswer = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Wrong Answer'}})
+
+      let runtimeError = await TrainingHistory.count({ where : { isFinished : 1 , status : 'Runtime Error'}})
+
+      let totalSubmission = await TrainingHistory.count({})
       return res.send({
         success : true,
         data : {
@@ -244,7 +268,12 @@ module.exports = {
           hard : hardE,// tổng câu hard- submit success
           solved : solved, //tổng câu  submit success
           todo : allExercise - solved,
-          attempted : attempted['rows'] && attempted['rows'][0] ? attempted['rows'][0]['attempted']: 0
+          attempted : attempted['rows'] && attempted['rows'][0] ? attempted['rows'][0]['attempted']: 0, //sô câu hỏi đã submit
+          acceptedSubmissions : acceptedSubmissions ,// số lần submiss success,
+          wrongAnswer : wrongAnswer,
+          runtimeError : runtimeError,
+          other : totalSubmission - (wrongAnswer + runtimeError + acceptedSubmissions ),
+          rateAcceptedSubmissions : (acceptedSubmissions/totalSubmission).toFixed(2)*(100) 
         }
       })
       

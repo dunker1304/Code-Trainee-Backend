@@ -51,7 +51,10 @@ module.exports.custom = {
   UN_AUTH_TO_DELETE :5,
 
   // NOT FOUND USER
-  NOT_FOUND_USER : 6
+  NOT_FOUND_USER : 6,
+
+  //EDIT SUCCESS ACCOUNT
+  EDIT_ACCOUNT_SUCCESS : true
 
 
 };

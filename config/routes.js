@@ -73,4 +73,11 @@ module.exports.routes = {
 
   // ProgramLanguageController
   "get /api/program-language/all": "ProgramLanguageController.getAllByExercise",
+
+  //AdminController
+  "post /api/admin/get-user-by-role" : "AdminController.getUserByRole",
+  "post /api/admin/get-user-by-id" : "AdminController.getUserById",
+  "post /api/admin/edit-an-account" : "AdminController.editAnAccount",
+  "post /api/admin/create-an-account" : "AdminController.createAnAccount",
+  "post /api/admin/search-fuzzy-account" : "AdminController.getUserByRoleWithKeySearch"
 };

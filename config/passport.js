@@ -14,6 +14,10 @@ passport.use(new JwtStrategy({
   passReqToCallback: true
 }, async (req, payload, done) => {
   try {
+    if (Date.now() >= payload.exp ) {
+      return done(null, false, { message : 'Token expired'});
+    }
+    
     //Find the user specified in token
     const user = await User.findOne({id:payload.sub});
     // If user doesn't exists, handle it
