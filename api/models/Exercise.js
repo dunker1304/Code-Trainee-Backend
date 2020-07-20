@@ -1,5 +1,5 @@
 module.exports = {
-  tableName: "Exercise",
+  tableName: "exercise",
   attributes: {
     points: { type: "number" },
     level: {

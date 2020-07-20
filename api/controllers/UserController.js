@@ -293,6 +293,33 @@ module.exports = {
         }
       });
     }
+  },
+
+  getRole : async function ( req , res ) {
+    try {
+      let ignoreAdmin = req.body.ignoreAdmin
+      let listRole = []
+
+      if(ignoreAdmin) {
+        listRole = await Role.find({id : { '!=' : 3}});
+      }
+      else {
+        listRole = await Role.find({});
+      }
+
+      return res.send({
+        success : true , 
+        data : listRole
+      })
+      
+
+    } catch (error) {
+      return res.send({
+        success : false ,
+        data : [],
+        error : CONSTANTS.API_ERROR
+      })
+    }
   }
   
 };
