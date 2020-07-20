@@ -380,6 +380,7 @@ module.exports = {
       return res.send({
         success: false,
         message: error.message,
+        data : []
       });
     }
   },
@@ -522,6 +523,11 @@ module.exports = {
         where: { userId: userId },
         sort: "createdAt DESC",
         limit: 5,
+      })
+
+      return res.send({
+        success : true , 
+        data : submissions
       })
      } catch (error) {
        return res.send({
