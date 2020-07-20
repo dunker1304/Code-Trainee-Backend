@@ -85,7 +85,7 @@ module.exports = {
       let id = req.query.id;
       id = Number.parseInt(id);
       if (!id || !Number.isInteger(id)) {
-        res.send({ message: "Invalid exercise id!" });
+        res.send({ success: false, message: "Invalid exercise id!" });
         return;
       }
       let count = await Exercise.count();
@@ -94,9 +94,25 @@ module.exports = {
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({ question: exercise, testCases: testCases, total: count });
+      res.send({success: true, question: exercise, testCases: testCases, total: count });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
+    }
+  },
+
+  getAllSubmissions: async (req, res) => {
+    try {
+      let userID = parseInt(req.query.userID);
+      let exerciseID = parseInt(req.query.exerciseID)
+      if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
+        res.send({ success: false, message: "Invalid ID" })
+      } else {
+        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID })
+        console.log(submissions, 'all submissions')
+        res.send({ success: true, submissions: submissions })
+      }
+    } catch (error) {
+      res.send({ success: false, message: error.message, code: 500 })
     }
   },
 
