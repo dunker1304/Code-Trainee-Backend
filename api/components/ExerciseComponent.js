@@ -31,7 +31,6 @@ module.exports = {
             `${CONSTANTS.DOMAIN_JUDGE}/submissions/${response.data.token}?fields=stdout,stdin,time,memory,stderr,token,compile_output,message,status,expected_output`,
             config
           );
-          console.log(resultRes.data, 'token jask')
 
           status = resultRes.data.status.id;
           reTry = reTry + 1;
