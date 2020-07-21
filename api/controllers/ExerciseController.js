@@ -664,5 +664,41 @@ module.exports = {
         error: CONSTANTS.API_ERROR
       })
     }
+  },
+
+  getExerciseNeedApproval: async (req, res) => {
+    try {
+      let exerciseNeedApproval = await Exercise.find({isApproved: false, isDeleted: false});
+      res.json({
+        success: true,
+        data: exerciseNeedApproval,
+      })
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+
+  updateExerciseNeedApproval: async (req, res) => {
+    try{
+      let {id} = req.body;
+      let updatedExercise = await Exercise.updateOne({
+        id: id,
+      }).set({
+        isApproved: true
+      })
+      res.json({
+        success: true,
+        data: {id: updatedExercise.id},
+      })
+
+    } catch(e) {
+      res.json({
+        success: false,
+      })
+      console.log(e)
+    }
   }
 };

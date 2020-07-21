@@ -28,11 +28,6 @@ module.exports.routes = {
   "post /api/get-comment-comment-id": "CommentController.getCommentByCommentId",
   "post /api/delete-a-comment": "CommentController.deleteAComment",
 
-  // TestcaseController
-  "get /api/testcase": "TestCaseController.getById",
-  "post /api/save-testcase": "TestCaseController.saveTestCase",
-  "post /api/update-tescase": "TestCaseController.updateTestCase",
-
   // TestController
   "post /api/test": "TestController.post",
   "get /api/get": "TestController.get",
@@ -49,6 +44,9 @@ module.exports.routes = {
   "post /api/exercise/update": "ExerciseController.updateExercise",
   "get /api/exercise/get-by-owner": "ExerciseController.getByOwner",
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
+  "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
+  "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
+
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
   "post /api/add-wishList": "ExerciseController.addWishList",
@@ -83,7 +81,7 @@ module.exports.routes = {
   "get /api/tags/exercise/:exerciseId": "TagController.getTagsByExerciseId",
   "get /api/tags/all": "TagController.getAllTags",
 
-  //AdminController
+  // AdminController
   "post /api/admin/get-user-by-role": "AdminController.getUserByRole",
   "post /api/admin/get-user-by-id": "AdminController.getUserById",
   "post /api/admin/edit-an-account": "AdminController.editAnAccount",
