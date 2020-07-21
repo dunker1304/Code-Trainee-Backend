@@ -176,7 +176,6 @@ module.exports = {
   createExercise: async (req, res) => {
     try {
       let { content, title, points, level, tags } = req.body;
-      console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
         tags.map(async (e) => {
@@ -201,6 +200,14 @@ module.exports = {
       await Exercise.addToCollection(exercise.id, "tags").members(
         mappingTagIds
       );
+      // default always support language id 1
+      let snippet = await CodeSnippet.create({
+        exerciseId: exercise.id,
+        programLanguageId: 1,
+        sampleCode: "",
+        isActive: true,
+      }).fetch();
+      await Exercise.addToCollection(exercise.id, "codeSnippets").members([snippet.id]);
       res.json({
         success: true,
         data: {
@@ -618,6 +625,7 @@ module.exports = {
          result.push(item)
       });
      
+
 
       return res.send({
         success : true,
