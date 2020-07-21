@@ -118,7 +118,7 @@ module.exports = {
 
   submitSolution: async (req, res) => {
     try {
-      let { question, testcases, answer, language } = req.body;
+      let { question, testcases, answer, language, userID } = req.body;
       console.log(req.body, "solution");
       let status = "Accepted";
       testcases.forEach((testcase) => {
@@ -128,13 +128,13 @@ module.exports = {
         }
       });
       let history = await TrainingHistory.create({
-        userId: 3,
+        userId: userID || 3 ,
         exerciseId: question.id,
         status: status,
         answer: answer,
         programLanguageId: language,
         isFinished: status == "Accepted" ? true : false,
-      });
+      }).fetch();
 
       res.send({ success: true, solution: history });
     } catch (error) {
