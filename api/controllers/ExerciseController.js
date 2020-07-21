@@ -27,7 +27,7 @@ module.exports = {
     };
 
     //get testcase of exercise
-    let testCase = await TestCase.find({ exerciseId: 1 });
+    let testCase = await TestCase.find({ exerciseId: questionId });
 
     if (testCase.length == 0) {
       console.log(testCase, "k co testcase");
