@@ -178,7 +178,7 @@ module.exports = {
       let { content, title, points, level, tags } = req.body;
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [ ... new Set(tags) ].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -189,7 +189,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -229,7 +229,7 @@ module.exports = {
       console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [... new Set(tags)].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -240,7 +240,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       id = Number(id);
       points = Number(points);
       content = purifier.purify(content);
