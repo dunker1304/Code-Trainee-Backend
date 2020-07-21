@@ -9,7 +9,7 @@ module.exports = {
       <br/>
      Thanks for signing up with CodeTrainee!<br/>
      You must follow this link to activate your account:
-     <a href= 'http://localhost:1337/accounts/confirm-email/${secret}'>http://localhost:1337/accounts/confirm-email/${secret}</a>
+     <a href= 'https://api.codetrainee.codes/accounts/confirm-email/${secret}'>https://api.codetrainee.codes/accounts/confirm-email/${secret}</a>
      <br/>Have fun coding, and don't hesitate to contact us with your feedback.`
     }
 

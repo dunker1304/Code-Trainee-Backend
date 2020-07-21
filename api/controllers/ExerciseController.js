@@ -387,6 +387,7 @@ module.exports = {
       return res.send({
         success: false,
         message: error.message,
+        data : []
       });
     }
   },
@@ -529,6 +530,24 @@ module.exports = {
         where: { userId: userId },
         sort: "createdAt DESC",
         limit: 5,
+      }).populate('exerciseId').populate('programLanguageId')
+
+      let result = []
+
+      submissions.forEach((ele,index)=> {
+         let item = {
+           name : ele['exerciseId']['title'],
+           language : ele['programLanguageId']['name'],
+           status : ele['status']
+
+         }
+
+         result.push(item)
+      })
+
+      return res.send({
+        success : true , 
+        data : result
       })
      } catch (error) {
        return res.send({

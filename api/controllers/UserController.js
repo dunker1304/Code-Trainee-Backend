@@ -136,7 +136,10 @@ module.exports = {
       const token = await signToken(user);
       // Send a cookie containing JWT
       res.cookie('access_token', token, {
-        httpOnly: true
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        //secure: true,
+        domain : '.codetrainee.codes',
       });
       res.send({ success: true, message: 'Login successfully', 'user': user });
     })(req, res, next);
@@ -292,6 +295,33 @@ module.exports = {
           attempted :  0
         }
       });
+    }
+  },
+
+  getRole : async function ( req , res ) {
+    try {
+      let ignoreAdmin = req.body.ignoreAdmin
+      let listRole = []
+
+      if(ignoreAdmin) {
+        listRole = await Role.find({id : { '!=' : 3}});
+      }
+      else {
+        listRole = await Role.find({});
+      }
+
+      return res.send({
+        success : true , 
+        data : listRole
+      })
+      
+
+    } catch (error) {
+      return res.send({
+        success : false ,
+        data : [],
+        error : CONSTANTS.API_ERROR
+      })
     }
   }
   

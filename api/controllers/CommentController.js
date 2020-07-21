@@ -134,7 +134,10 @@ module.exports = {
 
       return res.send({
         success : false,
-        data : [],
+        data : {
+          comments :0,
+          total : 0
+        },
         error: error.message
       })
       

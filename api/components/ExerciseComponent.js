@@ -71,7 +71,7 @@ module.exports = {
     ${typeJoin} join TrainingHistory as c
     on a.id = c.exercise_id
     inner join Tag as d
-    on b.tag_id = d.id WHERE a.is_deleted = 0      
+    on b.tag_id = d.id WHERE a.is_deleted = 0 and a.is_approved = 1     
      `
   },
 
