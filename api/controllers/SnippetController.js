@@ -33,7 +33,7 @@ module.exports = {
       console.log(e);
     }
   },
-  // // only update or create if not exist supported language 'active' field
+  // only update or create if not exist supported language 'active' field
   updateOrCreateSupportedLanguage: async (req, res) => {
     try {
       let {
@@ -42,48 +42,44 @@ module.exports = {
         exerciseId,
       } = req.body;
       console.log(req.body);
-      let actives = [
-        ...activeLangIds.map(async (i) => {
-          let snippet = await CodeSnippet.findOrCreate(
-            {
-              exerciseId: exerciseId,
-              programLanguageId: i,
-            },
-            {
-              exerciseId: exerciseId,
-              programLanguageId: i,
-              sampleCode: "",
-              isActive: true,
-            }
-          );
-          await CodeSnippet.updateOne({
-            id: snippet.id,
-          }).set({
+      let actives = activeLangIds.map(async (i) => {
+        let snippet = await CodeSnippet.findOrCreate(
+          {
+            exerciseId: exerciseId,
+            programLanguageId: i,
+          },
+          {
+            exerciseId: exerciseId,
+            programLanguageId: i,
+            sampleCode: "",
             isActive: true,
-          });
-        }),
-      ];
-      let notActives = [
-        ...notActiveLangIds.map(async (i) => {
-          let snippet = await CodeSnippet.findOrCreate(
-            {
-              exerciseId: exerciseId,
-              programLanguageId: i,
-            },
-            {
-              exerciseId: exerciseId,
-              programLanguageId: i,
-              sampleCode: "",
-              isActive: false,
-            }
-          );
-          await CodeSnippet.updateOne({
-            id: snippet.id,
-          }).set({
+          }
+        );
+        return CodeSnippet.updateOne({
+          id: snippet.id,
+        }).set({
+          isActive: true,
+        });
+      });
+      let notActives = notActiveLangIds.map(async (i) => {
+        let snippet = await CodeSnippet.findOrCreate(
+          {
+            exerciseId: exerciseId,
+            programLanguageId: i,
+          },
+          {
+            exerciseId: exerciseId,
+            programLanguageId: i,
+            sampleCode: "",
             isActive: false,
-          });
-        }),
-      ];
+          }
+        );
+        return CodeSnippet.updateOne({
+          id: snippet.id,
+        }).set({
+          isActive: false,
+        });
+      });
       await Promise.all([...actives, ...notActives]);
       res.json({
         success: true,
@@ -97,11 +93,10 @@ module.exports = {
   },
 
   getSnippetCode: async (req, res) => {
-    let {
-      userID,
-      exerciseID, 
-      languageID
-    } = req.query
-    CodeSnippet.findOne({ exerciseId: exerciseID, programLanguageId: languageID})
-  }
+    let { userID, exerciseID, languageID } = req.query;
+    CodeSnippet.findOne({
+      exerciseId: exerciseID,
+      programLanguageId: languageID,
+    });
+  },
 };
