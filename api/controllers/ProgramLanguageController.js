@@ -4,6 +4,7 @@ module.exports = {
       let { exerciseId } = req.query;
       let all = await ProgramLanguage.find().populate("codeSnippets", {
         exerciseId: exerciseId,
+        isActive: true
       });
       res.json({
         success: true,
