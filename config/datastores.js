@@ -50,7 +50,7 @@ module.exports.datastores = {
     host: "localhost",
     port: "3306",
     user: "root",
-    password: "haidunk2210",
+    password: "admin",
     database: "CodeTrainee",
     timezone: "asia/Ho_Chi_Minh",
   },
@@ -60,7 +60,7 @@ module.exports.datastores = {
     host: "localhost",
     port: "3306",
     user: "root",
-    password: "haidunk2210",
+    password: "admin",
     database: "Test",
     timezone: "asia/Ho_Chi_Minh",
   }

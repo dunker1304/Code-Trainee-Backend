@@ -43,7 +43,7 @@ module.exports.routes = {
     "ExerciseController.getBasicInfoById",
   "post /api/exercise/create": "ExerciseController.createExercise",
   "post /api/exercise/update": "ExerciseController.updateExercise",
-  "get /api/exercise/get-by-owner": "ExerciseController.getByOwner",
+  "get /api/exercise/owner/:ownerId": "ExerciseController.getByOwner",
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
   "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
@@ -67,7 +67,7 @@ module.exports.routes = {
   "post /api/testcase/create": "TestCaseController.createTestCase",
   "post /api/testcase/update": "TestCaseController.updateTestCase",
   "post /api/testcase/delete": "TestCaseController.deleteTestcase",
-  "get /api/testcase/get-by-exercise": "TestCaseController.getByExercise",
+  "get /api/testcase/exercise/:exerciseId": "TestCaseController.getByExercise",
 
   // SnippetController
   "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",
