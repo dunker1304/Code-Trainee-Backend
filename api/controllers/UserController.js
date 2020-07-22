@@ -139,7 +139,7 @@ module.exports = {
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
         //secure: true,
-        //domain : '.codetrainee.codes',
+        domain : '.codetrainee.codes',
       });
       res.send({ success: true, message: 'Login successfully', 'user': user });
     })(req, res, next);
