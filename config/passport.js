@@ -19,16 +19,31 @@ passport.use(new JwtStrategy({
     }
     
     //Find the user specified in token
-    const user = await User.findOne({id:payload.sub});
+    const user = await User.findOne({id:payload.sub}).populate('roles');
     // If user doesn't exists, handle it
     if (!user) {
       return done(null, false);
     }
-   
 
+    //format user
+    let responseUser = {
+      id : user['id'],
+      username : user['username'],
+      displayName : user['displayName'],
+      imageLink : user['imageLink'],
+      dateOfBirth : user['dateOfBirth'],
+      email : user['email'],
+      phone : user['phone'],
+      role : {
+        id : user['roles'][0]['id'],
+        name : user['roles'][0]['name']
+      }
+    }
+
+  
     // Otherwise, return the user
-    req.user = user;
-    done(null, user);
+    req.user = responseUser;
+    done(null, responseUser);
   } catch(error) {
     done(error, false);
   }
@@ -125,7 +140,7 @@ passport.use(new LocalStrategy({
     criteria['isLoginLocal'] = 1;
     
     // Find the user given the email or username
-    const user = await User.findOne(criteria);
+    const user = await User.findOne(criteria).populate('roles');
     
     // If not, handle it
     if (!user) {
@@ -144,9 +159,26 @@ passport.use(new LocalStrategy({
     if( user.status == 0 && user.isLoginLocal == 1 ){
         return done(null ,false , { message : 'Account not verify!'})
     }
+
+   
+     //format user
+     let responseUser = {
+      id : user['id'],
+      username : user['username'],
+      displayName : user['displayName'],
+      imageLink : user['imageLink'],
+      dateOfBirth : user['dateOfBirth'],
+      email : user['email'],
+      phone : user['phone'],
+      role : {
+        id : user['roles'][0]['id'],
+        name : user['roles'][0]['name']
+      }
+    }
+
   
     // Otherwise, return the user
-    done(null, user);
+    done(null, responseUser);
   } catch(error) {
     done(error, false);
   }

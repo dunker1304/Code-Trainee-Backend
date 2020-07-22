@@ -180,7 +180,7 @@ module.exports = {
       if(err) 
        return res.send({
         success: false,
-        message : 'Đã có lỗi xảy ra'
+        message : err
       })
    
       if(!user) {
@@ -242,7 +242,7 @@ module.exports = {
       let hardE = 0;
       
 
-      let rawResult = await sails.sendNativeQuery(`SELECT * FROM exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
+      let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
 
       rawResult['rows'].forEach(ele => {
          if(ele['level'] == 'Easy') easyE++;
@@ -320,6 +320,20 @@ module.exports = {
       return res.send({
         success : false ,
         data : [],
+        error : CONSTANTS.API_ERROR
+      })
+    }
+  },
+
+  signOut : async function ( req ,res) {
+    try {
+      res.clearCookie('access_token');
+      // console.log('I managed to get here!');
+      res.json({ success: true });
+      
+    } catch (error) {
+      return res.send({
+        success : false,
         error : CONSTANTS.API_ERROR
       })
     }

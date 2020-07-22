@@ -28,6 +28,7 @@ module.exports = {
         let user = {
           id : element['userId']['id'],
           index : index + 1,
+          key : index + 1,
           email: element['userId']['email'],
           role: element['roleId']['name'],
           username : element['userId']['username'],

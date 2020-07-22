@@ -49,7 +49,7 @@ module.exports = {
         if (CONSTANTS.ERROR_STATUS.indexOf(status) !== -1) {
           result["success"] = false;
         }
-        console.log(result, 'first response')
+      //  console.log(result, 'first response')
 
         return result;
       }
@@ -64,7 +64,7 @@ module.exports = {
     }
   },
   createQuery : async function(selectSQL , typeJoin) {
-    return `Select ${selectSQL} from exercise as a 
+    return `Select ${selectSQL} from Exercise as a 
     inner join ExerciseTag as b
     on a.id = b.exercise_id 
     ${typeJoin} join TrainingHistory as c
