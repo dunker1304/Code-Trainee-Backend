@@ -581,7 +581,8 @@ module.exports = {
   // get list exercise by owner
   getByOwner: async (req, res) => {
     try {
-      let { ownerId } = req.query;
+      let { ownerId } = req.params;
+      console.log('ownerId', ownerId)
       let exercises = await Exercise.find({
         where: {
           createdBy: ownerId,
