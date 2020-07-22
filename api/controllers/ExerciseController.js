@@ -27,7 +27,7 @@ module.exports = {
     };
 
     //get testcase of exercise
-    let testCase = await TestCase.find({ exerciseId: 1 });
+    let testCase = await TestCase.find({ exerciseId: questionId });
 
     if (testCase.length == 0) {
       console.log(testCase, "k co testcase");
@@ -118,7 +118,7 @@ module.exports = {
 
   submitSolution: async (req, res) => {
     try {
-      let { question, testcases, answer, language } = req.body;
+      let { question, testcases, answer, language, userID } = req.body;
       console.log(req.body, "solution");
       let status = "Accepted";
       testcases.forEach((testcase) => {
@@ -128,13 +128,13 @@ module.exports = {
         }
       });
       let history = await TrainingHistory.create({
-        userId: 3,
+        userId: userID || 3 ,
         exerciseId: question.id,
         status: status,
         answer: answer,
         programLanguageId: language,
         isFinished: status == "Accepted" ? true : false,
-      });
+      }).fetch();
 
       res.send({ success: true, solution: history });
     } catch (error) {
@@ -176,10 +176,9 @@ module.exports = {
   createExercise: async (req, res) => {
     try {
       let { content, title, points, level, tags } = req.body;
-      console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [ ... new Set(tags) ].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -190,7 +189,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -201,6 +200,14 @@ module.exports = {
       await Exercise.addToCollection(exercise.id, "tags").members(
         mappingTagIds
       );
+      // default always support language id 1
+      let snippet = await CodeSnippet.create({
+        exerciseId: exercise.id,
+        programLanguageId: 1,
+        sampleCode: "",
+        isActive: true,
+      }).fetch();
+      await Exercise.addToCollection(exercise.id, "codeSnippets").members([snippet.id]);
       res.json({
         success: true,
         data: {
@@ -222,7 +229,7 @@ module.exports = {
       console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [... new Set(tags)].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -233,7 +240,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       id = Number(id);
       points = Number(points);
       content = purifier.purify(content);
@@ -639,6 +646,7 @@ module.exports = {
       });
      
 
+
       return res.send({
         success : true,
         data : {
@@ -669,6 +677,41 @@ module.exports = {
         error : 1,
         data : {}
       })
+    }
+  },    
+  getExerciseNeedApproval: async (req, res) => {
+    try {
+      let exerciseNeedApproval = await Exercise.find({isApproved: false, isDeleted: false});
+      res.json({
+        success: true,
+        data: exerciseNeedApproval,
+      })
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+
+  updateExerciseNeedApproval: async (req, res) => {
+    try{
+      let {id} = req.body;
+      let updatedExercise = await Exercise.updateOne({
+        id: id,
+      }).set({
+        isApproved: true
+      })
+      res.json({
+        success: true,
+        data: {id: updatedExercise.id},
+      })
+
+    } catch(e) {
+      res.json({
+        success: false,
+      })
+      console.log(e)
     }
   }
 };

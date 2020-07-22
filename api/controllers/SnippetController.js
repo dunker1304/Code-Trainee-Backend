@@ -33,7 +33,7 @@ module.exports = {
       console.log(e);
     }
   },
-  // // only update or create if not exist supported language 'active' field
+  // only update or create if not exist supported language 'active' field
   updateOrCreateSupportedLanguage: async (req, res) => {
     try {
       let {
@@ -61,7 +61,6 @@ module.exports = {
           isActive: true,
         });
       });
-
       let notActives = notActiveLangIds.map(async (i) => {
         let snippet = await CodeSnippet.findOrCreate(
           {
@@ -81,7 +80,6 @@ module.exports = {
           isActive: false,
         });
       });
-
       await Promise.all([...actives, ...notActives]);
       res.json({
         success: true,
