@@ -175,7 +175,8 @@ module.exports = {
   // create exercise
   createExercise: async (req, res) => {
     try {
-      let { content, title, points, level, tags } = req.body;
+      let { content, title, points, level, tags, createdBy } = req.body;
+      console.log('createdBy', createdBy)
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
         [ ... new Set(tags) ].map(async (e) => {
@@ -196,6 +197,7 @@ module.exports = {
         level,
         content,
         title,
+        createdBy
       }).fetch();
       await Exercise.addToCollection(exercise.id, "tags").members(
         mappingTagIds
