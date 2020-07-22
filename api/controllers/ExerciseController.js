@@ -178,7 +178,7 @@ module.exports = {
       let { content, title, points, level, tags } = req.body;
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [ ... new Set(tags) ].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -189,7 +189,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       content = purifier.purify(content); // escape XSR
       let exercise = await Exercise.create({
         points,
@@ -229,7 +229,7 @@ module.exports = {
       console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
-        tags.map(async (e) => {
+        [... new Set(tags)].map(async (e) => {
           return Tag.findOrCreate(
             {
               name: e,
@@ -240,7 +240,7 @@ module.exports = {
           );
         })
       );
-      let mappingTagIds = [...mappingTags].map((e) => e.id);
+      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
       id = Number(id);
       points = Number(points);
       content = purifier.purify(content);
@@ -663,6 +663,42 @@ module.exports = {
         },
         error: CONSTANTS.API_ERROR
       })
+    }
+  },
+
+  getExerciseNeedApproval: async (req, res) => {
+    try {
+      let exerciseNeedApproval = await Exercise.find({isApproved: false, isDeleted: false});
+      res.json({
+        success: true,
+        data: exerciseNeedApproval,
+      })
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+
+  updateExerciseNeedApproval: async (req, res) => {
+    try{
+      let {id} = req.body;
+      let updatedExercise = await Exercise.updateOne({
+        id: id,
+      }).set({
+        isApproved: true
+      })
+      res.json({
+        success: true,
+        data: {id: updatedExercise.id},
+      })
+
+    } catch(e) {
+      res.json({
+        success: false,
+      })
+      console.log(e)
     }
   }
 };
