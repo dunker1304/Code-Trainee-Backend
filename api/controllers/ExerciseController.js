@@ -258,6 +258,7 @@ module.exports = {
         },
       });
     } catch (e) {
+      console.log(e)
       res.json({
         success: false,
         data: {},
@@ -666,6 +667,18 @@ module.exports = {
     }
   },
 
+  //get submission by Id 
+  getSubmissionById : async ( req , res) => {
+    try {
+      
+    } catch (error) {
+      return res.send({
+        success : false,
+        error : 1,
+        data : {}
+      })
+    }
+  },    
   getExerciseNeedApproval: async (req, res) => {
     try {
       let exerciseNeedApproval = await Exercise.find({isApproved: false, isDeleted: false});
