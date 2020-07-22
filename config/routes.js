@@ -61,6 +61,7 @@ module.exports.routes = {
   "get /api/wish-list/:type": "ExerciseController.getWishListByType",
   "get /api/wish-list": "ExerciseController.getWishList",
   "get /api/all-submission": "ExerciseController.getAllSubmission",
+  "get /api/submission/:subId" : "ExerciseController.getSubmissionById",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
