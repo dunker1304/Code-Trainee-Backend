@@ -442,7 +442,6 @@ module.exports = {
       let wishlist = await WishList.destroyOne({
         exerciseId: exerciseId,
         userId: userId,
-        type: typeWishList,
       });
 
       return res.send({
