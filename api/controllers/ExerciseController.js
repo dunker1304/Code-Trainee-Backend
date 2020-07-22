@@ -669,8 +669,38 @@ module.exports = {
   //get submission by Id 
   getSubmissionById : async ( req , res) => {
     try {
+      let userId = req.user ? req.user['id'] : 5;
+      let roleId = req.user ? req.user['role']['id'] : 5;
+      let subId = req.params.subId
+      
+      //if teacher -> get submission if your exercise theirr created
+      let sub = await TrainingHistory.findOne({id : subId}).populate('programLanguageId').populate('exerciseId');
+      let result  = {}
+      if(sub) {
+        result = {
+          id : sub['id'],
+          exercise : {
+            id : sub['exerciseId']['id'],
+            title : sub['exerciseId']['title']
+          },
+          language : {
+            id : sub['programLanguageId']['id'],
+            name : sub['programLanguageId']['name']
+          },
+          answer : sub['answer'],
+          createdAt : sub['createdAt'],
+          userId : sub['userId'],
+          status : sub['status']
+          
+        }
+      }
+      return res.send({
+        success : true,
+        data: result
+      })
       
     } catch (error) {
+      console.log(error)
       return res.send({
         success : false,
         error : 1,
