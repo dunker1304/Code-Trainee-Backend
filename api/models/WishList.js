@@ -8,10 +8,6 @@ module.exports = {
     exerciseId: {
       model: "Exercise",
       columnName: "exercise_id",
-    },
-    type: {
-      model : 'TypeWishList',
-      columnName : "type"
     }
   },
 };
