@@ -19,6 +19,7 @@ module.exports.routes = {
   "get /api/profile/:userId" : "UserController.getUserById",
   "get /api/user/exercise":"UserController.getExerciseOfAUser",
   "post /api/user/role":"UserController.getRole",
+  "get /signout":"UserController.signOut",
 
   //CommentController :
   "post /api/create-comment": "CommentController.createAComment",

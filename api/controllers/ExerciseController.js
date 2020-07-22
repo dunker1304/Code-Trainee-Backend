@@ -251,6 +251,7 @@ module.exports = {
         },
       });
     } catch (e) {
+      console.log(e)
       res.json({
         success: false,
         data: {},
@@ -654,6 +655,19 @@ module.exports = {
           total : 0
         },
         error: CONSTANTS.API_ERROR
+      })
+    }
+  },
+
+  //get submission by Id 
+  getSubmissionById : async ( req , res) => {
+    try {
+      
+    } catch (error) {
+      return res.send({
+        success : false,
+        error : 1,
+        data : {}
       })
     }
   }

@@ -24,7 +24,7 @@ module.exports.policies = {
   // },
 
   // UserController : {
-  //   'getUserById' : 'isAuthenticate'
+  //   '*' : 'isAuthenticate'
   // },
 
   // ExerciseController : {
