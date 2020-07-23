@@ -611,6 +611,7 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
+      console.log(id, deletedExercise, 'delete ex');
       res.json({
         success: true,
         data: {

@@ -34,10 +34,10 @@ module.exports.routes = {
   "get /api/get": "TestController.get",
 
   // ExerciseController
+  "get /api/exercise": "ExerciseController.getExerciseById",
   "post /api/submissions": "ExerciseController.submitExercise",
   "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
-  "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
   "get /api/exercise/basic-info/:exerciseId":
     "ExerciseController.getBasicInfoById",
