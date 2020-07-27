@@ -89,7 +89,7 @@ module.exports = {
         return;
       }
       let count = await Exercise.count();
-      let exercise = await Exercise.findOne({ id: id });
+      let exercise = await Exercise.findOne({ id: id, isApproved: true, isDeleted: false });
       let testCases;
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
@@ -97,6 +97,76 @@ module.exports = {
       res.send({success: true, question: exercise, testCases: testCases, total: count });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
+    }
+  },
+
+  getVoteExercise: async (req, res) => {
+    try {
+      let userID = req.query.userID
+      let questionID = req.query.questionID
+      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: questionID})
+      res.send({ success: true, exerciseVote: vote })
+    } catch (e) {
+      res.send({ success: false, message: e })
+    }
+  },
+
+  reactExercise: async (req, res) => {
+    try {
+      let userID = req.body.userID
+      let exerciseID = req.body.exerciseID
+      let status = req.body.status
+      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: exerciseID })
+      let result;
+      let updatedExercise = await Exercise.findOne({ id: exerciseID });
+      if (vote) {
+        if (status == 'like' && vote.statusVote == 1) {
+          console.log('giam like')
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 0 })
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ like: updatedExercise.like - 1 })
+        } else if (status == 'like' && (vote.statusVote == 0 || vote.statusVote == -1)) {
+          console.log('tang like')
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 1 })
+          if (vote.statusVote == 0) {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1 })
+          } else {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1, dislike: updatedExercise.dislike - 1 })
+          }
+          
+        } else if (status == 'dislike' && vote.statusVote == -1) {
+          console.log('giam dislike')
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 0 })
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ dislike: updatedExercise.dislike - 1 })
+        } else {
+          console.log('tang dislike')
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: -1 })
+          if (vote.statusVote == 0) {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ dislike: updatedExercise.dislike + 1 })
+          } else {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ dislike: updatedExercise.dislike + 1, like: updatedExercise.like - 1 })
+          }
+          
+        }
+      } else {
+        if (status == 'like') {
+          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: 1 }).fetch();
+        } else {
+          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: -1 }).fetch();
+        }
+      }
+      res.send({ success: true, resultVote: result, updatedExercise: updatedExercise })
+    } catch (error) {
+      res.send({ success: false, message: error })
     }
   },
 
@@ -613,6 +683,7 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
+      console.log(id, deletedExercise, 'delete ex');
       res.json({
         success: true,
         data: {
