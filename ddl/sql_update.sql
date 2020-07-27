@@ -50,3 +50,18 @@ alter table `TrainingHistory` modify column `status` varchar(255)
 -- 15/7/2020
 ALTER TABLE `Comment` MODIFY content VARCHAR(10000)  CHARACTER SET utf8;
 ALTER TABLE `Comment` MODIFY title VARCHAR(300)  CHARACTER SET utf8;
+
+-- 26/07
+CREATE TABLE ExerciseVote (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  user_id int(11) DEFAULT NULL,
+  exercise_id int(11) DEFAULT NULL,
+  status_vote tinyint(1) DEFAULT '0',
+  created_at datetime DEFAULT NULL,
+  updated_at datetime DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY exercise_id (exercise_id),
+  KEY user_id (user_id),
+  CONSTRAINT ExerciseVote_ibfk_1 FOREIGN KEY (exercise_id) REFERENCES Exercise (id),
+  CONSTRAINT ExerciseVote_ibfk_2 FOREIGN KEY (user_id) REFERENCES User (id)
+)

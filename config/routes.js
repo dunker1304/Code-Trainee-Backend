@@ -47,6 +47,8 @@ module.exports.routes = {
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
   "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
+  "get /api/exercise/vote": "ExerciseController.getVoteExercise",
+  'post /api/exercise/react': 'ExerciseController.reactExercise',
 
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
