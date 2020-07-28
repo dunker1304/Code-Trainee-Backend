@@ -121,13 +121,11 @@ module.exports = {
       let updatedExercise = await Exercise.findOne({ id: exerciseID });
       if (vote) {
         if (status == 'like' && vote.statusVote == 1) {
-          console.log('giam like')
           result = await ExerciseVote.updateOne({ id: vote.id })
                                      .set({ statusVote: 0 })
           updatedExercise = await Exercise.updateOne({ id: exerciseID })
                                           .set({ like: updatedExercise.like - 1 })
         } else if (status == 'like' && (vote.statusVote == 0 || vote.statusVote == -1)) {
-          console.log('tang like')
           result = await ExerciseVote.updateOne({ id: vote.id })
                                      .set({ statusVote: 1 })
           if (vote.statusVote == 0) {
@@ -139,13 +137,11 @@ module.exports = {
           }
           
         } else if (status == 'dislike' && vote.statusVote == -1) {
-          console.log('giam dislike')
           result = await ExerciseVote.updateOne({ id: vote.id })
                                      .set({ statusVote: 0 })
           updatedExercise = await Exercise.updateOne({ id: exerciseID })
                                      .set({ dislike: updatedExercise.dislike - 1 })
         } else {
-          console.log('tang dislike')
           result = await ExerciseVote.updateOne({ id: vote.id })
                                      .set({ statusVote: -1 })
           if (vote.statusVote == 0) {
@@ -160,8 +156,12 @@ module.exports = {
       } else {
         if (status == 'like') {
           result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: 1 }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1 })
         } else {
           result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: -1 }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ dislike: updatedExercise.dislike + 1 })
         }
       }
       res.send({ success: true, resultVote: result, updatedExercise: updatedExercise })
@@ -231,15 +231,18 @@ module.exports = {
   },
 
   getRandom: async (req, res) => {
-    let exercise = await Exercise.count().then((count) =>
-      Exercise.find()
-        .limit(1)
-        .skip(parseInt(Math.random() * count))
-    );
-    return res.send({
-      success: true,
-      data: exercise[0],
-    });
+    try {
+      let count = await Exercise.count({ isDeleted: false, isApproved: true })
+      let random = parseInt(Math.random() * count)
+      let allExercise = await Exercise.find({ isDeleted: false, isApproved: true })
+      res.send({
+        success: true,
+        data: allExercise[random]
+      });
+    } catch (err) {
+      res.send({ success: false, message: err })
+    }
+    
   },
 
   // create exercise

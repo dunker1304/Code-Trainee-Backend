@@ -250,4 +250,55 @@ describe('Exercise Controller Testing', () => {
     })
   })
 
+  it('# GET VOTE EXERCISE', done => {
+    Exercise.find({}).limit(1).exec((err, exercise) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .post('/api/exercise/vote')
+      .send({
+        userID: 7,
+        questionID: 1
+      })
+      .end((err, res) => {
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
+  it('# REACT EXERCISE', done => {
+    Exercise.find({}).limit(1).exec((err, exercise) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .post('/api/exercise/react')
+      .send({
+        userID: 7,
+        exerciseID: 1,
+        status: 'like'
+      })
+      .end((err, res) => {
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
+  it('# REACT EXERCISE', done => {
+    Exercise.find({}).limit(1).exec((err, exercise) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .post('/api/exercise/react')
+      .send({
+        userID: 7,
+        exerciseID: 1,
+        status: 'dislike'
+      })
+      .end((err, res) => {
+        console.log(res.body, 'react exer')
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
 })
