@@ -15,7 +15,7 @@ module.exports = {
 
     await MailService.sendWelcomeMail(sender)
   },
-  validateSignUp :  (data)=> {
+  validateSignUp : async (data)=> {
 
     //if empty 
     if(!data || !data.username || !data.email || (data.key != 'admin-edit' && !data.password) ){
@@ -57,6 +57,15 @@ module.exports = {
 
     //validate username
     if(data.username) {
+      let validateSpecial = await sails.helpers.validateSpecial.with({
+        value : data.username
+      });
+      if(!validateSpecial){
+        return {
+          success : false,
+          message : 'Username have special character!'
+        }
+      }
       if(data.username.length > 30) {
         return {
           success : false,
@@ -67,6 +76,17 @@ module.exports = {
 
     //validate displayName
     if(data.displayName) {
+
+      let validateSpecial = await sails.helpers.validateSpecial.with({
+        value : data.displayName
+      });
+      if(!validateSpecial){
+        return {
+          success : false,
+          message : 'Displayname have special character!'
+        }
+      }
+
       if(data.displayName.length > 30 || data.displayName.length < 4) {
         return {
           success : false,
@@ -92,7 +112,7 @@ module.exports = {
         }
     }
     return {
-      success :true ,
+      success :false ,
       message :''
     }
   }

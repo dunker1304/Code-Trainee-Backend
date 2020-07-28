@@ -33,6 +33,58 @@ module.exports = {
 
     let resultCreate =  await Comment.create(comment).fetch()
     let afterCreated = await Comment.findOne({id:resultCreate['id']}).populate('senderId')
+    let questionInfo = await Exercise.findOne({id : questionId});
+    //send notification
+    if(parentId == -1) {
+
+      let sql = `select DISTINCT sender_id from Comment where parent_id = -1 and exercise_id = ${questionInfo['id']}`
+      let receivers = await sails.sendNativeQuery(sql);
+      
+      if(receivers && receivers['rows']) {
+        let tmp = receivers['rows'].map((value)=> {
+          return value['sender_id']
+        })
+        let index = tmp.find(element => element == questionInfo['createdBy']);
+
+        if(index == -1) 
+        tmp.push(questionInfo['createdBy'])
+
+        // tmp.forEach(element => {
+          for(let i = 0 ;i <tmp.length ; i++  ){
+            let info = {
+              content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
+              linkAction : `/exercise/${questionInfo['id']}/discuss`,
+              receiver : tmp[i],
+              type : 1,
+           }
+           await Notification.create(info)
+        }
+      //  });
+      }
+      
+    }
+    else {
+      //send notification to ower of this exercise
+      let commentInfo = await Comment.findOne({ where : {id : parentId}})
+      let info2 = {
+        content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
+        linkAction : `/exercise/${questionInfo['id']}/discuss_${afterCreated['id']}`,
+        receiver : questionInfo['createdBy'],
+        type : 1,
+     }
+     await Notification.create(info2)
+
+     //send to ower of this comment
+     let info = {
+      content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> replied your comment on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
+      linkAction : `/exercise/${questionInfo['id']}/discuss_${afterCreated['id']}`,
+      receiver : commentInfo['senderId'],
+      type : 1,
+    }
+    await Notification.create(info)
+
+    }
+   
     
     return  res.send({
       success : true ,

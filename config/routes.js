@@ -90,4 +90,10 @@ module.exports.routes = {
   "post /api/admin/create-an-account": "AdminController.createAnAccount",
   "post /api/admin/search-fuzzy-account":
     "AdminController.getUserByRoleWithKeySearch",
+
+  //Notification Controller
+  "get /api/get-most-notification" : "NotificationController.getMostNotification",
+  "post /api/mark-as-read":"NotificationController.maskAsRead",
+  "post /api/remove-notification":"NotificationController.removeNotification",
+  "get /api/get-all-notification":"NotificationController.getAllNotification"
 };

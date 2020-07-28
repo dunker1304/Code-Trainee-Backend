@@ -54,7 +54,7 @@ module.exports = {
       let data = req.body
     
       //validate request
-      let validate = CustomerComponent.validateSignUp(data);
+      let validate = await CustomerComponent.validateSignUp(data);
 
       if (!validate['success']) {
         return res.json(validate)
@@ -177,11 +177,13 @@ module.exports = {
   currentUser: function (req, res, next) {
     passport.authenticate('jwt', async function (err, user, message) {
 
-      if(err) 
-       return res.send({
-        success: false,
-        message : err
-      })
+      if(err) {
+        return res.send({
+          success: false,
+          message : err
+        })
+      }
+      
    
       if(!user) {
         return res.status(403).json({
@@ -309,13 +311,14 @@ module.exports = {
       else {
         listRole = await Role.find({});
       }
+      sails.sentry.captureMessage("Another message");
 
       return res.send({
         success : true , 
         data : listRole
       })
       
-
+ 
     } catch (error) {
       return res.send({
         success : false ,
@@ -327,7 +330,7 @@ module.exports = {
 
   signOut : async function ( req ,res) {
     try {
-      res.clearCookie('access_token');
+      res.clearCookie('access_token', { domain : 'localhost'});
       // console.log('I managed to get here!');
       res.json({ success: true });
       
