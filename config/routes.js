@@ -34,19 +34,21 @@ module.exports.routes = {
   "get /api/get": "TestController.get",
 
   // ExerciseController
+  "get /api/exercise": "ExerciseController.getExerciseById",
   "post /api/submissions": "ExerciseController.submitExercise",
   "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
-  "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
   "get /api/exercise/basic-info/:exerciseId":
     "ExerciseController.getBasicInfoById",
   "post /api/exercise/create": "ExerciseController.createExercise",
   "post /api/exercise/update": "ExerciseController.updateExercise",
-  "get /api/exercise/get-by-owner": "ExerciseController.getByOwner",
+  "get /api/exercise/owner/:ownerId": "ExerciseController.getByOwner",
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
   "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
+  "get /api/exercise/vote": "ExerciseController.getVoteExercise",
+  'post /api/exercise/react': 'ExerciseController.reactExercise',
 
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
@@ -68,7 +70,7 @@ module.exports.routes = {
   "post /api/testcase/create": "TestCaseController.createTestCase",
   "post /api/testcase/update": "TestCaseController.updateTestCase",
   "post /api/testcase/delete": "TestCaseController.deleteTestcase",
-  "get /api/testcase/get-by-exercise": "TestCaseController.getByExercise",
+  "get /api/testcase/exercise/:exerciseId": "TestCaseController.getByExercise",
 
   // SnippetController
   "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",

@@ -93,14 +93,9 @@ module.exports = {
   // pagination
   getByExercise: async (req, res) => {
     try {
-      let { exerciseId, page, limit } = req.query;
-      // page = page || 1;
-      // limit = limit || 10;
-      let skip = (page - 1) * limit;
+      let { exerciseId } = req.params;
       let result = await TestCase.find({
         where: { exerciseId: exerciseId },
-        // limit: limit,
-        // skip: skip,
         sort: "createdAt DESC",
       });
       res.json({
