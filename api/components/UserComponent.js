@@ -15,7 +15,7 @@ module.exports = {
 
     await MailService.sendWelcomeMail(sender)
   },
-  validateSignUp : async (data)=> {
+  validateSignUp :  (data)=> {
 
     //if empty 
     if(!data || !data.username || !data.email || (data.key != 'admin-edit' && !data.password) ){

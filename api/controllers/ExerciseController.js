@@ -89,7 +89,7 @@ module.exports = {
         return;
       }
       let count = await Exercise.count();
-      let exercise = await Exercise.findOne({ id: id });
+      let exercise = await Exercise.findOne({ id: id, isApproved: true, isDeleted: false });
       let testCases;
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
@@ -97,6 +97,76 @@ module.exports = {
       res.send({success: true, question: exercise, testCases: testCases, total: count });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
+    }
+  },
+
+  getVoteExercise: async (req, res) => {
+    try {
+      let userID = req.query.userID
+      let questionID = req.query.questionID
+      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: questionID})
+      res.send({ success: true, exerciseVote: vote })
+    } catch (e) {
+      res.send({ success: false, message: e })
+    }
+  },
+
+  reactExercise: async (req, res) => {
+    try {
+      let userID = req.body.userID
+      let exerciseID = req.body.exerciseID
+      let status = req.body.status
+      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: exerciseID })
+      let result;
+      let updatedExercise = await Exercise.findOne({ id: exerciseID });
+      if (vote) {
+        if (status == 'like' && vote.statusVote == 1) {
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 0 })
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ like: updatedExercise.like - 1 })
+        } else if (status == 'like' && (vote.statusVote == 0 || vote.statusVote == -1)) {
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 1 })
+          if (vote.statusVote == 0) {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1 })
+          } else {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1, dislike: updatedExercise.dislike - 1 })
+          }
+          
+        } else if (status == 'dislike' && vote.statusVote == -1) {
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: 0 })
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ dislike: updatedExercise.dislike - 1 })
+        } else {
+          result = await ExerciseVote.updateOne({ id: vote.id })
+                                     .set({ statusVote: -1 })
+          if (vote.statusVote == 0) {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ dislike: updatedExercise.dislike + 1 })
+          } else {
+            updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                          .set({ dislike: updatedExercise.dislike + 1, like: updatedExercise.like - 1 })
+          }
+          
+        }
+      } else {
+        if (status == 'like') {
+          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: 1 }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ like: updatedExercise.like + 1 })
+        } else {
+          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: -1 }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID })
+                                     .set({ dislike: updatedExercise.dislike + 1 })
+        }
+      }
+      res.send({ success: true, resultVote: result, updatedExercise: updatedExercise })
+    } catch (error) {
+      res.send({ success: false, message: error })
     }
   },
 
@@ -164,15 +234,18 @@ module.exports = {
   },
 
   getRandom: async (req, res) => {
-    let exercise = await Exercise.count().then((count) =>
-      Exercise.find()
-        .limit(1)
-        .skip(parseInt(Math.random() * count))
-    );
-    return res.send({
-      success: true,
-      data: exercise[0],
-    });
+    try {
+      let count = await Exercise.count({ isDeleted: false, isApproved: true })
+      let random = parseInt(Math.random() * count)
+      let allExercise = await Exercise.find({ isDeleted: false, isApproved: true })
+      res.send({
+        success: true,
+        data: allExercise[random]
+      });
+    } catch (err) {
+      res.send({ success: false, message: err })
+    }
+    
   },
 
   // create exercise
@@ -616,6 +689,7 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
+      console.log(id, deletedExercise, 'delete ex');
       res.json({
         success: true,
         data: {
@@ -675,8 +749,38 @@ module.exports = {
   //get submission by Id 
   getSubmissionById : async ( req , res) => {
     try {
+      let userId = req.user ? req.user['id'] : 5;
+      let roleId = req.user ? req.user['role']['id'] : 5;
+      let subId = req.params.subId
+      
+      //if teacher -> get submission if your exercise theirr created
+      let sub = await TrainingHistory.findOne({id : subId}).populate('programLanguageId').populate('exerciseId');
+      let result  = {}
+      if(sub) {
+        result = {
+          id : sub['id'],
+          exercise : {
+            id : sub['exerciseId']['id'],
+            title : sub['exerciseId']['title']
+          },
+          language : {
+            id : sub['programLanguageId']['id'],
+            name : sub['programLanguageId']['name']
+          },
+          answer : sub['answer'],
+          createdAt : sub['createdAt'],
+          userId : sub['userId'],
+          status : sub['status']
+          
+        }
+      }
+      return res.send({
+        success : true,
+        data: result
+      })
       
     } catch (error) {
+      console.log(error)
       return res.send({
         success : false,
         error : 1,

@@ -49,7 +49,6 @@ module.exports = {
         if (CONSTANTS.ERROR_STATUS.indexOf(status) !== -1) {
           result["success"] = false;
         }
-      //  console.log(result, 'first response')
 
         return result;
       }

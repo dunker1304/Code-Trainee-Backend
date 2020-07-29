@@ -34,10 +34,10 @@ module.exports.routes = {
   "get /api/get": "TestController.get",
 
   // ExerciseController
+  "get /api/exercise": "ExerciseController.getExerciseById",
   "post /api/submissions": "ExerciseController.submitExercise",
   "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
-  "get /api/exercise": "ExerciseController.getExerciseById",
   "get /api/exercise/random": "ExerciseController.getRandom",
   "get /api/exercise/basic-info/:exerciseId":
     "ExerciseController.getBasicInfoById",
@@ -47,6 +47,8 @@ module.exports.routes = {
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
   "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
+  "get /api/exercise/vote": "ExerciseController.getVoteExercise",
+  'post /api/exercise/react': 'ExerciseController.reactExercise',
 
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
@@ -61,6 +63,7 @@ module.exports.routes = {
   "get /api/wish-list/:type": "ExerciseController.getWishListByType",
   "get /api/wish-list": "ExerciseController.getWishList",
   "get /api/all-submission": "ExerciseController.getAllSubmission",
+  "get /api/submission/:subId" : "ExerciseController.getSubmissionById",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
