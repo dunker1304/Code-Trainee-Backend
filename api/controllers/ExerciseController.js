@@ -145,9 +145,12 @@ module.exports = {
   getBasicInfoById: async (req, res) => {
     try {
       let { exerciseId } = req.params;
-      let exercise = await Exercise.findOne({ id: exerciseId }).populate(
+      let exercise = await Exercise.findOne({ id: exerciseId, isDeleted: false }).populate(
         "tags"
       );
+      if(!exercise) {
+        throw new Error('already deleted')
+      }
       res.json({
         success: true,
         data: { ...exercise },
@@ -683,7 +686,13 @@ module.exports = {
   },    
   getExerciseNeedApproval: async (req, res) => {
     try {
-      let exerciseNeedApproval = await Exercise.find({isApproved: false, isDeleted: false});
+      let exerciseNeedApproval = await Exercise.find({
+        where: {
+          isApproved: false,
+          isDeleted: false,
+        },
+        sort: "updatedAt DESC",
+      });
       res.json({
         success: true,
         data: exerciseNeedApproval,

@@ -70,13 +70,13 @@ module.exports.routes = {
   "get /api/testcase/exercise/:exerciseId": "TestCaseController.getByExercise",
 
   // SnippetController
-  "post /api/snippet/sample/update": "SnippetController.updateOrCreateSample",
-  "post /api/snippet/supported-language/update":
-    "SnippetController.updateOrCreateSupportedLanguage",
+  "post /api/snippet/update":
+    "SnippetController.updateOrCreateSnippet",
   "get /api/snippet-code": "SnippetController.getSnippetCode",
 
   // ProgramLanguageController
-  "get /api/program-language/all": "ProgramLanguageController.getAllByExercise",
+  "get /api/language/exercise/:exerciseId": "ProgramLanguageController.getAllByExerciseId",
+  "get /api/language/all": "ProgramLanguageController.getAll",
 
   // TagController
   "get /api/tags/exercise/:exerciseId": "TagController.getTagsByExerciseId",
