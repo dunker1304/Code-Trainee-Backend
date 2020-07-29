@@ -1,16 +1,28 @@
 module.exports = {
-  getAllByExercise: async (req, res) => {
+  getAllByExerciseId: async (req, res) => {
     try {
-      let { exerciseId } = req.query;
-      let all = await ProgramLanguage.find().populate("codeSnippets", {
+      let { exerciseId } = req.params;
+      let languages = await ProgramLanguage.find().populate("codeSnippets", {
         exerciseId: exerciseId,
-        isActive: true
+        isActive: true,
       });
       res.json({
         success: true,
-        data: {
-          result: all,
-        },
+        data: languages,
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
+  },
+  getAll: async (req, res) => {
+    try {
+      let languages = await ProgramLanguage.find();
+      res.json({
+        success: true,
+        data: languages,
       });
     } catch (e) {
       res.json({
