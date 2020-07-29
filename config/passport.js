@@ -35,8 +35,8 @@ passport.use(new JwtStrategy({
       email : user['email'],
       phone : user['phone'],
       role : {
-        id : user['roles'][0]['id'],
-        name : user['roles'][0]['name']
+        id :  user['roles'] &&  user['roles'].length > 0 ? user['roles'][0]['id'] : '',
+        name :   user['roles'] &&  user['roles'].length > 0 ? user['roles'][0]['name'] : ''
       }
     }
 
@@ -171,8 +171,8 @@ passport.use(new LocalStrategy({
       email : user['email'],
       phone : user['phone'],
       role : {
-        id : user['roles'][0]['id'],
-        name : user['roles'][0]['name']
+        id :  user['roles'] &&  user['roles'].length > 0 ? user['roles'][0]['id'] : '',
+        name :   user['roles'] &&  user['roles'].length > 0 ? user['roles'][0]['name'] : ''
       }
     }
 

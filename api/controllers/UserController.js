@@ -54,7 +54,7 @@ module.exports = {
       let data = req.body
     
       //validate request
-      let validate = CustomerComponent.validateSignUp(data);
+      let validate = await CustomerComponent.validateSignUp(data);
 
       if (!validate['success']) {
         return res.json(validate)
@@ -132,6 +132,13 @@ module.exports = {
         return res.json({ 'success': false, 'message': message })
       }
 
+      let domain = ''
+      if(sails.config.environment == 'development') {
+        domain = CONSTANTS.DOMAIN_COOKIES_LOCAL
+      }
+      else 
+       domain = CONSTANTS.DOMAIN_COOKIES_PROD
+
       // Generate the token
       const token = await signToken(user);
       // Send a cookie containing JWT
@@ -139,7 +146,7 @@ module.exports = {
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
         //secure: true,
-        //domain : '.codetrainee.codes',
+        domain : domain,
       });
       res.send({ success: true, message: 'Login successfully', 'user': user });
     })(req, res, next);
@@ -177,11 +184,13 @@ module.exports = {
   currentUser: function (req, res, next) {
     passport.authenticate('jwt', async function (err, user, message) {
 
-      if(err) 
-       return res.send({
-        success: false,
-        message : err
-      })
+      if(err) {
+        return res.send({
+          success: false,
+          message : err
+        })
+      }
+      
    
       if(!user) {
         return res.status(403).json({
@@ -309,13 +318,14 @@ module.exports = {
       else {
         listRole = await Role.find({});
       }
+      sails.sentry.captureMessage("Another message");
 
       return res.send({
         success : true , 
         data : listRole
       })
       
-
+ 
     } catch (error) {
       return res.send({
         success : false ,
@@ -327,7 +337,13 @@ module.exports = {
 
   signOut : async function ( req ,res) {
     try {
-      res.clearCookie('access_token');
+      let domain = ''
+      if(sails.config.environment == 'development') {
+        domain = CONSTANTS.DOMAIN_COOKIES_LOCAL
+      }
+      else 
+       domain = CONSTANTS.DOMAIN_COOKIES_PROD
+      res.clearCookie('access_token', { domain : domain});
       // console.log('I managed to get here!');
       res.json({ success: true });
       

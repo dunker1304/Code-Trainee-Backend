@@ -126,6 +126,28 @@ describe("User Controller Testing",function(){
     })
   })
 
+  it('# API GET ROLE',function(done){
+    supertest(sails.hooks.http.app)
+    .post(`/api/user/role`)
+    .end(function(err,res){
+      expect(res.statusCode).to.equal(200); 
+      expect(res.body.success).to.equal(true)
+      expect(res.body.data).to.an('array')
+      done(); 
+    })
+  })
+
+  it('# API SIGN OUT',function(done){
+    supertest(sails.hooks.http.app)
+    .get(`/signout`)
+    .end(function(err,res){
+      expect(res.statusCode).to.equal(200); 
+      expect(res.body.success).to.equal(true)
+      done(); 
+    })
+  })
+
+
 
 
 
