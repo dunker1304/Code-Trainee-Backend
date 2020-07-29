@@ -54,7 +54,14 @@ module.exports.custom = {
   NOT_FOUND_USER : 6,
 
   //EDIT SUCCESS ACCOUNT
-  EDIT_ACCOUNT_SUCCESS : true
+  EDIT_ACCOUNT_SUCCESS : true,
+
+  //DOMAIN_COOKIES_LOCAL : 
+  DOMAIN_COOKIES_LOCAL:'localhost',
+
+  //DOMAIN_COOKIES_PROD: 
+  DOMAIN_COOKIES_PROD : '.codetrainee.codes'
+
 
 
 };
