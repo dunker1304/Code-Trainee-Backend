@@ -827,5 +827,42 @@ module.exports = {
       })
       console.log(e)
     }
+  },
+
+  getExerciseToReview: async (req, res) => {
+    try {
+      let { exerciseId } = req.params;
+      let exercise = await Exercise.findOne({
+        id: exerciseId,
+        isDeleted: false,
+        isApproved: false
+      })
+        .populate("tags")
+        .populate("codeSnippets")
+        .populate("testCases");
+      if (!exercise) {
+        res.json({
+          success: true,
+        });
+        return;
+      }
+      let snippetPromises = [...exercise.codeSnippets].map(async (c) => {
+        const lang = await ProgramLanguage.findOne({ id: c.programLanguageId });
+        c.languageName = lang.name;
+        return c;
+      });
+
+      let snippets = await Promise.all(snippetPromises);
+      exercise.codeSnippets = snippets;
+      res.json({
+        success: true,
+        data: exercise,
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
   }
 };

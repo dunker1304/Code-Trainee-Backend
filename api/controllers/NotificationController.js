@@ -81,6 +81,29 @@ module.exports = {
         data : []
       })
     }
+  },
+
+  pushNotification: async (req, res) =>{
+     try {
+       let { reviewerIds, content, linkAction } = req.body;
+       let notiPromises = reviewerIds.map(async (t) => {
+         await Notification.create({
+           content: content,
+           linkAction: linkAction,
+           receiver: t,
+         });
+       });
+
+       await Promise.all(notiPromises);
+
+       return res.json({
+         success: true,
+       });
+     } catch (error) {
+       return res.json({
+         success: false,
+       });
+     }
   }
 };
 
