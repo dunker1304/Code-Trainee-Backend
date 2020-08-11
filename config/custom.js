@@ -43,7 +43,7 @@ module.exports.custom = {
   API_ERROR : 1, // hệ thống đã có lỗi xảy ra
   VALIDATE_COMMENT_CONTENT : 2, // Content of comment may not empty!
   VALIDATE_COMMENT_CONTENT_LENGTH : 3, // Content of comment too long!
-
+  VALIDATE_COMMENT_TITLE_LENGTH:7,
   //VOTE A COMMENT : 
   ERROR_VOTED : 4,
 
@@ -56,12 +56,24 @@ module.exports.custom = {
   //EDIT SUCCESS ACCOUNT
   EDIT_ACCOUNT_SUCCESS : true,
 
-  //DOMAIN_COOKIES_LOCAL : 
-  DOMAIN_COOKIES_LOCAL:'localhost',
+  //URL_FRONTEND_LOCAL : 
+  URL_FRONTEND_LOCAL : 'http://localhost:3000',
 
-  //DOMAIN_COOKIES_PROD: 
-  DOMAIN_COOKIES_PROD : '.codetrainee.codes'
+  //URL_FRONTEND_PROD:
+  URL_FRONTEND_PROD : 'https://codetrainee.codes',
 
+  //DOMAIN_FRONTEND_COOKIES_LOCAL : 
+  DOMAIN_FRONTEND_COOKIES_LOCAL : 'localhost',
+
+  //DOMAIN_FRONTEND_COOKIES_PROD
+  DOMAIN_FRONTEND_COOKIES_PROD : '.codetrainee.codes',
+
+  //ROLE
+  ROLE : {
+    AMDIN : 3,
+    TEACHER : 4,
+    STUDENT : 5
+  }
 
 
 };

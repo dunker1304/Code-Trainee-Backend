@@ -78,7 +78,7 @@ module.exports = {
      let info = {
       content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> replied your comment on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
       linkAction : `/exercise/${questionInfo['id']}/discuss_${afterCreated['id']}`,
-      receiver : commentInfo['senderId'],
+      receiver : commentInfo ? commentInfo['senderId'] : null,
       type : 1,
     }
     await Notification.create(info)
@@ -164,7 +164,7 @@ module.exports = {
       }
       let listComment = await Comment.find({ where : { exerciseId : questionId , parentId : -1 , isDeleted : 0} , 
         skip: (page -1) * 2,
-        limit: 2,
+        limit: 20,
         sort: `createdAt ${sortText}` }).populate('senderId')
 
     
@@ -200,7 +200,7 @@ module.exports = {
   getCommentByCommentId : async ( req, res )=> {
     try {
       let { commentId } = req.body
-      let userId = req.user && req.user['id'] ? req.user['id'] : 5
+      let userId = req.user && req.user['id'] ? req.user['id'] : null
       let comment = await Comment.findOne({where : { id : commentId }}).populate('senderId')
 
       let commentVoted = await CommentVote.findOne({where : { commentId : comment['id'], userId : userId}})
