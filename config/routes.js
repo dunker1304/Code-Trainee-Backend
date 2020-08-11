@@ -99,6 +99,6 @@ module.exports.routes = {
   "get /api/get-most-notification" : "NotificationController.getMostNotification",
   "post /api/mark-as-read":"NotificationController.maskAsRead",
   "post /api/remove-notification":"NotificationController.removeNotification",
-  "get /api/get-all-notification":"NotificationController.getAllNotification"
+  "get /api/get-all-notification":"NotificationController.getAllNotification",
   "post /api/notification/push": "NotificationController.pushNotification"
 };
