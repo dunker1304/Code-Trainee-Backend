@@ -32,7 +32,7 @@ alter table `ExerciseTag` rename column `category_id` to `tag_id`;
 alter table `Comment` rename column `question_id` to `exercise_id`;
 
 -- 4/7/2020 quynhkt
-ALTER TABLE TestCase CHANGE `question_id` `exercise_id` INT
+ALTER TABLE TestCase CHANGE `question_id` `exercise_id` INT;
 
 -- 8/7/2020 quynhkt
 CREATE TABLE TypeWishList (
@@ -41,11 +41,11 @@ id INT AUTO_INCREMENT PRIMARY KEY ,
 `created_by` INT ,
 FOREIGN KEY (created_by) REFERENCES `User`(id)
 
-)
+);
 
 -- 09/07/2020 dunk
-alter table `TrainingHistory` rename column `points` to `status` 
-alter table `TrainingHistory` modify column `status` varchar(255)
+alter table `TrainingHistory` rename column `points` to `status` ;
+alter table `TrainingHistory` modify column `status` varchar(255);
 
 -- 15/7/2020
 ALTER TABLE `Comment` MODIFY content VARCHAR(10000)  CHARACTER SET utf8;
@@ -64,4 +64,24 @@ CREATE TABLE ExerciseVote (
   KEY user_id (user_id),
   CONSTRAINT ExerciseVote_ibfk_1 FOREIGN KEY (exercise_id) REFERENCES Exercise (id),
   CONSTRAINT ExerciseVote_ibfk_2 FOREIGN KEY (user_id) REFERENCES User (id)
-)
+);
+
+-- 11/08/2020 datmv
+create table RequestReview (
+  id int(11) PRIMARY KEY AUTO_INCREMENT,
+  exercise_id int(11),
+  is_accepted tinyint(1) DEFAULT null,
+  created_at datetime DEFAULT NULL,
+  updated_at datetime DEFAULT NULL
+);
+create table DetailReview (
+  id int(11) PRIMARY KEY AUTO_INCREMENT,
+  request_id int(11),
+  comment varchar(500),
+  reviewer int(11),
+  is_accepted tinyint(1) DEFAULT null,
+  created_at datetime DEFAULT NULL,
+  updated_at datetime DEFAULT NULL,
+  
+  FOREIGN KEY (request_id) REFERENCES `RequestReview` (id)
+);
