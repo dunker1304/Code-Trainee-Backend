@@ -177,8 +177,7 @@ module.exports = {
       if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
         res.send({ success: false, message: "Invalid ID" })
       } else {
-        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID })
-        console.log(submissions, 'all submissions')
+        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID }).populate('programLanguageId')
         res.send({ success: true, submissions: submissions })
       }
     } catch (error) {
