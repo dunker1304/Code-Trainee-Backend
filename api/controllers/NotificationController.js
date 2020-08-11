@@ -91,6 +91,7 @@ module.exports = {
            content: content,
            linkAction: linkAction,
            receiver: t,
+           type: 2
          });
        });
 
