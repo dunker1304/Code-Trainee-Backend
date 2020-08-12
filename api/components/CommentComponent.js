@@ -1,7 +1,7 @@
 const CONSTANT = require('../../config/custom').custom
 module.exports = {
   validateAComment : (data)=> {
-    console.log(data)
+   
      
     //if content empty 
     if(!data.content ) {
@@ -17,6 +17,14 @@ module.exports = {
       return {
         success : false,
         error : CONSTANT.VALIDATE_COMMENT_CONTENT_LENGTH,
+        data : []
+      }
+    }
+
+    if(data.title && data.title > 150){
+      return {
+        success : false,
+        error : CONSTANT.VALIDATE_COMMENT_TITLE_LENGTH,
         data : []
       }
     }

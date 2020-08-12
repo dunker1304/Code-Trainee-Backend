@@ -7,9 +7,9 @@
 
 module.exports = {
   get: async function (req, res) {
-    let x = await User.find({ id: 5 }).populate("roles");
+    let x = await User.find({ id: 5 }).populate("roles", { id : 3});
 
-    return res.json("abc");
+    return res.json(x);
   },
   find: async function (req, res) {
     for (let i = 0; i < 10; i++) {

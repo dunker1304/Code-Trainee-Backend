@@ -27,7 +27,17 @@ module.exports.policies = {
   //   '*' : 'isAuthenticate'
   // },
 
-  // ExerciseController : {
-  //   '*' : 'isAuthenticate'
-  // }
+  ExerciseController : {
+    'addWishList' : 'isAuthenticate',
+    'removeWishList' : 'isAuthenticate',
+    'getWishList':'isAuthenticate',
+    'removeWishList' : 'isAuthenticate'
+  },
+  CommentController : {
+    'createAComment' : 'isAuthenticate',
+    'voteAComment':'isAuthenticate',
+    'deleteAComment':'isAuthenticate',
+    'getCommentByCommentId':'isAuthenticate'
+  },
+  
 };

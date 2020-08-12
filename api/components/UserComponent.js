@@ -1,6 +1,14 @@
 const MailService = require('../services/MailService');
+const CONSTANTS = require('../../config/custom').custom
 module.exports = {
   sendEmail : async (data,secret)=> {
+    
+    let url = ''
+    if(sails.config.environment == 'development') {
+      url = CONSTANTS.URL_FRONTEND_LOCAL
+    }
+    else 
+      url = CONSTANTS.URL_FRONTEND_PROD
     let sender = {
       'email' : data.email,
       'subject' : '[CodeTrainee] Confirm Email',
@@ -9,7 +17,7 @@ module.exports = {
       <br/>
      Thanks for signing up with CodeTrainee!<br/>
      You must follow this link to activate your account:
-     <a href= 'https://api.codetrainee.codes/accounts/confirm-email/${secret}'>https://api.codetrainee.codes/accounts/confirm-email/${secret}</a>
+     <a href= '${url}/verifyAccount?secret=${secret}'>${url}/verifyAccount?secret=${secret}</a>
      <br/>Have fun coding, and don't hesitate to contact us with your feedback.`
     }
 
@@ -112,8 +120,19 @@ module.exports = {
         }
     }
     return {
-      success :false ,
+      success :true ,
       message :''
+    }
+  },
+
+  switchRouterByRole :  (role)=> {
+    switch (Number(role)) {
+      case CONSTANTS.ROLE.AMDIN : 
+          return '/admin/accounts';
+      case CONSTANTS.ROLE.TEACHER:
+          return '/exercise'    ;
+      case CONSTANTS.ROLE.STUDENT:
+          return '/problem';    
     }
   }
  

@@ -5,13 +5,14 @@ module.exports = async function(req, res, next) {
    if(err) 
     return res.send({
      success: false,
-     message : 'Đã có lỗi xảy ra'
+     message : 'Something wrong happend!'
    })
 
    if(!user) {
-     return res.status(403).json({
+     return res.status(401).json({
        success : false,
-       message : 'Fail nhé'
+       message : 'Unauthorized',
+       code : 401
      })
    }
    req.user = user
