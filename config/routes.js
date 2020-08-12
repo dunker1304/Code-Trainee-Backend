@@ -20,6 +20,7 @@ module.exports.routes = {
   "get /api/user/exercise/:userId":"UserController.getExerciseOfAUser",
   "post /api/user/role":"UserController.getRole",
   "get /signout":"UserController.signOut",
+  "get /api/user/teacher/all":"UserController.getAllTeachersActive",
 
   //CommentController :
   "post /api/create-comment": "CommentController.createAComment",
@@ -49,6 +50,7 @@ module.exports.routes = {
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
   "get /api/exercise/vote": "ExerciseController.getVoteExercise",
   'post /api/exercise/react': 'ExerciseController.reactExercise',
+  'get /api/exercise/review/:exerciseId': 'ExerciseController.getExerciseToReview',
 
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
@@ -94,8 +96,14 @@ module.exports.routes = {
     "AdminController.getUserByRoleWithKeySearch",
 
   //Notification Controller
-  "get /api/get-most-notification" : "NotificationController.getMostNotification",
+  "get /api/get-most-notification/:userId" : "NotificationController.getMostNotification",
   "post /api/mark-as-read":"NotificationController.maskAsRead",
   "post /api/remove-notification":"NotificationController.removeNotification",
-  "get /api/get-all-notification":"NotificationController.getAllNotification"
+  "get /api/get-all-notification/:userId":"NotificationController.getAllNotification",
+  "post /api/notification/push": "NotificationController.pushNotification",
+
+  // ReviewControlelr
+  "post /api/review/request": "ReviewController.requestReview",
+  "post /api/review": "ReviewController.review",
+  "get /api/review/request/:exerciseId": "ReviewController.getRequestReview",
 };

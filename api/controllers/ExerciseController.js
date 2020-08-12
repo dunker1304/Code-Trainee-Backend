@@ -178,8 +178,7 @@ module.exports = {
       if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
         res.send({ success: false, message: "Invalid ID" })
       } else {
-        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID })
-        console.log(submissions, 'all submissions')
+        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID }).populate('programLanguageId')
         res.send({ success: true, submissions: submissions })
       }
     } catch (error) {
@@ -825,6 +824,43 @@ module.exports = {
         success: false,
       })
       console.log(e)
+    }
+  },
+
+  getExerciseToReview: async (req, res) => {
+    try {
+      let { exerciseId } = req.params;
+      let exercise = await Exercise.findOne({
+        id: exerciseId,
+        isDeleted: false,
+        isApproved: false
+      })
+        .populate("tags")
+        .populate("codeSnippets")
+        .populate("testCases");
+      if (!exercise) {
+        res.json({
+          success: true,
+        });
+        return;
+      }
+      let snippetPromises = [...exercise.codeSnippets].map(async (c) => {
+        const lang = await ProgramLanguage.findOne({ id: c.programLanguageId });
+        c.languageName = lang.name;
+        return c;
+      });
+
+      let snippets = await Promise.all(snippetPromises);
+      exercise.codeSnippets = snippets;
+      res.json({
+        success: true,
+        data: exercise,
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
     }
   }
 };

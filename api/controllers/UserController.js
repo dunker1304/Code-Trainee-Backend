@@ -457,6 +457,24 @@ module.exports = {
         error: CONSTANTS.API_ERROR
       })
     }
+  },
+
+  getAllTeachersActive: async (req, res) => {
+    try {
+      let teachers = await Role.findOne({ id: 4 }).populate("users", {
+        isDeleted: false
+      });
+
+      res.json({
+        success: true,
+        data: teachers.users,
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+      });
+      console.log(e);
+    }
   }
 
 };
