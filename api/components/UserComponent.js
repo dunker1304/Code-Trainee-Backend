@@ -74,10 +74,10 @@ module.exports = {
           message : 'Username have special character!'
         }
       }
-      if(data.username.length > 30) {
+      if(data.username.length > 30 || data.username.length < 3 ) {
         return {
           success : false,
-          message : 'Username must have at most 30 characters!'
+          message : 'Username must have at most 30 characters and at least 3 characters!'
         }
       }
     }
@@ -85,20 +85,25 @@ module.exports = {
     //validate displayName
     if(data.displayName) {
 
-      let validateSpecial = await sails.helpers.validateSpecial.with({
-        value : data.displayName
-      });
-      if(!validateSpecial){
-        return {
-          success : false,
-          message : 'Displayname have special character!'
-        }
-      }
+      // let validateSpecial = await sails.helpers.validateSpecial.with({
+      //   value : data.displayName
+      // });
+      // if(!validateSpecial){
+      //   return {
+      //     success : false,
+      //     message : 'Displayname have special character!'
+      //   }
+       if(/[#$%^&*()+=\-\[\]\';,.\/{}|":<>?~\\\\]/.test( data.displayName ) ) {
+            return {
+              success : false,
+              message : 'Displayname have special character!'
+           }
+       }
 
-      if(data.displayName.length > 30 || data.displayName.length < 4) {
+      if(data.displayName.length > 30 || data.displayName.length < 3) {
         return {
           success : false,
-          message : 'Displayname must have at most 30 characters and at least 4 characters!'
+          message : 'Displayname must have at most 30 characters and at least 3 characters!'
         }
       }
     }
@@ -119,6 +124,14 @@ module.exports = {
           }
         }
     }
+
+    //valite pass and repass
+    if( !data.rePassword || data.rePassword != data.password) {
+      return {
+        success : false,
+        message : 'Password is not matched!'
+      }
+    } 
     return {
       success :true ,
       message :''

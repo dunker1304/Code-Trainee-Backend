@@ -21,6 +21,7 @@
     "passport-google-token": "^0.1.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "popup-tools": "^1.0.2",
     "sails": "^1.2.4",
     "sails-hook-orm": "^2.1.1",
     "sails-hook-sentry": "^2.0.0-beta.2",
