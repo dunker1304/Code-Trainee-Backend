@@ -11,6 +11,7 @@ const CONSTANTS = require('../../config/custom').custom;
 const LocalStrategy = require('passport-local').Strategy;
 const CustomerComponent = require('../components/UserComponent')
 const uniqueString = require('unique-string');
+var popupTools = require('popup-tools');
 signToken = (user) => {
   return JWT.sign({
     iss: 'CodeTrainee',
@@ -64,8 +65,9 @@ module.exports = {
                domain : domain
              });
            
-             let redirect = CustomerComponent.switchRouterByRole(role)
-             res.redirect(`${url}${redirect}`)
+             //let redirect = CustomerComponent.switchRouterByRole(role)
+            // res.redirect(`${url}${redirect}`)
+             return res.end(popupTools.popupResponse({"success" : true, "message" : ""}))
           }
           else {
 
@@ -74,29 +76,35 @@ module.exports = {
 
             if (userLocal && userLocal['roles'].length > 0) {
               console.log("exit account register local")
-              let userUpdate = await User.update({ email: email })
+              let userUpdate = await User.updateOne({ email: email })
                 .set({
                   googleId: profile.id,
                   displayName: profile.displayName,
                   imageLink: profile.photos[0].value,
                   isLoginGoogle: 1,
                   secret: ''
-                }).fetch();
+                })
 
               let token = await signToken(userUpdate)
               res.cookie('access_token', token, {
                 httpOnly: false,
                 domain :domain
               });
-              let redirect = CustomerComponent.switchRouterByRole(role)
-              res.redirect(`${url}${redirect}`)
+              // let redirect = CustomerComponent.switchRouterByRole(role)
+              // res.redirect(`${url}${redirect}`)
+              return res.end(popupTools.popupResponse({"success" : true, 
+              "message" : `Email ${email} is already registered with your password. 
+               Now you can sign In this account by google or your password`}))
           
             }
             else 
               if(userLocal && userLocal['roles'].length == 0) {
                 //exist email with other role
                 console.log("exist email with other role")
-                 res.redirect(`${url}/`)
+                // res.redirect(`${url}/`)
+                return res.end(popupTools.popupResponse({"success" : false, 
+                "message" : `Email ${email} is already registered with anthor role. 
+                 Please use other email to register with this role `}))
               }
             else {
               try {
@@ -122,15 +130,17 @@ module.exports = {
                   httpOnly: false,
                   domain :domain
                 });
-                let redirect = CustomerComponent.switchRouterByRole(role)
-                res.redirect(`${url}${redirect}`)
+                // let redirect = CustomerComponent.switchRouterByRole(role)
+                // res.redirect(`${url}${redirect}`)
+                return res.end(popupTools.popupResponse({"success" : true,  "message" : ""}))
                
               } catch (error) {
                 console.log(error);
-                res.send({
-                  success : false,
-                  error : 1
-                })
+                // res.send({
+                //   success : false,
+                //   error : 1
+                // })
+                res.end(popupTools.popupResponse({"success" : false,  "message" : "Something wrong happened!"}))
               }
 
             }
@@ -202,6 +212,7 @@ module.exports = {
           'isLoginLocal': 1,
           'username': data.username,
           'secret': secret,
+          'displayName' : data.displayName
         }
 
         let user = await User.create(newUser).fetch();
@@ -335,7 +346,7 @@ module.exports = {
       let userId =  req.params.userId  ? req.params.userId :null
 
       //count All exercise
-      let allExercise = await Exercise.count({});
+      let allExercise = await Exercise.count({ isApproved :1});
 
       //count specific level if question
       // let easyE  = await Exercise.count({level:'Easy'})
@@ -350,8 +361,8 @@ module.exports = {
       let runtimeError = 0;
       let totalSubmission = 0;
       let attempted = 0
-
-      if(userId) {
+       userId = parseInt(req.query.userId);
+      if(Number.isInteger(userId) ) {
 
       let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
 
