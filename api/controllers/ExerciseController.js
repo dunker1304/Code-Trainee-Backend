@@ -179,6 +179,7 @@ module.exports = {
         res.send({ success: false, message: "Invalid ID" })
       } else {
         let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID }).populate('programLanguageId')
+                                  .sort([{createdAt: "DESC"}])
         res.send({ success: true, submissions: submissions })
       }
     } catch (error) {
