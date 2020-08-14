@@ -12,7 +12,7 @@ module.exports = {
       let { role } = req.body
       let page = req.body.page ? req.body.page : 1
       let keySearch = req.body.keySearch ? req.body.keySearch : ''
-      let pageSize = 1;
+      let pageSize = 20;
       let condition = {}
 
       if(role != -1) {
@@ -32,6 +32,8 @@ module.exports = {
           email: element['userId']['email'],
           role: element['roleId']['name'],
           username : element['userId']['username'],
+          isDeleted : element['userId']['isDeleted'] ,
+          statusNumber : element['userId']['status'],
           status: element['userId']['isDeleted'] ? 'Deactive' : element['userId']['status'] == 0 ? 'UnConfirmed':'Active',
         }
 
@@ -101,7 +103,6 @@ module.exports = {
       if(!validate['success']) {
         return res.send(validate)
       }
- 
  
       await User.updateOne({ id : userId}).set({ displayName : displayName , dateOfBirth : dateOfBirth ? moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'): null, phone :phone , isDeleted : deActive  })
  
@@ -252,6 +253,39 @@ module.exports = {
         },
         error : CONSTANTS.API_ERROR
       })
+    }
+  },
+  deactiveAccount : async function ( req,res) {
+    try {
+      let { userId , value , key } = req.body;
+       
+      let data = {};
+      let message = '';
+      if(key == 'confirm') {
+         data['status'] = value;
+         message = 'Confirm Account Success!'
+      }
+      if(key == 'active') {
+        data['isDeleted'] = value;
+        message = value ? 'Now, Account Is Deactive' : 'Now, Account Is Active'
+      }
+
+      await User.updateOne({ id : userId}).set(data)
+
+      return res.send({
+        success : true , 
+        message : message
+      })
+       
+    } catch (error) {
+      
+      console.log(error)
+      return res.send({
+        success : false,
+        error : CONSTANTS.API_ERROR,
+        data : {}
+      })
+      
     }
   }
 

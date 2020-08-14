@@ -126,12 +126,15 @@ module.exports = {
     }
 
     //valite pass and repass
+    if(data.key != 'admin-edit') {
     if( !data.rePassword || data.rePassword != data.password) {
       return {
         success : false,
         message : 'Password is not matched!'
       }
-    } 
+      } 
+    }
+  
     return {
       success :true ,
       message :''

@@ -55,19 +55,39 @@ module.exports = {
           console.log(role)
 
           let existUser = await User.findOne({ 'googleId': profile.id }).populate('roles', {id :role})
-          if (existUser && existUser['roles'] && existUser['roles'].length > 0) {
-             
-             console.log('user has already exitss');
+          if (existUser ) {
+
+            if(existUser['roles'] && existUser['roles'].length > 0) {
+              console.log('user has already exitss');
             
-             let token = await signToken(existUser)
-             res.cookie('access_token', token, {
-               httpOnly: false,
-               domain : domain
-             });
+              let token = await signToken(existUser)
+              res.cookie('access_token', token, {
+                httpOnly: false,
+                domain : domain
+              });
+            
+              //let redirect = CustomerComponent.switchRouterByRole(role)
+             // res.redirect(`${url}${redirect}`)
+              return res.end(popupTools.popupResponse({"success" : true, "message" : ""}))
+            }
+
+            if(existUser['roles'] && existUser['roles'].length == 0) {
+              console.log('user has already exitss with other role');
+            
+              let token = await signToken(existUser)
+              res.cookie('access_token', token, {
+                httpOnly: false,
+                domain : domain
+              });
+            
+              return res.end(popupTools.popupResponse({"success" : false, 
+                "message" : `Email ${profile.emails[0].value} is already registered with anthor role. 
+                 Please use other email to register with this role `}))
+
+            }
+            
+             
            
-             //let redirect = CustomerComponent.switchRouterByRole(role)
-            // res.redirect(`${url}${redirect}`)
-             return res.end(popupTools.popupResponse({"success" : true, "message" : ""}))
           }
           else {
 
