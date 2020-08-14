@@ -94,6 +94,7 @@ module.exports.routes = {
   "post /api/admin/create-an-account": "AdminController.createAnAccount",
   "post /api/admin/search-fuzzy-account":
     "AdminController.getUserByRoleWithKeySearch",
+  "post /api/admin/deactive-an-account": "AdminController.deactiveAccount",
 
   //Notification Controller
   "get /api/get-most-notification/:userId" : "NotificationController.getMostNotification",
