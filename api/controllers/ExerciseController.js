@@ -862,5 +862,63 @@ module.exports = {
       });
       console.log(e);
     }
+  },
+
+  getExerciseStatisById : async (req,res)=> {
+     try {
+       
+       let exeId = req.body.exerciseId
+       let page = req.body.page ? req.body.page : 1;
+       let limit = 20;
+       //get all submission of this exxercise Id
+       let list = await TrainingHistory.find( { where : { exerciseId : exeId },limit : limit,sort: 'createdAt DESC',skip : (page  -1 )*limit}).populate('userId').populate('programLanguageId')
+
+       //count all - to pagging
+       let count =  await TrainingHistory.count( { where : { exerciseId : exeId }})
+
+       let totalPage = count % limit == 0 ? count/limit : (Math.floor(count/limit) + 1);
+
+       //info exercise
+       let exericse = await Exercise.findOne({ where : {id : exeId}})
+
+       let exer = {
+         id : exericse['id'],
+         loc : exericse['points'],
+         createdAt :  moment(exericse['createdAt']).format("YYYY-MM-DD"),
+         level : exericse['level'],
+         totalSubmission : count,
+         title : exericse['title']
+       }
+
+       //format response
+       let result = [];
+       list.forEach((element,index) => {
+         let tmp = {};
+         tmp['index'] = index+1;
+         tmp['id'] = element['id'];
+         tmp['user'] = element['userId'] ? { 'name' :element['userId']['displayName'],'id' : element['userId']['id']} : null;
+         tmp['language'] = element['programLanguageId']? { 'name' :element['programLanguageId']['name'],'id' : element['programLanguageId']['id']} : null;
+         tmp['runtime'] = element['timeNeeded'],
+         tmp['status'] = element['status']
+         result.push(tmp)
+        });
+
+        return res.json({
+          success: true,
+          data  : {
+            'list' : result,
+            'count' : totalPage,
+            'exercise' : exer
+          }
+        });
+
+       
+     } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        data  : []
+      });
+     }
   }
 };
