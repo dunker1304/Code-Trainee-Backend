@@ -88,7 +88,7 @@ module.exports = {
       let count = await Exercise.count();
       let exercise = await Exercise.findOne({
         id: id,
-        isApproved: true,
+        isApproved: 'accepted',
         isDeleted: false,
       });
       let testCases;
@@ -284,11 +284,11 @@ module.exports = {
 
   getRandom: async (req, res) => {
     try {
-      let count = await Exercise.count({ isDeleted: false, isApproved: true });
+      let count = await Exercise.count({ isDeleted: false, isApproved: 'accepted' });
       let random = parseInt(Math.random() * count);
       let allExercise = await Exercise.find({
         isDeleted: false,
-        isApproved: true,
+        isApproved: 'accepted',
       });
       res.send({
         success: true,
@@ -1069,7 +1069,7 @@ module.exports = {
       let updatedExercise = await Exercise.updateOne({
         id: id,
       }).set({
-        isApproved: true,
+        isApproved: 'accepted',
       });
       res.json({
         success: true,
