@@ -30,7 +30,6 @@ module.exports = {
     let testCase = await TestCase.find({ exerciseId: questionId });
 
     if (testCase.length == 0) {
-      console.log(testCase, "k co testcase");
       let submitData = {
         language_id: languageId,
         source_code: Buffer.from(sourceCode).toString("base64"),
@@ -39,14 +38,12 @@ module.exports = {
         //'expected_output': '40'
       };
       let submittedResult = await ExerciseComponent.submitExercise(submitData);
-      console.log(submittedResult.message.response, "submited result");
       if (submittedResult.data.stdout) {
         submittedResult.data.stdout = submittedResult.data.stdout.toString();
         var buf = Buffer.from(submittedResult.data.stdin, "base64").toString(
           "ascii"
         );
         var buf1 = Buffer.from("<Buffer 8b>", "utf8");
-        console.log(buf, "stdout");
       }
       res.send([submittedResult]);
     } else {
@@ -91,7 +88,7 @@ module.exports = {
       let count = await Exercise.count();
       let exercise = await Exercise.findOne({
         id: id,
-        isApproved: true,
+        isApproved: 'accepted',
         isDeleted: false,
       });
       let testCases;
@@ -241,7 +238,6 @@ module.exports = {
   submitSolution: async (req, res) => {
     try {
       let { question, testcases, answer, language, userID } = req.body;
-      console.log(req.body, "solution");
       let status = "Accepted";
       testcases.forEach((testcase) => {
         if (testcase.data.description != "Accepted") {
@@ -288,11 +284,11 @@ module.exports = {
 
   getRandom: async (req, res) => {
     try {
-      let count = await Exercise.count({ isDeleted: false, isApproved: true });
+      let count = await Exercise.count({ isDeleted: false, isApproved: 'accepted' });
       let random = parseInt(Math.random() * count);
       let allExercise = await Exercise.find({
         isDeleted: false,
-        isApproved: true,
+        isApproved: 'accepted',
       });
       res.send({
         success: true,
@@ -905,7 +901,6 @@ module.exports = {
   getByOwner: async (req, res) => {
     try {
       let { ownerId } = req.params;
-      console.log("ownerId", ownerId);
       let exercises = await Exercise.find({
         where: {
           createdBy: ownerId,
@@ -939,7 +934,6 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
-      console.log(id, deletedExercise, "delete ex");
       res.json({
         success: true,
         data: {
@@ -1075,7 +1069,7 @@ module.exports = {
       let updatedExercise = await Exercise.updateOne({
         id: id,
       }).set({
-        isApproved: true,
+        isApproved: 'accepted',
       });
       res.json({
         success: true,
