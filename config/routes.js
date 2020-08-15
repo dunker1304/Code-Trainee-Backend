@@ -50,7 +50,6 @@ module.exports.routes = {
   "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
   "get /api/exercise/vote": "ExerciseController.getVoteExercise",
   'post /api/exercise/react': 'ExerciseController.reactExercise',
-  'get /api/exercise/review/:exerciseId': 'ExerciseController.getExerciseToReview',
 
   //quynhkt-exerciseController
   "post /api/search-exercise": "ExerciseController.searchExercise",
@@ -105,5 +104,7 @@ module.exports.routes = {
   // ReviewControlelr
   "post /api/review/request": "ReviewController.requestReview",
   "post /api/review": "ReviewController.review",
-  "get /api/review/request/:exerciseId": "ReviewController.getRequestReview",
+  "get /api/review/request/:requestId": "ReviewController.getRequestReview",
+  "get /api/review/exercise/:exerciseId": "ReviewController.getExerciseReview",
+  "get /api/review/reviewers/:exerciseId": "ReviewController.getLastReviewers",
 };

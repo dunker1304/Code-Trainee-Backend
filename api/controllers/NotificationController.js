@@ -86,12 +86,12 @@ module.exports = {
   pushNotification: async (req, res) =>{
      try {
        let { reviewerIds, content, linkAction } = req.body;
-       let notiPromises = reviewerIds.map(async (t) => {
-         await Notification.create({
+       let notiPromises = reviewerIds.map((t) => {
+         Notification.create({
            content: content,
            linkAction: linkAction,
            receiver: t,
-           type: 2
+           type: 2,
          });
        });
 

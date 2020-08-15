@@ -89,12 +89,21 @@ module.exports = {
         return;
       }
       let count = await Exercise.count();
-      let exercise = await Exercise.findOne({ id: id, isApproved: true, isDeleted: false });
+      let exercise = await Exercise.findOne({
+        id: id,
+        isApproved: true,
+        isDeleted: false,
+      });
       let testCases;
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id });
       }
-      res.send({success: true, question: exercise, testCases: testCases, total: count });
+      res.send({
+        success: true,
+        question: exercise,
+        testCases: testCases,
+        total: count,
+      });
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
     }
@@ -102,86 +111,127 @@ module.exports = {
 
   getVoteExercise: async (req, res) => {
     try {
-      let userID = req.query.userID
-      let questionID = req.query.questionID
-      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: questionID})
-      res.send({ success: true, exerciseVote: vote })
+      let userID = req.query.userID;
+      let questionID = req.query.questionID;
+      let vote = await ExerciseVote.findOne({
+        userId: userID,
+        exerciseId: questionID,
+      });
+      res.send({ success: true, exerciseVote: vote });
     } catch (e) {
-      res.send({ success: false, message: e })
+      res.send({ success: false, message: e });
     }
   },
 
   reactExercise: async (req, res) => {
     try {
-      let userID = req.body.userID
-      let exerciseID = req.body.exerciseID
-      let status = req.body.status
-      let vote = await ExerciseVote.findOne({ userId: userID, exerciseId: exerciseID })
+      let userID = req.body.userID;
+      let exerciseID = req.body.exerciseID;
+      let status = req.body.status;
+      let vote = await ExerciseVote.findOne({
+        userId: userID,
+        exerciseId: exerciseID,
+      });
       let result;
       let updatedExercise = await Exercise.findOne({ id: exerciseID });
       if (vote) {
-        if (status == 'like' && vote.statusVote == 1) {
-          result = await ExerciseVote.updateOne({ id: vote.id })
-                                     .set({ statusVote: 0 })
-          updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                          .set({ like: updatedExercise.like - 1 })
-        } else if (status == 'like' && (vote.statusVote == 0 || vote.statusVote == -1)) {
-          result = await ExerciseVote.updateOne({ id: vote.id })
-                                     .set({ statusVote: 1 })
+        if (status == "like" && vote.statusVote == 1) {
+          result = await ExerciseVote.updateOne({ id: vote.id }).set({
+            statusVote: 0,
+          });
+          updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+            like: updatedExercise.like - 1,
+          });
+        } else if (
+          status == "like" &&
+          (vote.statusVote == 0 || vote.statusVote == -1)
+        ) {
+          result = await ExerciseVote.updateOne({ id: vote.id }).set({
+            statusVote: 1,
+          });
           if (vote.statusVote == 0) {
-            updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                     .set({ like: updatedExercise.like + 1 })
+            updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+              like: updatedExercise.like + 1,
+            });
           } else {
-            updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                     .set({ like: updatedExercise.like + 1, dislike: updatedExercise.dislike - 1 })
+            updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+              like: updatedExercise.like + 1,
+              dislike: updatedExercise.dislike - 1,
+            });
           }
-          
-        } else if (status == 'dislike' && vote.statusVote == -1) {
-          result = await ExerciseVote.updateOne({ id: vote.id })
-                                     .set({ statusVote: 0 })
-          updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                     .set({ dislike: updatedExercise.dislike - 1 })
+        } else if (status == "dislike" && vote.statusVote == -1) {
+          result = await ExerciseVote.updateOne({ id: vote.id }).set({
+            statusVote: 0,
+          });
+          updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+            dislike: updatedExercise.dislike - 1,
+          });
         } else {
-          result = await ExerciseVote.updateOne({ id: vote.id })
-                                     .set({ statusVote: -1 })
+          result = await ExerciseVote.updateOne({ id: vote.id }).set({
+            statusVote: -1,
+          });
           if (vote.statusVote == 0) {
-            updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                          .set({ dislike: updatedExercise.dislike + 1 })
+            updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+              dislike: updatedExercise.dislike + 1,
+            });
           } else {
-            updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                          .set({ dislike: updatedExercise.dislike + 1, like: updatedExercise.like - 1 })
+            updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+              dislike: updatedExercise.dislike + 1,
+              like: updatedExercise.like - 1,
+            });
           }
-          
         }
       } else {
-        if (status == 'like') {
-          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: 1 }).fetch();
-          updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                     .set({ like: updatedExercise.like + 1 })
+        if (status == "like") {
+          result = await ExerciseVote.create({
+            userId: userID,
+            exerciseId: exerciseID,
+            statusVote: 1,
+          }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+            like: updatedExercise.like + 1,
+          });
         } else {
-          result = await ExerciseVote.create({ userId: userID, exerciseId: exerciseID, statusVote: -1 }).fetch();
-          updatedExercise = await Exercise.updateOne({ id: exerciseID })
-                                     .set({ dislike: updatedExercise.dislike + 1 })
+          result = await ExerciseVote.create({
+            userId: userID,
+            exerciseId: exerciseID,
+            statusVote: -1,
+          }).fetch();
+          updatedExercise = await Exercise.updateOne({ id: exerciseID }).set({
+            dislike: updatedExercise.dislike + 1,
+          });
         }
       }
-      res.send({ success: true, resultVote: result, updatedExercise: updatedExercise })
+      res.send({
+        success: true,
+        resultVote: result,
+        updatedExercise: updatedExercise,
+      });
     } catch (error) {
-      res.send({ success: false, message: error })
+      res.send({ success: false, message: error });
     }
   },
 
   getAllSubmissions: async (req, res) => {
     try {
       let userID = parseInt(req.query.userID);
-      let exerciseID = parseInt(req.query.exerciseID)
-      if (!userID || !exerciseID || !Number.isInteger(userID) || !Number.isInteger(exerciseID)) {
-        res.send({ success: false, message: "Invalid ID" })
+      let exerciseID = parseInt(req.query.exerciseID);
+      if (
+        !userID ||
+        !exerciseID ||
+        !Number.isInteger(userID) ||
+        !Number.isInteger(exerciseID)
+      ) {
+        res.send({ success: false, message: "Invalid ID" });
       } else {
-        let submissions = await TrainingHistory.find({ exerciseId: exerciseID, userId: userID }).populate('programLanguageId')
-        res.send({ success: true, submissions: submissions })
+        let submissions = await TrainingHistory.find({
+          exerciseId: exerciseID,
+          userId: userID,
+        }).populate("programLanguageId");
+        res.send({ success: true, submissions: submissions });
       }
     } catch (error) {
-      res.send({ success: false, message: error.message, code: 500 })
+      res.send({ success: false, message: error.message, code: 500 });
     }
   },
 
@@ -197,7 +247,7 @@ module.exports = {
         }
       });
       let history = await TrainingHistory.create({
-        userId: userID || 3 ,
+        userId: userID || 3,
         exerciseId: question.id,
         status: status,
         answer: answer,
@@ -214,11 +264,12 @@ module.exports = {
   getBasicInfoById: async (req, res) => {
     try {
       let { exerciseId } = req.params;
-      let exercise = await Exercise.findOne({ id: exerciseId, isDeleted: false }).populate(
-        "tags"
-      );
-      if(!exercise) {
-        throw new Error('already deleted')
+      let exercise = await Exercise.findOne({
+        id: exerciseId,
+        isDeleted: false,
+      }).populate("tags");
+      if (!exercise) {
+        throw new Error("already deleted");
       }
       res.json({
         success: true,
@@ -234,238 +285,432 @@ module.exports = {
 
   getRandom: async (req, res) => {
     try {
-      let count = await Exercise.count({ isDeleted: false, isApproved: true })
-      let random = parseInt(Math.random() * count)
-      let allExercise = await Exercise.find({ isDeleted: false, isApproved: true })
+      let count = await Exercise.count({ isDeleted: false, isApproved: true });
+      let random = parseInt(Math.random() * count);
+      let allExercise = await Exercise.find({
+        isDeleted: false,
+        isApproved: true,
+      });
       res.send({
         success: true,
-        data: allExercise[random]
+        data: allExercise[random],
       });
     } catch (err) {
-      res.send({ success: false, message: err })
+      res.send({ success: false, message: err });
     }
-    
   },
 
   // create exercise
   createExercise: async (req, res) => {
     try {
-      let { content, title, points, level, tags, createdBy } = req.body;
-      console.log('createdBy', createdBy)
-      tags.push("#"); // default 1 tags
-      let mappingTags = await Promise.all(
-        [ ... new Set(tags) ].map(async (e) => {
-          return Tag.findOrCreate(
+      let {
+        content,
+        title,
+        points,
+        level,
+        tags,
+        testcases,
+        languages,
+        reviewerIds,
+        createdBy,
+      } = req.body;
+      await sails.getDatastore().transaction(async (db) => {
+        let mappingTagPromises = [...tags].map((e) =>
+          Tag.findOrCreate(
             {
               name: e,
             },
             {
               name: e,
+              createdBy: createdBy,
             }
-          );
+          ).usingConnection(db)
+        );
+        let mappingTags = await Promise.all(mappingTagPromises);
+        let mappingTagIds = [...mappingTags].map((e) => e.id);
+        content = purifier.purify(content); // escape XSR
+        let exercise = await Exercise.create({
+          points: points,
+          level: level,
+          content: content,
+          title: title,
+          createdBy: createdBy,
+          isApproved: "waiting",
         })
-      );
-      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
-      content = purifier.purify(content); // escape XSR
-      let exercise = await Exercise.create({
-        points,
-        level,
-        content,
-        title,
-        createdBy
-      }).fetch();
-      await Exercise.addToCollection(exercise.id, "tags").members(
-        mappingTagIds
-      );
-      // default always support language id 1
-      let snippet = await CodeSnippet.create({
-        exerciseId: exercise.id,
-        programLanguageId: 1,
-        sampleCode: "",
-        isActive: true,
-      }).fetch();
-      await Exercise.addToCollection(exercise.id, "codeSnippets").members([snippet.id]);
-      res.json({
-        success: true,
-        data: {
-          id: exercise.id,
-        },
+          .fetch()
+          .usingConnection(db);
+        await Exercise.addToCollection(exercise.id, "tags")
+          .members(mappingTagIds)
+          .usingConnection(db);
+        let mappingSnippets = await CodeSnippet.createEach(
+          [...languages].map((t) => ({
+            exerciseId: exercise.id,
+            programLanguageId: t.id,
+            sampleCode: t.sampleCode,
+            isActive: t.isActive,
+            createdBy: createdBy,
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        let mappingSnippetIds = [...mappingSnippets].map((t) => t.id);
+        await Exercise.addToCollection(exercise.id, "codeSnippets")
+          .members(mappingSnippetIds)
+          .usingConnection(db);
+        let mappingTestcases = await TestCase.createEach(
+          [...testcases].map((t) => ({
+            isHidden: t.isHidden,
+            input: t.input,
+            expectedOutput: t.output,
+            createdBy: createdBy,
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        let mappingTestcaseIds = [...mappingTestcases].map((t) => t.id);
+        await Exercise.addToCollection(exercise.id, "testCases")
+          .members(mappingTestcaseIds)
+          .usingConnection(db);
+        let requestReview = await RequestReview.create({
+          exerciseId: exercise.id,
+          isAccepted: "waiting",
+        })
+          .fetch()
+          .usingConnection(db);
+        let mappingDetailReviews = await DetailReview.createEach(
+          [...reviewerIds].map((t) => ({
+            requestId: requestReview.id,
+            comment: "",
+            reviewer: t,
+            isAccepted: "waiting",
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        let mappingDetailReviewIds = mappingDetailReviews.map((t) => t.id);
+        await RequestReview.addToCollection(requestReview.id, "details")
+          .members(mappingDetailReviewIds)
+          .usingConnection(db);
+        let mappingNotis = await Notification.createEach(
+          [...reviewerIds].map((t) => ({
+            content: "You have requested to review a exercise.",
+            linkAction: `/review?request=${requestReview.id}`,
+            receiver: t,
+            type: 2,
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        res.json({
+          success: true,
+        });
       });
     } catch (e) {
       res.json({
         success: false,
+        code: 500,
       });
       console.log(e);
     }
   },
 
-  // save exercise basic information
+  // update exercise
   updateExercise: async (req, res) => {
     try {
-      let { id, content, title, points, level, tags } = req.body;
-      console.log("tags", tags);
-      tags.push("#"); // default 1 tags
-      let mappingTags = await Promise.all(
-        [... new Set(tags)].map(async (e) => {
-          return Tag.findOrCreate(
+      let {
+        id,
+        content,
+        title,
+        points,
+        level,
+        tags,
+        testcases,
+        languages,
+        reviewerIds,
+        createdBy,
+      } = req.body;
+      console.log({
+        id,
+        content,
+        title,
+        points,
+        level,
+        tags,
+        testcases,
+        languages,
+        reviewerIds,
+        createdBy,
+      });
+      await sails.getDatastore().transaction(async (db) => {
+        let mappingTagPromises = [...tags].map((e) =>
+          Tag.findOrCreate(
             {
               name: e,
             },
             {
               name: e,
+              createdBy: createdBy,
             }
-          );
+          ).usingConnection(db)
+        );
+        let mappingTags = await Promise.all(mappingTagPromises);
+        let mappingTagIds = [...mappingTags].map((e) => e.id);
+        content = purifier.purify(content); // escape XSR
+        let exercise = await Exercise.updateOne({
+          id: id,
         })
-      );
-      let mappingTagIds = [...new Set(mappingTags)].map((e) => e.id);
-      id = Number(id);
-      points = Number(points);
-      content = purifier.purify(content);
-      let updatedExercise = await Exercise.updateOne({ id: id }).set({
-        points: points,
-        level: level,
-        content: content,
-        title: title,
-      });
-      await Exercise.replaceCollection(id, "tags").members(mappingTagIds);
-      res.json({
-        success: true,
-        data: {
-          id: updatedExercise.id,
-        },
+          .set({
+            points: points,
+            level: level,
+            content: content,
+            title: title,
+            isApproved: "waiting",
+          })
+          .usingConnection(db);
+        await Exercise.replaceCollection(id, "tags")
+          .members(mappingTagIds)
+          .usingConnection(db);
+        let mappingSnippetPromises = [...languages].map(async (t) => {
+          let newOrExistingRecord = await CodeSnippet.findOrCreate(
+            {
+              exerciseId: id,
+              programLanguageId: t.id,
+            },
+            {
+              exerciseId: id,
+              programLanguageId: t.id,
+              createdBy: createdBy,
+            }
+          ).usingConnection(db);
+          return await CodeSnippet.updateOne({
+            exerciseId: id,
+            programLanguageId: t.id,
+          })
+            .set({
+              sampleCode: t.sampleCode,
+              isActive: t.isActive,
+            })
+            .usingConnection(db);
+        });
+        let mappingSnippets = await Promise.all(mappingSnippetPromises);
+        let mappingSnippetIds = [...mappingSnippets].map((t) => t.id);
+        await Exercise.replaceCollection(id, "codeSnippets")
+          .members(mappingSnippetIds)
+          .usingConnection(db);
+        let mappingCreatedTestcases = await TestCase.createEach(
+          [...testcases]
+            .filter((t) => !t.id)
+            .map((t) => ({
+              isHidden: t.isHidden,
+              input: t.input,
+              expectedOutput: t.output,
+              createdBy: createdBy,
+            }))
+        )
+          .fetch()
+          .usingConnection(db);
+        let mappingCreatedTestcaseIds = mappingCreatedTestcases.map(
+          (t) => t.id
+        );
+        await Exercise.replaceCollection(id, "testCases")
+          .members(mappingCreatedTestcaseIds)
+          .usingConnection(db);
+        let mappingTestcasePromises = [...testcases]
+          .filter((t) => t.id)
+          .map((t) =>
+            TestCase.updateOne({
+              id: t.id,
+            })
+              .set({
+                isHidden: t.isHidden,
+                input: t.input,
+                expectedOutput: t.output,
+              })
+              .usingConnection(db)
+          );
+        let mappingEditedTestcases = await Promise.all(mappingTestcasePromises);
+        let mappingEditedTestcaseIds = [...mappingEditedTestcases].map(
+          (t) => t.id
+        );
+        await Exercise.addToCollection(id, "testCases")
+          .members(mappingEditedTestcaseIds)
+          .usingConnection(db);
+        let requestReview = await RequestReview.create({
+          exerciseId: id,
+          isAccepted: "waiting",
+        })
+          .fetch()
+          .usingConnection(db);
+        let mappingDetailReviews = await DetailReview.createEach(
+          [...reviewerIds].map((t) => ({
+            requestId: requestReview.id,
+            comment: "",
+            reviewer: t,
+            isAccepted: "waiting",
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        let mappingDetailReviewIds = mappingDetailReviews.map((t) => t.id);
+        await RequestReview.addToCollection(requestReview.id, "details")
+          .members(mappingDetailReviewIds)
+          .usingConnection(db);
+        let mappingNotis = await Notification.createEach(
+          [...reviewerIds].map((t) => ({
+            content: "You have requested to review a exercise.",
+            linkAction: `/review?request=${requestReview.id}`,
+            receiver: t,
+            type: 2,
+          }))
+        )
+          .fetch()
+          .usingConnection(db);
+        res.json({
+          success: true,
+        });
       });
     } catch (e) {
-      console.log(e)
       res.json({
         success: false,
-        data: {},
-        code: 1,
+        code: 500,
       });
+      console.log(e);
     }
   },
 
   //search exercise
   searchExercise: async (req, res) => {
     try {
-          let data  = req.body ? req.body : {}
-          let condition = {}
-          let condition1 = ``
-          let limit = data.limit ? 10 : 10
-          let page = data.page ? data.page :1
-          let conditionLevelSQL = ``
-          let conditiontTagSQL = ``
-          let conditiontStatusSQL = ``
-          let conditionKeySearch = ``
-          let typeJoin = `left`
-          let selectSQL = `Count(DISTINCT a.id) as total`
-          let userId = req.user ? req.user : 5
-        
-          //filter by level
-          if(data.level){
-             condition = { 'level' : data.level.name}
-             conditionLevelSQL = `a.level = '${data.level.name}'`
-          }
+      let data = req.body ? req.body : {};
+      let condition = {};
+      let condition1 = ``;
+      let limit = data.limit ? 10 : 10;
+      let page = data.page ? data.page : 1;
+      let conditionLevelSQL = ``;
+      let conditiontTagSQL = ``;
+      let conditiontStatusSQL = ``;
+      let conditionKeySearch = ``;
+      let typeJoin = `left`;
+      let selectSQL = `Count(DISTINCT a.id) as total`;
+      let userId = req.user ? req.user : 5;
 
-          //filter by tag
-          if(data.tag && data.tag.length > 0) {
-             const tagIds = data.tag.map(value => value.id)
-             conditionTag = { id : { in : tagIds}}
-             conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`
-          }
+      //filter by level
+      if (data.level) {
+        condition = { level: data.level.name };
+        conditionLevelSQL = `a.level = '${data.level.name}'`;
+      }
 
-          //filter by status
-          if(data.status && data.status.id != -1) {
-             conditionStatus = { 'idFinished' : data.status.id }     
-             conditiontStatusSQL = `c.is_finished = ${data.status.id}`   
-             typeJoin = `inner`   
-          }
+      //filter by tag
+      if (data.tag && data.tag.length > 0) {
+        const tagIds = data.tag.map((value) => value.id);
+        conditionTag = { id: { in: tagIds } };
+        conditiontTagSQL = `b.tag_id in (${tagIds.toString()})`;
+      }
 
-          //filter by key_Search
-          if(data.term && data.term.name) {
-            conditionKeySearch = ` MATCH (title,content) AGAINST ('${data.term.name}' IN NATURAL LANGUAGE MODE)`
-          }
+      //filter by status
+      if (data.status && data.status.id != -1) {
+        conditionStatus = { idFinished: data.status.id };
+        conditiontStatusSQL = `c.is_finished = ${data.status.id}`;
+        typeJoin = `inner`;
+      }
 
-          let SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin)
-          //condition
-          if(conditionLevelSQL) {
-            // if(condition1) {
-                condition1 += ` AND ${conditionLevelSQL}`
-            //  }
-            //  else 
-            //     condition1 = ` WHERE ${conditionLevelSQL}`
-          }
+      //filter by key_Search
+      if (data.term && data.term.name) {
+        conditionKeySearch = ` MATCH (title,content) AGAINST ('${data.term.name}' IN NATURAL LANGUAGE MODE)`;
+      }
 
-          if(conditiontTagSQL) {
-          //  if(condition1) {
-               condition1 += ` AND ${conditiontTagSQL}`
-            // }
-            // else 
-            //    condition1 = ` WHERE ${conditiontTagSQL}`
-         }
+      let SQL = await ExerciseComponent.createQuery(selectSQL, typeJoin);
+      //condition
+      if (conditionLevelSQL) {
+        // if(condition1) {
+        condition1 += ` AND ${conditionLevelSQL}`;
+        //  }
+        //  else
+        //     condition1 = ` WHERE ${conditionLevelSQL}`
+      }
 
-         if(conditiontStatusSQL) {
-         // if(condition1) {
-             condition1 += ` AND ${conditiontStatusSQL}`
-          // }
-          // else 
-          //    condition1 = ` WHERE ${conditiontStatusSQL}`
-        }
+      if (conditiontTagSQL) {
+        //  if(condition1) {
+        condition1 += ` AND ${conditiontTagSQL}`;
+        // }
+        // else
+        //    condition1 = ` WHERE ${conditiontTagSQL}`
+      }
 
-        if(conditionKeySearch) {
-          condition1 += ` AND ${conditionKeySearch}`
-        }
+      if (conditiontStatusSQL) {
+        // if(condition1) {
+        condition1 += ` AND ${conditiontStatusSQL}`;
+        // }
+        // else
+        //    condition1 = ` WHERE ${conditiontStatusSQL}`
+      }
 
-       let pagging = ` ORDER BY a.ID ASC LIMIT ${(page-1)*limit},${limit}`
-      
-       //count
-       let SQLCount = SQL + condition1;
+      if (conditionKeySearch) {
+        condition1 += ` AND ${conditionKeySearch}`;
+      }
 
-       let count = await sails.sendNativeQuery(SQLCount);
-       //select 
-       selectSQL = `DISTINCT a.*`
-      
-       SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin) + condition1 + pagging
-       console.log(SQL)
-       let resultSQL = await sails.sendNativeQuery(SQL);
-           resultSQL = resultSQL['rows']
-       let resultFormated = []
-           for(let i=0 ;i < resultSQL.length ; i++){
-              let questionId = resultSQL[i]['id']
-              let createdBy =  resultSQL[i]['created_by']
-              let category = await ExerciseTag.find({exerciseId : questionId}).populate('tagId')
-                  category = category.map(value => {
-                    return {id : value['tagId']['id'],name:value['tagId']['name']}
-                  })
-             let isWishList = await WishList.findOne({userId : userId,exerciseId:questionId}) 
-             let author = await User.findOne({where : {id : createdBy} ,select : ['id','displayName']})
-             let countComment = await Comment.count({where :  {exerciseId : resultSQL[i]['id'] }})
-              let tmp = {...resultSQL[i]}
-                  tmp['categories'] = category
-                  if(isWishList) {
-                    tmp['isWishList'] = true
-                  }
-                  else 
-                    tmp['isWishList'] = false
+      let pagging = ` ORDER BY a.ID ASC LIMIT ${(page - 1) * limit},${limit}`;
 
-                  if(author)
-                    tmp['author'] =   author
-                    tmp['countComment'] = countComment;
-              resultFormated.push(tmp)
-               
-           }
-          
-          return res.send({
-            success : true ,
-            data : resultFormated,
-            total : count['rows'][0] && count['rows'][0]['total'] ? count['rows'][0]['total']:0,
-            
-          })
+      //count
+      let SQLCount = SQL + condition1;
+
+      let count = await sails.sendNativeQuery(SQLCount);
+      //select
+      selectSQL = `DISTINCT a.*`;
+
+      SQL =
+        (await ExerciseComponent.createQuery(selectSQL, typeJoin)) +
+        condition1 +
+        pagging;
+      console.log(SQL);
+      let resultSQL = await sails.sendNativeQuery(SQL);
+      resultSQL = resultSQL["rows"];
+      let resultFormated = [];
+      for (let i = 0; i < resultSQL.length; i++) {
+        let questionId = resultSQL[i]["id"];
+        let createdBy = resultSQL[i]["created_by"];
+        let category = await ExerciseTag.find({
+          exerciseId: questionId,
+        }).populate("tagId");
+        category = category.map((value) => {
+          return { id: value["tagId"]["id"], name: value["tagId"]["name"] };
+        });
+        let isWishList = await WishList.findOne({
+          userId: userId,
+          exerciseId: questionId,
+        });
+        let author = await User.findOne({
+          where: { id: createdBy },
+          select: ["id", "displayName"],
+        });
+        let countComment = await Comment.count({
+          where: { exerciseId: resultSQL[i]["id"] },
+        });
+        let tmp = { ...resultSQL[i] };
+        tmp["categories"] = category;
+        if (isWishList) {
+          tmp["isWishList"] = true;
+        } else tmp["isWishList"] = false;
+
+        if (author) tmp["author"] = author;
+        tmp["countComment"] = countComment;
+        resultFormated.push(tmp);
+      }
+
+      return res.send({
+        success: true,
+        data: resultFormated,
+        total:
+          count["rows"][0] && count["rows"][0]["total"]
+            ? count["rows"][0]["total"]
+            : 0,
+      });
     } catch (error) {
       console.log(error);
       return res.send({
         success: false,
         message: error.message,
-        data : []
+        data: [],
       });
     }
   },
@@ -473,18 +718,22 @@ module.exports = {
   //add question to wishList
   addWishList: async (req, res) => {
     try {
-      let {userId , questionId } = req.body
-       userId = 5;
-       WishList.findOrCreate({userId : userId , exerciseId : questionId},{userId : userId , exerciseId : questionId})
-      .exec(async(err, wishList, wasCreated)=> {
-        if (err) { return res.serverError(err); }
-      
-        if(wasCreated) {
+      let { userId, questionId } = req.body;
+      userId = 5;
+      WishList.findOrCreate(
+        { userId: userId, exerciseId: questionId },
+        { userId: userId, exerciseId: questionId }
+      ).exec(async (err, wishList, wasCreated) => {
+        if (err) {
+          return res.serverError(err);
+        }
+
+        if (wasCreated) {
           res.send({
-            success : true,
-            message : 'Add To WishList Success!',
-            data : wishList
-         })
+            success: true,
+            message: "Add To WishList Success!",
+            data: wishList,
+          });
         }
 
         if (wasCreated) {
@@ -501,7 +750,7 @@ module.exports = {
         }
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.send({
         success: false,
         message: error,
@@ -607,40 +856,42 @@ module.exports = {
         where: { userId: userId },
         sort: "createdAt DESC",
         limit: 5,
-      }).populate('exerciseId').populate('programLanguageId')
-
-      let result = []
-
-      submissions.forEach((ele,index)=> {
-         let item = {
-           name : ele['exerciseId']['title'],
-           language : ele['programLanguageId']['name'],
-           status : ele['status']
-
-         }
-
-         result.push(item)
       })
+        .populate("exerciseId")
+        .populate("programLanguageId");
+
+      let result = [];
+
+      submissions.forEach((ele, index) => {
+        let item = {
+          name: ele["exerciseId"]["title"],
+          language: ele["programLanguageId"]["name"],
+          status: ele["status"],
+        };
+
+        result.push(item);
+      });
 
       return res.send({
-        success : true , 
-        data : result
-      })
-     } catch (error) {
-       return res.send({
-         success : false,
-         data : [],
-         error : CONSTANTS.API_ERROR
-       })
-     }
-    },
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      return res.send({
+        success: false,
+        data: [],
+        error: CONSTANTS.API_ERROR,
+      });
+    }
+  },
 
-  getWishList : async ( req,res )=> {
-     try {
-    
-      let userId = req.user && req.user['id'] ? req.user['id']: 5
+  getWishList: async (req, res) => {
+    try {
+      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
 
-      let listWishList = await WishList.find({ userId : userId}).populate('exerciseId')
+      let listWishList = await WishList.find({ userId: userId }).populate(
+        "exerciseId"
+      );
 
       return res.send({
         success: true,
@@ -659,7 +910,7 @@ module.exports = {
   getByOwner: async (req, res) => {
     try {
       let { ownerId } = req.params;
-      console.log('ownerId', ownerId)
+      console.log("ownerId", ownerId);
       let exercises = await Exercise.find({
         where: {
           createdBy: ownerId,
@@ -667,9 +918,14 @@ module.exports = {
         },
         sort: "updatedAt DESC",
       });
+      let resutl = [...exercises].map((t) => ({
+        ...t,
+        createdAt: moment(new Date(t.createdAt).toISOString()).format(),
+        updatedAt: moment(new Date(t.updatedAt).toISOString()).format(),
+      }));
       res.json({
         success: true,
-        data: exercises,
+        data: resutl,
       });
     } catch (e) {
       res.json({
@@ -678,7 +934,7 @@ module.exports = {
       console.log(e);
     }
   },
- 
+
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
@@ -688,7 +944,7 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
-      console.log(id, deletedExercise, 'delete ex');
+      console.log(id, deletedExercise, "delete ex");
       res.json({
         success: true,
         data: {
@@ -705,88 +961,92 @@ module.exports = {
 
   // get all submission
 
-  getAllSubmission : async(req,res)=> {
+  getAllSubmission: async (req, res) => {
     try {
-      let userId = req.user && req.user['id'] ? req.user['id']: 5;
+      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
 
-      let listSubmission = await TrainingHistory.find({ where : {userId : userId ,  isFinished : 1}}).populate('programLanguageId').populate('exerciseId')
-      let totalSub = await TrainingHistory.count({ where : {userId : userId , isFinished : 1}})
-      let result = []
-      listSubmission.forEach(ele => {
-         let item = {
-           time : ele['createdAt'],
-           exercise : ele['exerciseId']['title'],
-           status : ele['status'],
-           runtime : ele['timeNeeded'],
-           language : ele['programLanguageId']['name']
-         }
-         result.push(item)
+      let listSubmission = await TrainingHistory.find({
+        where: { userId: userId, isFinished: 1 },
+      })
+        .populate("programLanguageId")
+        .populate("exerciseId");
+      let totalSub = await TrainingHistory.count({
+        where: { userId: userId, isFinished: 1 },
       });
-     
-
+      let result = [];
+      listSubmission.forEach((ele) => {
+        let item = {
+          time: ele["createdAt"],
+          exercise: ele["exerciseId"]["title"],
+          status: ele["status"],
+          runtime: ele["timeNeeded"],
+          language: ele["programLanguageId"]["name"],
+        };
+        result.push(item);
+      });
 
       return res.send({
-        success : true,
-        data : {
-          submission : result,
-          total : totalSub
-        }
-      })
-    } catch (error) {
-      console.log(error)
-      return res.send({
-        success : false,
-        data : {
-          submission : [],
-          total : 0
+        success: true,
+        data: {
+          submission: result,
+          total: totalSub,
         },
-        error: CONSTANTS.API_ERROR
-      })
+      });
+    } catch (error) {
+      console.log(error);
+      return res.send({
+        success: false,
+        data: {
+          submission: [],
+          total: 0,
+        },
+        error: CONSTANTS.API_ERROR,
+      });
     }
   },
 
-  //get submission by Id 
-  getSubmissionById : async ( req , res) => {
+  //get submission by Id
+  getSubmissionById: async (req, res) => {
     try {
-      let userId = req.user ? req.user['id'] : 5;
-      let roleId = req.user ? req.user['role']['id'] : 5;
-      let subId = req.params.subId
-      
+      let userId = req.user ? req.user["id"] : 5;
+      let roleId = req.user ? req.user["role"]["id"] : 5;
+      let subId = req.params.subId;
+
       //if teacher -> get submission if your exercise theirr created
-      let sub = await TrainingHistory.findOne({id : subId}).populate('programLanguageId').populate('exerciseId');
-      let result  = {}
-      if(sub) {
+      let sub = await TrainingHistory.findOne({ id: subId })
+        .populate("programLanguageId")
+        .populate("exerciseId");
+      let result = {};
+      if (sub) {
         result = {
-          id : sub['id'],
-          exercise : {
-            id : sub['exerciseId']['id'],
-            title : sub['exerciseId']['title']
+          id: sub["id"],
+          exercise: {
+            id: sub["exerciseId"]["id"],
+            title: sub["exerciseId"]["title"],
           },
-          language : {
-            id : sub['programLanguageId']['id'],
-            name : sub['programLanguageId']['name']
+          language: {
+            id: sub["programLanguageId"]["id"],
+            name: sub["programLanguageId"]["name"],
           },
-          answer : sub['answer'],
-          createdAt : sub['createdAt'],
-          userId : sub['userId'],
-          status : sub['status']
-          
-        }
+          answer: sub["answer"],
+          createdAt: sub["createdAt"],
+          userId: sub["userId"],
+          status: sub["status"],
+        };
       }
       return res.send({
-        success : true,
-        data: result
-      })
-      
+        success: true,
+        data: result,
+      });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return res.send({
-        success : false,
-        error : 1,
-        data : {}
-      })
+        success: false,
+        error: 1,
+        data: {},
+      });
     }
-  },    
+  },
   getExerciseNeedApproval: async (req, res) => {
     try {
       let exerciseNeedApproval = await Exercise.find({
@@ -799,7 +1059,7 @@ module.exports = {
       res.json({
         success: true,
         data: exerciseNeedApproval,
-      })
+      });
     } catch (e) {
       res.json({
         success: false,
@@ -809,54 +1069,16 @@ module.exports = {
   },
 
   updateExerciseNeedApproval: async (req, res) => {
-    try{
-      let {id} = req.body;
+    try {
+      let { id } = req.body;
       let updatedExercise = await Exercise.updateOne({
         id: id,
       }).set({
-        isApproved: true
-      })
-      res.json({
-        success: true,
-        data: {id: updatedExercise.id},
-      })
-
-    } catch(e) {
-      res.json({
-        success: false,
-      })
-      console.log(e)
-    }
-  },
-
-  getExerciseToReview: async (req, res) => {
-    try {
-      let { exerciseId } = req.params;
-      let exercise = await Exercise.findOne({
-        id: exerciseId,
-        isDeleted: false,
-        isApproved: false
-      })
-        .populate("tags")
-        .populate("codeSnippets")
-        .populate("testCases");
-      if (!exercise) {
-        res.json({
-          success: true,
-        });
-        return;
-      }
-      let snippetPromises = [...exercise.codeSnippets].map(async (c) => {
-        const lang = await ProgramLanguage.findOne({ id: c.programLanguageId });
-        c.languageName = lang.name;
-        return c;
+        isApproved: true,
       });
-
-      let snippets = await Promise.all(snippetPromises);
-      exercise.codeSnippets = snippets;
       res.json({
         success: true,
-        data: exercise,
+        data: { id: updatedExercise.id },
       });
     } catch (e) {
       res.json({
@@ -864,5 +1086,6 @@ module.exports = {
       });
       console.log(e);
     }
-  }
+  },
+
 };

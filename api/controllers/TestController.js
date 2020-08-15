@@ -5,19 +5,17 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+var moment = require("moment");
+
 module.exports = {
   get: async function (req, res) {
-    let x = await User.find({ id: 5 }).populate("roles");
-
-    return res.json("abc");
+    let tags = await Tag.create({
+      name: Math.random(),
+    }).fetch();
+    console.log(moment(new Date().toISOString()).format());
+    return res.json({ ...tags });
   },
   find: async function (req, res) {
-    for (let i = 0; i < 10; i++) {
-      await ProgramLanguage.create({
-        name: "language " + i,
-        code: "" + i,
-      });
-    }
     return res.json("");
   },
 };
