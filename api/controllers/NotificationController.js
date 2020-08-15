@@ -11,10 +11,16 @@ module.exports = {
     try {
        // let receiver = req.user ? req.user['id'] : 5
        let receiver= req.params.userId;
-        let list  = await Notification.find({where : { receiver : receiver , isDeleted : false},limit : 5,sort: 'createdAt DESC'});
+        let list  = await Notification.find({where : { receiver : receiver , isDeleted : false},limit : 4,sort: 'createdAt DESC'});
+
+        //count noti chưa read
+        let count = await Notification.count({ where : { receiver : receiver , isDeleted : false , isRead : false}});
         return res.send({
               success :true,
-              data : list
+              data : {
+                'listNoti' : list,
+                'notRead' : count
+              }
             })
     } catch (error) {
         console.log(error)
@@ -89,12 +95,12 @@ module.exports = {
   pushNotification: async (req, res) =>{
      try {
        let { reviewerIds, content, linkAction } = req.body;
-       let notiPromises = reviewerIds.map(async (t) => {
-         await Notification.create({
+       let notiPromises = reviewerIds.map((t) => {
+         Notification.create({
            content: content,
            linkAction: linkAction,
            receiver: t,
-           type: 2
+           type: 2,
          });
        });
 

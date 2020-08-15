@@ -2,11 +2,14 @@ module.exports = {
   tableName: "DetailReview",
   attributes: {
     comment: { type: "string" },
-    requestId: { type: "number", columnName: "request_id" },
     reviewer: { type: "number", columnName: "reviewer" },
     isAccepted: {
-      type: "boolean",
+      type: "string",
       columnName: "is_accepted",
+    },
+    requestId: {
+      model: "RequestReview",
+      columnName: "request_id",
     },
   },
 };

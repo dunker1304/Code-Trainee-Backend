@@ -52,7 +52,7 @@ module.exports = {
         // tmp.forEach(element => {
           for(let i = 0 ;i <tmp.length ; i++  ){
             let info = {
-              content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
+              content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['displayName'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
               linkAction : `/exercise/${questionInfo['id']}/discuss`,
               receiver : tmp[i],
               type : 1,
@@ -67,7 +67,7 @@ module.exports = {
       //send notification to ower of this exercise
       let commentInfo = await Comment.findOne({ where : {id : parentId}})
       let info2 = {
-        content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['name'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
+        content : `<a href= '/profile/${req.user ? req.user['id'] : 5}'>${req.user ? req.user['displayName'] : 'Hoang aN'}</a> commented on <a href = '/playground?questionID=${questionInfo['id']} '>${questionInfo['title']}</a>`,
         linkAction : `/exercise/${questionInfo['id']}/discuss_${afterCreated['id']}`,
         receiver : questionInfo['createdBy'],
         type : 1,

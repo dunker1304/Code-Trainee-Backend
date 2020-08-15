@@ -26,7 +26,7 @@ module.exports = {
           sampleCode: e.sampleCode,
         });
       });
-      await Promise.all([...promiseArr]);
+      await Promise.all(promiseArr);
       res.json({
         success: true,
       });
