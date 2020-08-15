@@ -10,14 +10,14 @@
 
 module.exports.routes = {
   // UserController
-  "get /oauth/google": "UserController.googleAuth",
+  "get /oauth/google/:role": "UserController.googleAuth",
   "post /signup": "UserController.signUp",
   "post /signin": "UserController.signIn",
   "get /accounts/confirm-email/:secret": "UserController.verifyAccount",
   "get /oauth/google/callback": "UserController.googleCallback",
   "get /api/current_user": "UserController.currentUser",
   "get /api/profile/:userId" : "UserController.getUserById",
-  "get /api/user/exercise":"UserController.getExerciseOfAUser",
+  "get /api/user/exercise/:userId":"UserController.getExerciseOfAUser",
   "post /api/user/role":"UserController.getRole",
   "get /signout":"UserController.signOut",
   "get /api/user/teacher/all":"UserController.getAllTeachersActive",
@@ -65,6 +65,7 @@ module.exports.routes = {
   "get /api/wish-list": "ExerciseController.getWishList",
   "get /api/all-submission": "ExerciseController.getAllSubmission",
   "get /api/submission/:subId" : "ExerciseController.getSubmissionById",
+  "post /api/exercise/statistic" : "ExerciseController.getExerciseStatisById",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
@@ -93,12 +94,13 @@ module.exports.routes = {
   "post /api/admin/create-an-account": "AdminController.createAnAccount",
   "post /api/admin/search-fuzzy-account":
     "AdminController.getUserByRoleWithKeySearch",
+  "post /api/admin/deactive-an-account": "AdminController.deactiveAccount",
 
   //Notification Controller
-  "get /api/get-most-notification" : "NotificationController.getMostNotification",
+  "get /api/get-most-notification/:userId" : "NotificationController.getMostNotification",
   "post /api/mark-as-read":"NotificationController.maskAsRead",
   "post /api/remove-notification":"NotificationController.removeNotification",
-  "get /api/get-all-notification":"NotificationController.getAllNotification",
+  "get /api/get-all-notification/:userId":"NotificationController.getAllNotification",
   "post /api/notification/push": "NotificationController.pushNotification",
 
   // ReviewControlelr

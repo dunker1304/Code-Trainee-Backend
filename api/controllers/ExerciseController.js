@@ -212,6 +212,7 @@ module.exports = {
     }
   },
 
+  //dunk
   getAllSubmissions: async (req, res) => {
     try {
       let userID = parseInt(req.query.userID);
@@ -227,7 +228,9 @@ module.exports = {
         let submissions = await TrainingHistory.find({
           exerciseId: exerciseID,
           userId: userID,
-        }).populate("programLanguageId");
+        })
+          .populate("programLanguageId")
+          .sort([{ createdAt: "DESC" }]);
         res.send({ success: true, submissions: submissions });
       }
     } catch (error) {
@@ -584,7 +587,7 @@ module.exports = {
       let data = req.body ? req.body : {};
       let condition = {};
       let condition1 = ``;
-      let limit = data.limit ? 10 : 10;
+      let limit = data.limit ? data.limit : 20;
       let page = data.page ? data.page : 1;
       let conditionLevelSQL = ``;
       let conditiontTagSQL = ``;
@@ -592,7 +595,7 @@ module.exports = {
       let conditionKeySearch = ``;
       let typeJoin = `left`;
       let selectSQL = `Count(DISTINCT a.id) as total`;
-      let userId = req.user ? req.user : 5;
+      let userId = req.body.userId ? req.body.userId : null;
 
       //filter by level
       if (data.level) {
@@ -675,10 +678,9 @@ module.exports = {
         category = category.map((value) => {
           return { id: value["tagId"]["id"], name: value["tagId"]["name"] };
         });
-        let isWishList = await WishList.findOne({
-          userId: userId,
-          exerciseId: questionId,
-        });
+        let isWishList = userId
+          ? await WishList.findOne({ userId: userId, exerciseId: questionId })
+          : null;
         let author = await User.findOne({
           where: { id: createdBy },
           select: ["id", "displayName"],
@@ -707,6 +709,7 @@ module.exports = {
       });
     } catch (error) {
       console.log(error);
+      sails.sentry.captureMessage(error);
       return res.send({
         success: false,
         message: error.message,
@@ -714,12 +717,12 @@ module.exports = {
       });
     }
   },
-
   //add question to wishList
   addWishList: async (req, res) => {
     try {
       let { userId, questionId } = req.body;
-      userId = 5;
+      userId = req.user["id"];
+
       WishList.findOrCreate(
         { userId: userId, exerciseId: questionId },
         { userId: userId, exerciseId: questionId }
@@ -729,21 +732,13 @@ module.exports = {
         }
 
         if (wasCreated) {
-          res.send({
-            success: true,
-            message: "Add To WishList Success!",
-            data: wishList,
-          });
-        }
-
-        if (wasCreated) {
-          res.send({
+          return res.send({
             success: true,
             message: "Add To WishList Success!",
             data: wishList,
           });
         } else {
-          res.send({
+          return res.send({
             success: false,
             message: "This Question already exist in WishList",
           });
@@ -751,7 +746,7 @@ module.exports = {
       });
     } catch (error) {
       console.log(error);
-      res.send({
+      return res.send({
         success: false,
         message: error,
       });
@@ -763,7 +758,7 @@ module.exports = {
   removeWishList: async (req, res) => {
     try {
       let { exerciseId, typeWishList } = req.body;
-      let userId = req.user ? req.user : 5;
+      let userId = req.user["id"];
 
       let wishlist = await WishList.destroyOne({
         exerciseId: exerciseId,
@@ -887,7 +882,7 @@ module.exports = {
 
   getWishList: async (req, res) => {
     try {
-      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
+      let userId = req.user["id"];
 
       let listWishList = await WishList.find({ userId: userId }).populate(
         "exerciseId"
@@ -959,11 +954,13 @@ module.exports = {
     }
   },
 
-  // get all submission
-
+  // get all submission_quynhkt
   getAllSubmission: async (req, res) => {
     try {
-      let userId = req.user && req.user["id"] ? req.user["id"] : 5;
+      sails.sockets.broadcast("artsAndEntertainment", "foo", {
+        greeting: "Hola!",
+      });
+      let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
         where: { userId: userId, isFinished: 1 },
@@ -976,7 +973,8 @@ module.exports = {
       let result = [];
       listSubmission.forEach((ele) => {
         let item = {
-          time: ele["createdAt"],
+          id: ele["id"],
+          time: moment(ele["createdAt"]).format("YYYY-MM-DD"),
           exercise: ele["exerciseId"]["title"],
           status: ele["status"],
           runtime: ele["timeNeeded"],
@@ -1008,8 +1006,11 @@ module.exports = {
   //get submission by Id
   getSubmissionById: async (req, res) => {
     try {
-      let userId = req.user ? req.user["id"] : 5;
-      let roleId = req.user ? req.user["role"]["id"] : 5;
+      console.log(
+        await sails.sockets.broadcast("artsAndEntertainment", "foo", {
+          greeting: "Hola!",
+        })
+      );
       let subId = req.params.subId;
 
       //if teacher -> get submission if your exercise theirr created
@@ -1029,7 +1030,7 @@ module.exports = {
             name: sub["programLanguageId"]["name"],
           },
           answer: sub["answer"],
-          createdAt: sub["createdAt"],
+          createdAt: moment(sub["createdAt"]).format("YYYY-MM-DD"),
           userId: sub["userId"],
           status: sub["status"],
         };
@@ -1088,4 +1089,76 @@ module.exports = {
     }
   },
 
+  getExerciseStatisById: async (req, res) => {
+    try {
+      let exeId = req.body.exerciseId;
+      let page = req.body.page ? req.body.page : 1;
+      let limit = 20;
+      //get all submission of this exxercise Id
+      let list = await TrainingHistory.find({
+        where: { exerciseId: exeId },
+        limit: limit,
+        sort: "createdAt DESC",
+        skip: (page - 1) * limit,
+      })
+        .populate("userId")
+        .populate("programLanguageId");
+
+      //count all - to pagging
+      let count = await TrainingHistory.count({ where: { exerciseId: exeId } });
+
+      let totalPage =
+        count % limit == 0 ? count / limit : Math.floor(count / limit) + 1;
+
+      //info exercise
+      let exericse = await Exercise.findOne({ where: { id: exeId } });
+
+      let exer = {
+        id: exericse["id"],
+        loc: exericse["points"],
+        createdAt: moment(exericse["createdAt"]).format("YYYY-MM-DD"),
+        level: exericse["level"],
+        totalSubmission: count,
+        title: exericse["title"],
+      };
+
+      //format response
+      let result = [];
+      list.forEach((element, index) => {
+        let tmp = {};
+        tmp["index"] = index + 1;
+        tmp["id"] = element["id"];
+        tmp["user"] = element["userId"]
+          ? {
+              name: element["userId"]["displayName"],
+              id: element["userId"]["id"],
+            }
+          : null;
+        tmp["language"] = element["programLanguageId"]
+          ? {
+              name: element["programLanguageId"]["name"],
+              id: element["programLanguageId"]["id"],
+            }
+          : null;
+        (tmp["runtime"] = element["timeNeeded"]),
+          (tmp["status"] = element["status"]);
+        result.push(tmp);
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          list: result,
+          count: totalPage,
+          exercise: exer,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        data: [],
+      });
+    }
+  },
 };

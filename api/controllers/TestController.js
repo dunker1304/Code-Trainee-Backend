@@ -9,11 +9,9 @@ var moment = require("moment");
 
 module.exports = {
   get: async function (req, res) {
-    let tags = await Tag.create({
-      name: Math.random(),
-    }).fetch();
-    console.log(moment(new Date().toISOString()).format());
-    return res.json({ ...tags });
+    let x = await User.find({ id: 5 }).populate("roles", { id : 3});
+
+    return res.json(x);
   },
   find: async function (req, res) {
     return res.json("");

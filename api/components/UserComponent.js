@@ -1,6 +1,14 @@
 const MailService = require('../services/MailService');
+const CONSTANTS = require('../../config/custom').custom
 module.exports = {
   sendEmail : async (data,secret)=> {
+    
+    let url = ''
+    if(sails.config.environment == 'development') {
+      url = CONSTANTS.URL_FRONTEND_LOCAL
+    }
+    else 
+      url = CONSTANTS.URL_FRONTEND_PROD
     let sender = {
       'email' : data.email,
       'subject' : '[CodeTrainee] Confirm Email',
@@ -9,7 +17,7 @@ module.exports = {
       <br/>
      Thanks for signing up with CodeTrainee!<br/>
      You must follow this link to activate your account:
-     <a href= 'https://api.codetrainee.codes/accounts/confirm-email/${secret}'>https://api.codetrainee.codes/accounts/confirm-email/${secret}</a>
+     <a href= '${url}/verifyAccount?secret=${secret}'>${url}/verifyAccount?secret=${secret}</a>
      <br/>Have fun coding, and don't hesitate to contact us with your feedback.`
     }
 
@@ -66,10 +74,10 @@ module.exports = {
           message : 'Username have special character!'
         }
       }
-      if(data.username.length > 30) {
+      if(data.username.length > 30 || data.username.length < 3 ) {
         return {
           success : false,
-          message : 'Username must have at most 30 characters!'
+          message : 'Username must have at most 30 characters and at least 3 characters!'
         }
       }
     }
@@ -77,20 +85,25 @@ module.exports = {
     //validate displayName
     if(data.displayName) {
 
-      let validateSpecial = await sails.helpers.validateSpecial.with({
-        value : data.displayName
-      });
-      if(!validateSpecial){
-        return {
-          success : false,
-          message : 'Displayname have special character!'
-        }
-      }
+      // let validateSpecial = await sails.helpers.validateSpecial.with({
+      //   value : data.displayName
+      // });
+      // if(!validateSpecial){
+      //   return {
+      //     success : false,
+      //     message : 'Displayname have special character!'
+      //   }
+       if(/[#$%^&*()+=\-\[\]\';,.\/{}|":<>?~\\\\]/.test( data.displayName ) ) {
+            return {
+              success : false,
+              message : 'Displayname have special character!'
+           }
+       }
 
-      if(data.displayName.length > 30 || data.displayName.length < 4) {
+      if(data.displayName.length > 30 || data.displayName.length < 3) {
         return {
           success : false,
-          message : 'Displayname must have at most 30 characters and at least 4 characters!'
+          message : 'Displayname must have at most 30 characters and at least 3 characters!'
         }
       }
     }
@@ -111,9 +124,31 @@ module.exports = {
           }
         }
     }
+
+    //valite pass and repass
+    if(data.key != 'admin-edit') {
+    if( !data.rePassword || data.rePassword != data.password) {
+      return {
+        success : false,
+        message : 'Password is not matched!'
+      }
+      } 
+    }
+  
     return {
-      success :false ,
+      success :true ,
       message :''
+    }
+  },
+
+  switchRouterByRole :  (role)=> {
+    switch (Number(role)) {
+      case CONSTANTS.ROLE.AMDIN : 
+          return '/admin/accounts';
+      case CONSTANTS.ROLE.TEACHER:
+          return '/exercise'    ;
+      case CONSTANTS.ROLE.STUDENT:
+          return '/problem';    
     }
   }
  
