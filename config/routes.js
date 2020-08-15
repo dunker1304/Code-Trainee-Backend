@@ -66,6 +66,7 @@ module.exports.routes = {
   "get /api/wish-list": "ExerciseController.getWishList",
   "get /api/all-submission": "ExerciseController.getAllSubmission",
   "get /api/submission/:subId" : "ExerciseController.getSubmissionById",
+  "post /api/exercise/statistic" : "ExerciseController.getExerciseStatisById",
 
   // TestcaseController
   "get /api/testcase": "TestCaseController.getById",
