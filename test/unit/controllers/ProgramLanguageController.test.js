@@ -2,15 +2,28 @@ var chai = require("chai");
 var supertest = require("supertest");
 const { expect } = require("chai");
 describe("Program Language Controller", function () {
-  it("getAllByExercise", function (done) {
-    supertest(sails.hooks.http.app)
-      .get("/api/program-language/all")
-      .end(function (err, res) {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body).to.be.an("Object");
-        expect(res.body.success).to.equal(true);
-        expect(res.body.data).to.be.an("Object");
-        done();
-      });
-  });
+  it('# GET ALL BY EXERCISE ID', done => {
+    ProgramLanguage.find({}).limit(1).exec((err, language) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .get('/api/language/exercise/1')
+      .end((err, res) => {
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
+  it('# GET ALL BY EXERCISE ID', done => {
+    ProgramLanguage.find({}).limit(1).exec((err, language) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .get('/api/language/all')
+      .end((err, res) => {
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
 });

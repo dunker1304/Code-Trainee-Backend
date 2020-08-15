@@ -30,7 +30,6 @@ module.exports = {
     let testCase = await TestCase.find({ exerciseId: questionId });
 
     if (testCase.length == 0) {
-      console.log(testCase, "k co testcase");
       let submitData = {
         language_id: languageId,
         source_code: Buffer.from(sourceCode).toString("base64"),
@@ -39,14 +38,12 @@ module.exports = {
         //'expected_output': '40'
       };
       let submittedResult = await ExerciseComponent.submitExercise(submitData);
-      console.log(submittedResult.message.response, "submited result");
       if (submittedResult.data.stdout) {
         submittedResult.data.stdout = submittedResult.data.stdout.toString();
         var buf = Buffer.from(submittedResult.data.stdin, "base64").toString(
           "ascii"
         );
         var buf1 = Buffer.from("<Buffer 8b>", "utf8");
-        console.log(buf, "stdout");
       }
       res.send([submittedResult]);
     } else {
@@ -190,7 +187,6 @@ module.exports = {
   submitSolution: async (req, res) => {
     try {
       let { question, testcases, answer, language, userID } = req.body;
-      console.log(req.body, "solution");
       let status = "Accepted";
       testcases.forEach((testcase) => {
         if (testcase.data.description != "Accepted") {
@@ -253,7 +249,6 @@ module.exports = {
   createExercise: async (req, res) => {
     try {
       let { content, title, points, level, tags, createdBy } = req.body;
-      console.log('createdBy', createdBy)
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
         [ ... new Set(tags) ].map(async (e) => {
@@ -305,7 +300,6 @@ module.exports = {
   updateExercise: async (req, res) => {
     try {
       let { id, content, title, points, level, tags } = req.body;
-      console.log("tags", tags);
       tags.push("#"); // default 1 tags
       let mappingTags = await Promise.all(
         [... new Set(tags)].map(async (e) => {
@@ -427,7 +421,6 @@ module.exports = {
        selectSQL = `DISTINCT a.*`
       
        SQL = await ExerciseComponent.createQuery(selectSQL,typeJoin) + condition1 + pagging
-       console.log(SQL)
        let resultSQL = await sails.sendNativeQuery(SQL);
            resultSQL = resultSQL['rows']
        let resultFormated = []
@@ -657,7 +650,6 @@ module.exports = {
   getByOwner: async (req, res) => {
     try {
       let { ownerId } = req.params;
-      console.log('ownerId', ownerId)
       let exercises = await Exercise.find({
         where: {
           createdBy: ownerId,
@@ -686,7 +678,6 @@ module.exports = {
       }).set({
         isDeleted: true,
       });
-      console.log(id, deletedExercise, 'delete ex');
       res.json({
         success: true,
         data: {
@@ -861,7 +852,6 @@ module.exports = {
       res.json({
         success: false,
       });
-      console.log(e);
     }
   }
 };

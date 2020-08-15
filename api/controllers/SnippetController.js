@@ -6,7 +6,6 @@ module.exports = {
         supportedLanguages, // [{languageId, sampleCode, isActive}]
         exerciseId,
       } = req.body;
-      console.log(req.body);
       let promiseArr = supportedLanguages.map(async (e) => {
         let snippet = await CodeSnippet.findOrCreate(
           {
