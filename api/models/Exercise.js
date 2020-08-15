@@ -13,9 +13,8 @@ module.exports = {
       defaultsTo: false,
     },
     isApproved: {
-      type: "boolean",
+      type: "string",
       columnName: "is_approved",
-      defaultsTo: false,
     },
     like: { type: "number", defaultsTo: 0 },
     dislike: { type: "number", defaultsTo: 0 },

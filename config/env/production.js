@@ -77,7 +77,6 @@ module.exports = {
       user: "root",
       password: "codetrainee",
       database: "CodeTrainee",
-      timezone: "utc"
     },
 
   },
