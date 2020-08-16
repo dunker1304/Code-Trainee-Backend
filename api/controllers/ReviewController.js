@@ -182,7 +182,7 @@ module.exports = {
                 })
                 .usingConnection(db);
               await Exercise.updateOne({
-                id: exerciseId,
+                id: requestReview.exerciseId,
               })
                 .set({
                   isApproved: "accepted",
@@ -197,7 +197,7 @@ module.exports = {
                 })
                 .usingConnection(db);
               await Exercise.updateOne({
-                id: exerciseId,
+                id: requestReview.exerciseId,
               })
                 .set({
                   isApproved: "rejected",
