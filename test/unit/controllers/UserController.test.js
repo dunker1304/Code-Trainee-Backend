@@ -4,28 +4,28 @@ const JWT = require('jsonwebtoken');
 const CONSTANTS = require('../../../config/custom').custom
 describe("User Controller Testing",function(){
 
-  beforeEach(function(done){
-    var newBlob = {
-      email :'xyz@gmail.com',
-      secret :'345zdfertrgytyj3457',
-      displayName :'anhoang',
-      username :'anhoang',
-      password:'123456',
-      isLoginLocal:1,
-      status:1
+  // beforeEach(function(done){
+  //   var newBlob = {
+  //     email :'xyz@gmail.com',
+  //     secret :'345zdfertrgytyj3457',
+  //     displayName :'anhoang',
+  //     username :'anhoang',
+  //     password:'123456',
+  //     isLoginLocal:1,
+  //     status:1
       
-    }
+  //   }
 
-    User.create(newBlob).then(function(){
-      done()
-    })
+  //   User.create(newBlob).then(function(){
+  //     done()
+  //   })
     
-  });
-  afterEach(function(done){
-     User.destroy({}).then(function(){
-       done()
-     })
-  });
+  // });
+  // afterEach(function(done){
+  //    User.destroy({}).then(function(){
+  //      done()
+  //    })
+  // });
 
 
   it("# GET USER BY ID",  function(done){

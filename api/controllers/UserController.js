@@ -366,7 +366,7 @@ module.exports = {
       let userId =  req.params.userId  ? req.params.userId :null
 
       //count All exercise
-      let allExercise = await Exercise.count({ isApproved :1});
+      let allExercise = await Exercise.count({ isApproved : 'accepted'});
 
       //count specific level if question
       // let easyE  = await Exercise.count({level:'Easy'})
