@@ -1046,7 +1046,7 @@ module.exports = {
     try {
       let exerciseNeedApproval = await Exercise.find({
         where: {
-          isApproved: false,
+          isApproved: 'rejected',
           isDeleted: false,
         },
         sort: "updatedAt DESC",
