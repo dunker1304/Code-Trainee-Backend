@@ -148,13 +148,15 @@ module.exports = {
             success: true,
           });
         } else {
-          let requestReview = await RequestReview.findOne({
+          let requestReview = await RequestReview.find({
             where: {
               id: requestId,
             },
           })
+            .limit(1)
             .populate("details")
             .usingConnection(db);
+          requestReview = requestReview[0];
           let numberReviewers = requestReview.details.length;
           await DetailReview.updateOne({
             requestId: requestId,
