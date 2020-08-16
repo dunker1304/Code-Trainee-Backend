@@ -136,7 +136,7 @@ module.exports = {
       console.log(data)
 
       //validate 
-      let validate  = UserComponent.validateSignUp(data)
+      let validate  = await UserComponent.validateSignUp(data)
 
       if(!validate['success']) {
         return res.send(validate)
@@ -190,7 +190,7 @@ module.exports = {
 
         return res.send({
           success : true , 
-          message : 'Add Account Successfully with default password: codetrainee@123',
+          message : 'Add Account Successfully with default password: codetrainee@123! Please check your email to confirm!',
         })
       }
 
