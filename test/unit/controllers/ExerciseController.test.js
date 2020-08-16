@@ -106,7 +106,7 @@ describe('Exercise Controller Testing', () => {
           points: 20,
           level: 'easy',
           isDeleted: false,
-          isApproved: false,
+          isApproved: 'rejected',
           like: 0,
           dislike: 0,
           content: '<h2>You have to count all of elements of array</h2>',
