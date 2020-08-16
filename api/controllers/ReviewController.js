@@ -121,7 +121,7 @@ module.exports = {
       await sails.getDatastore().transaction(async (db) => {
         let { comment, isAccepted, exerciseId, userId, requestId } = req.body;
         // mean self-review
-        if (!exerciseId) {
+        if (!!exerciseId) {
           let requestReview = await RequestReview.find({
             where: {
               exerciseId: exerciseId,
@@ -148,15 +148,11 @@ module.exports = {
             success: true,
           });
         } else {
-          let requestReview = await RequestReview.find({
-            where: {
-              id: requestId,
-            },
+          let requestReview = await RequestReview.findOne({
+            id: requestId,
           })
-            .limit(1)
             .populate("details")
             .usingConnection(db);
-          requestReview = requestReview[0];
           let numberReviewers = requestReview.details.length;
           await DetailReview.updateOne({
             requestId: requestId,
