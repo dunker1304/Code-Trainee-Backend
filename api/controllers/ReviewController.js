@@ -149,7 +149,9 @@ module.exports = {
           });
         } else {
           let requestReview = await RequestReview.findOne({
-            id: requestId,
+            where: {
+              id: requestId,
+            },
           })
             .populate("details")
             .usingConnection(db);
