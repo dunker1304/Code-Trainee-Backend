@@ -130,6 +130,7 @@ module.exports = {
           })
             .limit(1)
             .usingConnection(db);
+          requestReview = requestReview[0];
           await RequestReview.updateOne({
             id: requestReview.id,
           })
