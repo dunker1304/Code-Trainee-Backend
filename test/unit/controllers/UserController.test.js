@@ -147,8 +147,35 @@ describe("User Controller Testing",function(){
     })
   })
 
+  it('# GOOGLE AUTH', done => {
+    supertest(sails.hooks.http.app)
+    .get('/api/google/4')
+    .end((err, res) => {
+      if (err) return done(err)
+      expect(res.body.success).to.equal(true)
+      done()
+    })
+  })
 
+  it('# GOOGLE CALL BACK', done => {
+    supertest(sails.hooks.http.app)
+    .get('/oauth/google/callback')
+    .end((err, res) => {
+      done()
+    })
+  })
 
+  it('# GET ALL TEACHERS ACTIVE', done => {
+    Role.find({}).limit(1).exec((err, role) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .get('/api/user/teacher/all')
+      .end((err, res) => {
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
 
 
 })
