@@ -125,12 +125,11 @@ module.exports = {
 
   createAnAccount : async function ( req , res) {
     try {
-      let { username , displayName , email , phone, dateOfBirth, role } = req.body
+      let { username , displayName , email , phone, dateOfBirth, role ,key} = req.body
       let data = req.body
       data['password'] = 'codetrainee@123'
       let secret = uniqueString();
-      console.log(data)
-
+  
       //validate 
       let validate  = await UserComponent.validateSignUp(data)
 
@@ -145,7 +144,8 @@ module.exports = {
         phone : phone,
         dateOfBirth :  moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'),
         password : data['password'],
-        secret : secret
+        secret : secret,
+        isLoginLocal : 1
       }
 
       //validate -username - email 
@@ -186,7 +186,7 @@ module.exports = {
 
         return res.send({
           success : true , 
-          message : 'Add Account Successfully with default password: codetrainee@123! Please check your email to confirm!',
+          message : 'Add Account Successfully With Default Password: codetrainee@123. Please Check Your Email To Confirm!',
         })
       }
 
