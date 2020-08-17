@@ -35,33 +35,45 @@ module.exports = {
       if (requestReview) {
         let exerciseInfos = await Exercise.findOne({
           id: requestReview.exerciseId,
+          isDeleted: false,
         })
           .populate("tags")
           .populate("testCases")
           .populate("codeSnippets");
-        exerciseInfos.createdAt = moment(
-          new Date(exerciseInfos.createdAt).toISOString()
-        ).format();
-        exerciseInfos.updatedAt = moment(
-          new Date(exerciseInfos.updatedAt).toISOString()
-        ).format();
-        let mappingPromises = [...exerciseInfos.codeSnippets].map(async (t) => {
-          let lang = await ProgramLanguage.findOne({ id: t.programLanguageId });
-          return {
-            sampleCode: t.sampleCode,
-            languageName: lang.name,
-            id: t.id,
-            isActive: t.isActive,
-          };
-        });
-        let codeSnippets = await Promise.all(mappingPromises);
-        exerciseInfos.codeSnippets = [...codeSnippets].filter(
-          (t) => t.isActive
-        );
-        res.json({
-          success: true,
-          data: { ...requestReview, exerciseInfos: exerciseInfos },
-        });
+        if (exerciseInfos) {
+          exerciseInfos.createdAt = moment(
+            new Date(exerciseInfos.createdAt).toISOString()
+          ).format();
+          exerciseInfos.updatedAt = moment(
+            new Date(exerciseInfos.updatedAt).toISOString()
+          ).format();
+          let mappingPromises = [...exerciseInfos.codeSnippets].map(
+            async (t) => {
+              let lang = await ProgramLanguage.findOne({
+                id: t.programLanguageId,
+              });
+              return {
+                sampleCode: t.sampleCode,
+                languageName: lang.name,
+                id: t.id,
+                isActive: t.isActive,
+              };
+            }
+          );
+          let codeSnippets = await Promise.all(mappingPromises);
+          exerciseInfos.codeSnippets = [...codeSnippets].filter(
+            (t) => t.isActive
+          );
+          res.json({
+            success: true,
+            data: { ...requestReview, exerciseInfos: exerciseInfos },
+          });
+        } else {
+          res.json({
+            success: false,
+            code: 404,
+          });
+        }
       } else {
         res.json({
           success: false,

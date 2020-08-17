@@ -88,7 +88,7 @@ module.exports = {
       let count = await Exercise.count();
       let exercise = await Exercise.findOne({
         id: id,
-        isApproved: 'accepted',
+        isApproved: "accepted",
         isDeleted: false,
       });
       let testCases;
@@ -263,20 +263,32 @@ module.exports = {
   getBasicInfoById: async (req, res) => {
     try {
       let { exerciseId } = req.params;
+      if (Number.isNaN(Number(exerciseId))) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
       let exercise = await Exercise.findOne({
         id: exerciseId,
         isDeleted: false,
       }).populate("tags");
       if (!exercise) {
-        throw new Error("already deleted");
+        res.json({
+          success: false,
+          code: 404,
+        });
+      } else {
+        res.json({
+          success: true,
+          data: { ...exercise },
+        });
       }
-      res.json({
-        success: true,
-        data: { ...exercise },
-      });
     } catch (e) {
       res.json({
         success: false,
+        code: 500,
       });
       console.log(e);
     }
@@ -284,11 +296,14 @@ module.exports = {
 
   getRandom: async (req, res) => {
     try {
-      let count = await Exercise.count({ isDeleted: false, isApproved: 'accepted' });
+      let count = await Exercise.count({
+        isDeleted: false,
+        isApproved: "accepted",
+      });
       let random = parseInt(Math.random() * count);
       let allExercise = await Exercise.find({
         isDeleted: false,
-        isApproved: 'accepted',
+        isApproved: "accepted",
       });
       res.send({
         success: true,
@@ -1046,7 +1061,7 @@ module.exports = {
     try {
       let exerciseNeedApproval = await Exercise.find({
         where: {
-          isApproved: 'rejected',
+          isApproved: "rejected",
           isDeleted: false,
         },
         sort: "updatedAt DESC",
@@ -1069,7 +1084,7 @@ module.exports = {
       let updatedExercise = await Exercise.updateOne({
         id: id,
       }).set({
-        isApproved: 'accepted',
+        isApproved: "accepted",
       });
       res.json({
         success: true,
