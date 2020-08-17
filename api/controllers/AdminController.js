@@ -93,24 +93,20 @@ module.exports = {
 
   editAnAccount : async function(req , res) {
     try {
-      let { displayName , dateOfBirth , phone , role ,deActive , userId } = req.body
+      let { displayName , dateOfBirth , phone, userId } = req.body
 
 
       //valiate - info
 
-      let validate = UserComponent.validateSignUp(req.body)
+      let validate = await UserComponent.validateSignUp(req.body)
 
       if(!validate['success']) {
         return res.send(validate)
       }
  
-      await User.updateOne({ id : userId}).set({ displayName : displayName , dateOfBirth : dateOfBirth ? moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'): null, phone :phone , isDeleted : deActive  })
+      await User.updateOne({ id : userId}).set({ displayName : displayName , dateOfBirth : dateOfBirth ? moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'): null, phone :phone  })
  
-      //update role
-      if(role) {
-        await UserAuthority.update({userId : userId}).set({roleId : role})
-      }
-
+     
       return res.send({
         success : true , 
         message : CONSTANTS.EDIT_ACCOUNT_SUCCESS

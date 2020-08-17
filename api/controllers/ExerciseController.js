@@ -882,11 +882,29 @@ module.exports = {
 
       let listWishList = await WishList.find({ userId: userId }).populate(
         "exerciseId"
-      );
+      ).populate('userId')
+
+      //format response
+      let result  = []
+      listWishList.forEach( (ele,index) => {
+        let tmp = {
+          'id' : ele['id'],
+          'index' : index + 1,
+          'userId' : ele['userId'],
+          'exercise': {
+            'id' : ele['exerciseId']['id'],
+            'title' : ele['exerciseId']['title'],
+            'loc' : ele['exerciseId']['points'],
+            'author' : ele['userId']['displayName'],
+            'level' :  ele['exerciseId']['level'],
+          }
+        }
+        result.push(tmp)
+      });
 
       return res.send({
         success: true,
-        data: listWishList,
+        data: result,
       });
     } catch (error) {
       console.log(error);

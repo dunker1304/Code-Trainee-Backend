@@ -26,7 +26,7 @@ module.exports = {
   validateSignUp : async (data)=> {
 
     //if empty 
-    if(!data || !data.username || !data.email || (data.key != 'admin-edit' && !data.password) ){
+    if(!data ||  (data.key != 'self-edit' && !data.username) ||  (data.key != 'self-edit' && !data.email) || (data.key != 'self-edit' && !data.password) ){
       return {
         success : false,
         message : 'Please fill out all information!'
@@ -126,7 +126,7 @@ module.exports = {
     }
 
     //valite pass and repass
-    if(data.key != 'admin-edit') {
+    if(data.key != 'self-edit') {
     if( !data.rePassword || data.rePassword != data.password) {
       return {
         success : false,
