@@ -136,6 +136,7 @@ module.exports = {
           })
             .set({
               isAccepted: isAccepted ? "accepted" : "rejected",
+              selfComment: comment,
             })
             .usingConnection(db);
           await Exercise.updateOne({
@@ -168,42 +169,45 @@ module.exports = {
             requestId: requestId,
             isAccepted: "waiting",
           }).usingConnection(db);
-          // if everyone reviewed
-          if (stillWaitingReview.length === 0) {
-            let acceptedReview = await DetailReview.find({
-              requestId: requestId,
-              isAccepted: "accepted",
-            }).usingConnection(db);
-            if (acceptedReview.length === numberReviewers) {
-              await RequestReview.updateOne({
-                id: requestReview.id,
-              })
-                .set({
-                  isAccepted: "accepted",
+          // check if exercise is self-reviewed or not
+          if (requestReview.isAccepted === "waiting") {
+            // if everyone reviewed
+            if (stillWaitingReview.length === 0) {
+              let rejectedReview = await DetailReview.find({
+                requestId: requestId,
+                isAccepted: "rejected",
+              }).usingConnection(db);
+              if (rejectedReview.length === 0) {
+                await RequestReview.updateOne({
+                  id: requestReview.id,
                 })
-                .usingConnection(db);
-              await Exercise.updateOne({
-                id: requestReview.exerciseId,
-              })
-                .set({
-                  isApproved: "accepted",
+                  .set({
+                    isAccepted: "accepted",
+                  })
+                  .usingConnection(db);
+                await Exercise.updateOne({
+                  id: requestReview.exerciseId,
                 })
-                .usingConnection(db);
-            } else {
-              await RequestReview.updateOne({
-                id: requestReview.id,
-              })
-                .set({
-                  isAccepted: "rejected",
+                  .set({
+                    isApproved: "accepted",
+                  })
+                  .usingConnection(db);
+              } else {
+                await RequestReview.updateOne({
+                  id: requestReview.id,
                 })
-                .usingConnection(db);
-              await Exercise.updateOne({
-                id: requestReview.exerciseId,
-              })
-                .set({
-                  isApproved: "rejected",
+                  .set({
+                    isAccepted: "rejected",
+                  })
+                  .usingConnection(db);
+                await Exercise.updateOne({
+                  id: requestReview.exerciseId,
                 })
-                .usingConnection(db);
+                  .set({
+                    isApproved: "rejected",
+                  })
+                  .usingConnection(db);
+              }
             }
           }
           res.json({ success: true });

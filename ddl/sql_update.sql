@@ -90,3 +90,6 @@ create table DetailReview (
 alter table `RequestReview` modify column `is_accepted` varchar(10);
 alter table `DetailReview` modify column `is_accepted` varchar(10);
 alter table `Exercise` modify column `is_approved` varchar(10);
+
+-- 17/08/2020 datmv
+alter table `RequestReview` ADD COLUMN `self_comment` varchar(500) ;
