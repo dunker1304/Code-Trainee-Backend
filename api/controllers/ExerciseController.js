@@ -1140,6 +1140,7 @@ module.exports = {
         let tmp = {};
         tmp["index"] = index + 1;
         tmp["id"] = element["id"];
+        tmp['createdAt'] = moment(element["createdAt"]).format("YYYY-MM-DD"),
         tmp["user"] = element["userId"]
           ? {
               name: element["userId"]["displayName"],
