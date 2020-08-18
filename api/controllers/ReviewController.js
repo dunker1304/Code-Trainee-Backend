@@ -149,6 +149,7 @@ module.exports = {
             .set({
               isAccepted: isAccepted ? "accepted" : "rejected",
               selfComment: comment,
+              isSelfReview: true,
             })
             .usingConnection(db);
           await Exercise.updateOne({
@@ -177,6 +178,16 @@ module.exports = {
               isAccepted: isAccepted ? "accepted" : "rejected",
             })
             .usingConnection(db);
+          let exercise = await Exercise.findOne({
+            id: requestReview.exerciseId,
+          });
+          let reviewedBy = await User.findOne({ id: userId });
+          await Notification.create({
+            content: `<a href='#'>${exercise.title} have been reviewed by <a href='/profile/${userId}'>${reviewedBy.email}.</>`,
+            linkAction: ``,
+            receiver: exercise.createdBy,
+            type: 3,
+          }).usingConnection(db);
           let stillWaitingReview = await DetailReview.find({
             requestId: requestId,
             isAccepted: "waiting",
@@ -195,6 +206,7 @@ module.exports = {
                 })
                   .set({
                     isAccepted: "accepted",
+                    isSelfReview: false,
                   })
                   .usingConnection(db);
                 await Exercise.updateOne({
@@ -210,6 +222,7 @@ module.exports = {
                 })
                   .set({
                     isAccepted: "rejected",
+                    isSelfReview: false,
                   })
                   .usingConnection(db);
                 await Exercise.updateOne({
