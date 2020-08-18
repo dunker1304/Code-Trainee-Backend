@@ -895,26 +895,26 @@ module.exports = {
     try {
       let userId = req.user["id"];
 
-      let listWishList = await WishList.find({ userId: userId }).populate(
-        "exerciseId"
-      ).populate('userId')
+      let listWishList = await WishList.find({ userId: userId })
+        .populate("exerciseId")
+        .populate("userId");
 
       //format response
-      let result  = []
-      listWishList.forEach( (ele,index) => {
+      let result = [];
+      listWishList.forEach((ele, index) => {
         let tmp = {
-          'id' : ele['id'],
-          'index' : index + 1,
-          'userId' : ele['userId'],
-          'exercise': {
-            'id' : ele['exerciseId']['id'],
-            'title' : ele['exerciseId']['title'],
-            'loc' : ele['exerciseId']['points'],
-            'author' : ele['userId']['displayName'],
-            'level' :  ele['exerciseId']['level'],
-          }
-        }
-        result.push(tmp)
+          id: ele["id"],
+          index: index + 1,
+          userId: ele["userId"],
+          exercise: {
+            id: ele["exerciseId"]["id"],
+            title: ele["exerciseId"]["title"],
+            loc: ele["exerciseId"]["points"],
+            author: ele["userId"]["displayName"],
+            level: ele["exerciseId"]["level"],
+          },
+        };
+        result.push(tmp);
       });
 
       return res.send({
@@ -941,14 +941,50 @@ module.exports = {
         },
         sort: "updatedAt DESC",
       });
-      let resutl = [...exercises].map((t) => ({
-        ...t,
-        createdAt: moment(new Date(t.createdAt).toISOString()).format(),
-        updatedAt: moment(new Date(t.updatedAt).toISOString()).format(),
-      }));
+      let resultPromises = [...exercises].map(async (t) => {
+        let lastRequestReview = (
+          await RequestReview.find({
+            where: {
+              exerciseId: t.id,
+            },
+            sort: "updatedAt DESC",
+          })
+            .limit(1)
+            .populate("details")
+        )[0];
+        if (lastRequestReview) {
+          lastRequestReview.createdAt = moment(
+            new Date(lastRequestReview.createdAt).toISOString()
+          ).format();
+          lastRequestReview.updatedAt = moment(
+            new Date(lastRequestReview.updatedAt).toISOString()
+          ).format();
+          let detailsPromises = [...lastRequestReview.details].map(
+            async (e) => {
+              let user = await User.findOne({ id: e.reviewer });
+              e.reviewer = user;
+              e.createdAt = moment(
+                new Date(e.createdAt).toISOString()
+              ).format();
+              e.updatedAt = moment(
+                new Date(e.updatedAt).toISOString()
+              ).format();
+              return e;
+            }
+          );
+          lastRequestReview.details = await Promise.all(detailsPromises);
+        }
+        return {
+          ...t,
+          createdAt: moment(new Date(t.createdAt).toISOString()).format(),
+          updatedAt: moment(new Date(t.updatedAt).toISOString()).format(),
+          lastRequestReview: lastRequestReview,
+        };
+      });
+      let result = await Promise.all(resultPromises);
       res.json({
         success: true,
-        data: resutl,
+        data: result,
       });
     } catch (e) {
       res.json({
@@ -1155,13 +1191,13 @@ module.exports = {
         let tmp = {};
         tmp["index"] = index + 1;
         tmp["id"] = element["id"];
-        tmp['createdAt'] = moment(element["createdAt"]).format("YYYY-MM-DD"),
-        tmp["user"] = element["userId"]
-          ? {
-              name: element["userId"]["displayName"],
-              id: element["userId"]["id"],
-            }
-          : null;
+        (tmp["createdAt"] = moment(element["createdAt"]).format("YYYY-MM-DD")),
+          (tmp["user"] = element["userId"]
+            ? {
+                name: element["userId"]["displayName"],
+                id: element["userId"]["id"],
+              }
+            : null);
         tmp["language"] = element["programLanguageId"]
           ? {
               name: element["programLanguageId"]["name"],

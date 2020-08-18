@@ -93,3 +93,4 @@ alter table `Exercise` modify column `is_approved` varchar(10);
 
 -- 17/08/2020 datmv
 alter table `RequestReview` ADD COLUMN `self_comment` varchar(500) ;
+alter table `RequestReview` ADD COLUMN `is_self_review` tinyint(1);
