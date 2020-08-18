@@ -59,6 +59,11 @@ module.exports = {
 
             if(existUser['roles'] && existUser['roles'].length > 0) {
               console.log('user has already exitss');
+
+              //if accout is deactive
+              if(existUser['isDeleted']) {
+                return res.end(popupTools.popupResponse({"success" : false, "message" : 'Account is deactive! You cannot login!'}))
+              }
             
               let token = await signToken(existUser)
               res.cookie('access_token', token, {

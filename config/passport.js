@@ -84,6 +84,12 @@ passport.use(new LocalStrategy({
     if (!user || (user && user['roles'] && user['roles'].length == 0)) {
       return done(null, false, {message : 'Account not exist!'});
     }
+
+    //if account is delete
+    if( user.isDeleted == 1 && user.isLoginLocal == 1 ){
+      return done(null ,false , { message : 'Account is deactive! You cannot login!'})
+    }
+
   
     // Check if the password is correct
     const isMatch = await User.isValidPassword(user,password);
@@ -95,7 +101,7 @@ passport.use(new LocalStrategy({
 
     //if account not verify
     if( user.status == 0 && user.isLoginLocal == 1 ){
-        return done(null ,false , { message : 'Account not verify!'})
+        return done(null ,false , { message : 'Account not verify!Please check your email to confirm!'})
     }
 
    
