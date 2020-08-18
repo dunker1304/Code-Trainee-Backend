@@ -183,7 +183,7 @@ module.exports = {
           });
           let reviewedBy = await User.findOne({ id: userId });
           await Notification.create({
-            content: `<a href='#'>${exercise.title} have been reviewed by <a href='/profile/${userId}'>${reviewedBy.email}.</>`,
+            content: `<a href='#'>${exercise.title}</a> have been reviewed by <a href='/profile/${userId}'>${reviewedBy.email}.</a>`,
             linkAction: ``,
             receiver: exercise.createdBy,
             type: 3,
