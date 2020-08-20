@@ -263,7 +263,12 @@ module.exports = {
   getBasicInfoById: async (req, res) => {
     try {
       let { exerciseId } = req.params;
-      if (Number.isNaN(Number(exerciseId))) {
+      let { userId } = req.query;
+      if (
+        !exerciseId ||
+        exerciseId === "" ||
+        (exerciseId !== undefined && Number.isNaN(Number(exerciseId)))
+      ) {
         res.json({
           success: false,
           code: 404,
@@ -280,10 +285,18 @@ module.exports = {
           code: 404,
         });
       } else {
-        res.json({
-          success: true,
-          data: { ...exercise },
-        });
+        console.log({ createdBy: exercise.createdBy, userId });
+        if (exercise.createdBy === Number(userId)) {
+          res.json({
+            success: true,
+            data: { ...exercise },
+          });
+        } else {
+          res.json({
+            success: false,
+            code: 403,
+          });
+        }
       }
     } catch (e) {
       res.json({
@@ -443,19 +456,32 @@ module.exports = {
         reviewerIds,
         createdBy,
       } = req.body;
-      console.log({
-        id,
-        content,
-        title,
-        points,
-        level,
-        tags,
-        testcases,
-        languages,
-        reviewerIds,
-        createdBy,
-      });
       await sails.getDatastore().transaction(async (db) => {
+        let exercise = await Exercise.findOne({ id: id }).usingConnection(db);
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.isDeleted) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "exercise was deleted" },
+          });
+          return;
+        }
+        if (exercise.createdBy !== Number(createdBy)) {
+          res.json({
+            success: false,
+            code: 2,
+            data: { message: "not authorized" },
+          });
+          return;
+        }
         let mappingTagPromises = [...tags].map((e) =>
           Tag.findOrCreate(
             {
@@ -470,7 +496,7 @@ module.exports = {
         let mappingTags = await Promise.all(mappingTagPromises);
         let mappingTagIds = [...mappingTags].map((e) => e.id);
         content = purifier.purify(content); // escape XSR
-        let exercise = await Exercise.updateOne({
+        await Exercise.updateOne({
           id: id,
         })
           .set({
@@ -997,17 +1023,36 @@ module.exports = {
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
-      let { id } = req.body;
-      let deletedExercise = await Exercise.updateOne({
-        id: id,
-      }).set({
-        isDeleted: true,
-      });
-      res.json({
-        success: true,
-        data: {
-          id: deletedExercise.id,
-        },
+      await sails.getDatastore().transaction(async (db) => {
+        let { id, userId } = req.body;
+        let exercise = await Exercise.findOne({ id: id });
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.createdBy !== Number(userId)) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "not authorized." },
+          });
+          return;
+        }
+        let deletedExercise = await Exercise.updateOne({
+          id: id,
+        }).set({
+          isDeleted: true,
+        });
+        res.json({
+          success: true,
+          data: {
+            id: deletedExercise.id,
+          },
+        });
       });
     } catch (e) {
       res.json({
