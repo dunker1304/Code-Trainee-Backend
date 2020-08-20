@@ -106,6 +106,7 @@ module.exports.routes = {
   // ReviewControlelr
   "post /api/review/request": "ReviewController.requestReview",
   "post /api/review": "ReviewController.review",
+  "post /api/self-review": "ReviewController.selfReview",
   "get /api/review/request/:requestId": "ReviewController.getRequestReview",
   "get /api/review/exercise/:exerciseId": "ReviewController.getExerciseReview",
   "get /api/review/reviewers/:exerciseId": "ReviewController.getLastReviewers",
