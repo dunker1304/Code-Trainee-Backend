@@ -502,7 +502,7 @@ module.exports = {
       });
       
       let activeTeachers = teacherRoles.users.filter(
-        (t) => t.isLoginLocal === 1 && t.status === 1
+        (t) => (t.isLoginLocal === 1 && t.status === 1) || isLoginGoogle === 1
       );
 
       res.json({
