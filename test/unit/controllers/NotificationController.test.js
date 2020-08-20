@@ -3,10 +3,10 @@ const { expect } = require('chai');
 
 describe('Notification Controller Testing', () => {
   it('# GET MOST NOTIFICATION', done => {
-    Notification.find({}).limit(1).exec((err, user) => {
+    User.find({}).limit(1).exec((err, user) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/get-most-notification/7')
+      .get(`/api/get-most-notification/${user[0]['id']}`)
       .end((err, res) => {
         if(err) return done(err)
         expect(res.body.success).to.equal(true)
@@ -15,45 +15,39 @@ describe('Notification Controller Testing', () => {
     })
   })
 
-  it('# MARK AS READ', done => {
-    Notification.find({}).limit(1).exec((err, user) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# MARK AS READ', async () => {
+      let user = await User.find({}).limit(1);
+      let noti = await Notification.find({isRead : false ,receiver : user[0]['id'] }).limit(1);
+      let res  = await supertest(sails.hooks.http.app)
       .post('/api/mark-as-read')
       .send({
-        notificationId: 25,
+        notificationId: noti ? noti[0]['id'] : 0,
         isRead: true,
-        userId: 7
+        userId: user[0]['id']
       })
-      .end((err, res) => {
-        if(err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
+    
   })
 
-  it('# REMOVE NOTIFICATION', done => {
-    Notification.find({}).limit(1).exec((err, user) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# REMOVE NOTIFICATION', async () => {
+      let user = await User.find({}).limit(1);
+      let noti = await Notification.find({isDeleted : false ,receiver : user[0]['id'] }).limit(1);
+      let res = await supertest(sails.hooks.http.app)
       .post('/api/remove-notification')
       .send({
-        notificationId: 25
+        notificationId: noti ? noti[0]['id']:0
       })
-      .end((err, res) => {
-        if(err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
+   
   })
 
   it('# GET ALL NOTIFICATION', done => {
-    Notification.find({}).limit(1).exec((err, user) => {
+    User.find({}).limit(1).exec((err, user) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/get-all-notification/7')
+      .get(`/api/get-all-notification/${user[0]['id']}`)
       .end((err, res) => {
         if(err) return done(err)
         expect(res.body.success).to.equal(true)
@@ -63,12 +57,12 @@ describe('Notification Controller Testing', () => {
   })
 
   it('# PUSH NOTIFICATION', done => {
-    Notification.find({}).limit(1).exec((err, user) => {
+    User.find({}).limit(1).exec((err, user) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
       .post('/api/notification/push')
       .send({
-        reviewerIds: ""
+        reviewerIds: [user[0]['id']]
       })
       .end((err, res) => {
         if(err) return done(err)

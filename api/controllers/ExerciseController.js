@@ -313,7 +313,7 @@ module.exports = {
         reviewerIds,
         createdBy,
       } = req.body;
-      await sails.getDatastore().transaction(async (db) => {
+      await sails.getDatastore('test').transaction(async (db) => {
         let mappingTagPromises = [...tags].map((e) =>
           Tag.findOrCreate(
             {
@@ -440,7 +440,7 @@ module.exports = {
         reviewerIds,
         createdBy,
       });
-      await sails.getDatastore().transaction(async (db) => {
+      await sails.getDatastore('test').transaction(async (db) => {
         let mappingTagPromises = [...tags].map((e) =>
           Tag.findOrCreate(
             {

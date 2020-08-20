@@ -40,7 +40,7 @@
   "scripts": {
     "start": "sails lift",
     "nodemon_start": "start nodemon app.js",
-    "test": "node ./node_modules/mocha/bin/mocha test/lifecycle.test.js test/unit/**/*.test.js --timeout 10000",
+    "test": "node ./node_modules/mocha/bin/mocha test/lifecycle.test.js test/unit/**/ReviewController.test.js --timeout 10000",
     "lint": "./node_modules/eslint/bin/eslint.js . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "custom-tests": "echo \"(No other custom tests yet.)\" && echo",
     "coverage": "nyc --report==text npm run test"

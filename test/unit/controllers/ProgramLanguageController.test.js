@@ -3,10 +3,10 @@ var supertest = require("supertest");
 const { expect } = require("chai");
 describe("Program Language Controller", function () {
   it('# GET ALL BY EXERCISE ID', done => {
-    ProgramLanguage.find({}).limit(1).exec((err, language) => {
+    Exercise.find({}).limit(1).exec((err, exer) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/language/exercise/1')
+      .get(`/api/language/exercise/${exer[0]['id']}`)
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
         done()
@@ -14,16 +14,13 @@ describe("Program Language Controller", function () {
     })
   })
 
-  it('# GET ALL BY EXERCISE ID', done => {
-    ProgramLanguage.find({}).limit(1).exec((err, language) => {
-      if (err) return done(err)
+  it('# GET ALL ', done => {
       supertest(sails.hooks.http.app)
       .get('/api/language/all')
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
         done()
       })
-    })
   })
 
 });

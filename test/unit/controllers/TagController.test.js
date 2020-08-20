@@ -2,7 +2,7 @@ var chai = require("chai");
 var supertest = require("supertest");
 const { expect } = require("chai");
 describe("Snippet Controller", function () {
-  it("getTagsByExerciseId", function (done) {
+  it("# GET TAG BY EXERCISE_ID", function (done) {
     supertest(sails.hooks.http.app)
       .get("/api/tags/exercise/1")
       .end(function (err, res) {
@@ -13,7 +13,7 @@ describe("Snippet Controller", function () {
         done();
       });
   });
-  it("getAllTags", function (done) {
+  it("# GET ALL TAGS", function (done) {
     supertest(sails.hooks.http.app)
       .get("/api/tags/all")
       .end(function (err, res) {

@@ -145,7 +145,7 @@ module.exports = {
         dateOfBirth :  moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'),
         password : data['password'],
         secret : secret,
-        isLoginLocal : 1
+        isLoginLocal : true
       }
 
       //validate -username - email 
