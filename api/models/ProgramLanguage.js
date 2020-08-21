@@ -1,5 +1,5 @@
 module.exports = {
-  tableName: "ProgramLanguage",
+  tableName: "ProgramingLanguage",
   attributes: {
     name: { type: "string" },
     code: { type: "number", description: "code map to Judge0, ex: Java: 62" },
