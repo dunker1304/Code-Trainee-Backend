@@ -37,6 +37,8 @@ module.exports.routes = {
   // ExerciseController
   "get /api/exercise": "ExerciseController.getExerciseById",
   "post /api/submissions": "ExerciseController.submitExercise",
+  "post /api/exercise/save-code": "ExerciseController.saveCode",
+  "get /api/exercise/temp-code": "ExerciseController.getTempCode",
   "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise/random": "ExerciseController.getRandom",
