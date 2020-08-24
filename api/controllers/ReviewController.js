@@ -124,7 +124,6 @@ module.exports = {
     try {
       let { exerciseId } = req.params;
       let { userId } = req.query;
-      console.log(exerciseId)
       if (
         !exerciseId ||
         exerciseId === "" ||
@@ -178,12 +177,12 @@ module.exports = {
       );
       let codeSnippets = await Promise.all(mappingSnippetPromises);
       exerciseInfos.codeSnippets = [...codeSnippets].filter((t) => t.isActive);
-      return res.json({
+       res.json({
         success: true,
         data: { ...exerciseInfos },
       });
     } catch (e) {
-      return res.json({
+       res.json({
         success: false,
         code: 500,
       });
@@ -341,7 +340,7 @@ module.exports = {
 
   selfReview: async (req, res) => {
     try {
-      await sails.getDatastore('test').transaction(async (db) => {
+      await sails.getDatastore().transaction(async (db) => {
         let { comment, isAccepted, exerciseId, userId } = req.body;
         if (
           !exerciseId ||
@@ -389,9 +388,8 @@ module.exports = {
           sort: "createdAt DESC",
         })
           .limit(1)
-         .usingConnection(db);
+          .usingConnection(db);
         requestReview = requestReview[0];
-        console.log(requestReview)
         if (requestReview && requestReview.isAccepted === "waiting") {
           await RequestReview.updateOne({
             id: requestReview.id,
