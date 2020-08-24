@@ -61,7 +61,7 @@ module.exports.datastores = {
     port: "3306",
     user: "root",
     password: "",
-    database: "CodeTrainee_TEST",
-    timezone: "asia/Ho_Chi_Minh",
+    database: "CodeTrainee_TESTDATA",
+    timezone: "utc",
   }
 };

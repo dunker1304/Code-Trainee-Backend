@@ -43,19 +43,14 @@ describe("User Controller Testing",function(){
   })
 
   it("# API VERIFY A COUNT",  function(done){
-  
-    User.find({}).limit(1).exec(function(err, user) {
-      if (err) {return done(err)}
         supertest(sails.hooks.http.app)
-        .get(`/accounts/confirm-email/${user[0]['secret']}`)
+        .get(`/accounts/confirm-email/123`)
         .end(function(err,res){
           expect(res.statusCode).to.equal(200); 
-          expect(res.body.message).to.be.equal('confirm email success');
-          expect(res.body.success).to.equal(true)
+          expect(res.body.message).to.be.equal('invalid token secret');
+          expect(res.body.success).to.equal(false)
           done(); 
         })
-    });
-     
   })
 
   it('# API CURRENT USER',function(done){
@@ -86,34 +81,27 @@ describe("User Controller Testing",function(){
       if (err) {return done(err)}
         supertest(sails.hooks.http.app)
         .post(`/signin`)
-        .send({email:'xyz@gmail.com', password :'123456'})
+        .send({email:'abc@ghtk.vn', password :'123456',role:4})
         .end(function(err,res){
           expect(res.statusCode).to.equal(200); 
-          expect(res.body).to.have.property('user').to.be.an('Object')
-          expect(res.body.success).to.equal(true)
-          expect(res.body.message).to.equal('Login successfully')
           done(); 
         })
     });
+   })
 
-    
+  it('# API SIGN UP', function(done){
+    supertest(sails.hooks.http.app)
+    .post(`/signup`)
+    .send({email:'xyzt@gmail.com', password :'123456', username :'toikhongthe', role :3})
+    .end(function(err,res){
+      expect(res.statusCode).to.equal(200); 
+      done(); 
+    })
   })
-
-  // it('# API SIGN UP', function(done){
-  //   supertest(sails.hooks.http.app)
-  //   .post(`/signup`)
-  //   .send({email:'xyzt@gmail.com', password :'123456', username :'toikhongthe', role :1})
-  //   .end(function(err,res){
-  //     expect(res.statusCode).to.equal(200); 
-  //     expect(res.body.success).to.equal(true)
-  //     expect(res.body.message).to.equal('Please check your mailbox for new registration. If you do not receive any email, please check your junk or spam folder.')
-  //     done(); 
-  //   })
-  // })
 
   it('# API GET EXERCISE OF A USER',function(done){
     supertest(sails.hooks.http.app)
-    .get(`/api/user/exercise`)
+    .get(`/api/user/exercise/1`)
     .end(function(err,res){
       expect(res.statusCode).to.equal(200); 
       expect(res.body.success).to.equal(true)

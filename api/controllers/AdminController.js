@@ -141,11 +141,11 @@ module.exports = {
         username : username,
         displayName : displayName,
         email : email ,
-        phone : phone,
-        dateOfBirth :  moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'),
+        phone : phone ? phone : '',
+        dateOfBirth :  dateOfBirth ? moment(dateOfBirth,'DD-MM-YYYY').format('YYYY-MM-DD'): null,
         password : data['password'],
         secret : secret,
-        isLoginLocal : 1
+        isLoginLocal : true
       }
 
       //validate -username - email 

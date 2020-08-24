@@ -60,35 +60,24 @@ describe("Snippet Controller", function () {
 
 
   it("# getSnippetCode", function (done) {
-    CodeSnippet.find({}).limit(1).exec((err, snippet) => {
-      if (err) return done(err);
       supertest(sails.hooks.http.app)
-        .get("/api/snippet-code")
-        .send({ userID: 1, exerciseID: 1, languageID: 1 })
+        .get`/api/snippet-code?exerciseID=1&languageID=1`
         .end(function (err, res) {
           expect(res.statusCode).to.equal(200);
-          expect(res.body).to.be.an("Object");
-          expect(res.body.success).to.equal(true);
-          expect(res.body.data).to.be.an("Object");
           done();
         });
-    })
   })
 
-  it('# UPDATE OR CREATE SNIPPET', done => {
-    CodeSnippet.find({}).limit(1).exec((err, code) => {
-      if (err) return done(err);
-      supertest(sails.hooks.http.app)
-      .post('/api/snippet/update')
-      .send({
-        supportedLanguages: [{ languageId: 1, sampleCode: "asdas", isActive: true}],
-        exerciseId: 1
-      })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
-  })
+  it('# UPDATE OR CREATE SNIPPET', async() => {
 
+    let language = await ProgramLanguage.find({}).limit(1);
+    let exercise = await Exercise.find({}).limit(1)
+    let res = await supertest(sails.hooks.http.app)
+    .post('/api/snippet/update')
+    .send({
+      supportedLanguages: [{ languageId: language[0]['id'], sampleCode: "asdas", isActive: true}],
+      exerciseId: exercise[0]['id']
+    })
+    expect(res.body.success).to.equal(true)
+    })
 });

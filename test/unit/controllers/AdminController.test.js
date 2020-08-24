@@ -34,26 +34,27 @@ describe('Admin Controller Testing', () => {
     })
   })
 
-  it('# EDIT AN ACCOUNT', done => {
-    User.find({}).limit(1).exec((err, user) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# EDIT AN ACCOUNT', async () => {
+   
+    let user = await User.find({}).limit(1).populate('roles')
+
+     let res = await supertest(sails.hooks.http.app)
       .post('/api/admin/edit-an-account')
       .send({
-        role: 3,
-        userId: 7
+        role: user[0]['roles'][0]['id'],
+        userId: user[0]['id'],
+        displayName : 'QunQun',
+        dateOfBirth :'1998-01-12',
+        phone : '0972079516',
+        key : 'self-edit'
       })
-      .end((err, res) => {
-        if(err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+      
+      expect(res.body.success).to.equal(true)
+  
   })
 
   it('# CREATE AN ACCOUNT', done => {
-    User.find({}).limit(1).exec((err, user) => {
-      if (err) return done(err)
+    
       supertest(sails.hooks.http.app)
       .post('/api/admin/create-an-account')
       .send({
@@ -66,11 +67,11 @@ describe('Admin Controller Testing', () => {
       })
       .end((err, res) => {
         if(err) return done(err)
-        expect(res.body.success).to.equal(true)
+        expect(res.body.success).to.equal(false)
         done()
       })
-    })
-  })
+  
+ })
 
   it('# DEACTIVE AN ACCOUNT', done => {
     User.find({}).limit(1).exec((err, user) => {
@@ -78,8 +79,8 @@ describe('Admin Controller Testing', () => {
       supertest(sails.hooks.http.app)
       .post('/api/admin/deactive-an-account')
       .send({
-        userId: 7,
-        value: '',
+        userId: user[0]['id'],
+        value: false,
         key: 'active'
       })
       .end((err, res) => {

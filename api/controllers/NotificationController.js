@@ -57,7 +57,7 @@ module.exports = {
       let { notificationId } = req.body
      // let userId = req.user ? req.user['id']: 5;
      let userId= req.body.userId;
-      let updated  = await Notification.update({id : notificationId , receiver : userId}).set({isDeleted : true})
+      let updated  = await Notification.update({id : notificationId , receiver : userId}).set({isDeleted : true}).fetch()
 
       return res.send({
         success  : true ,

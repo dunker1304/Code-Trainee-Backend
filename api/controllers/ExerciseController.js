@@ -954,6 +954,9 @@ module.exports = {
           name: ele["exerciseId"]["title"],
           language: ele["programLanguageId"]["name"],
           status: ele["status"],
+          id : ele['id'],
+          index : index + 1,
+          exerciseId :  ele["exerciseId"]['id']
         };
 
         result.push(item);
@@ -1120,9 +1123,7 @@ module.exports = {
   // get all submission_quynhkt
   getAllSubmission: async (req, res) => {
     try {
-      sails.sockets.broadcast("artsAndEntertainment", "foo", {
-        greeting: "Hola!",
-      });
+     
       let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
@@ -1134,14 +1135,16 @@ module.exports = {
         where: { userId: userId, isFinished: 1 },
       });
       let result = [];
-      listSubmission.forEach((ele) => {
+      listSubmission.forEach((ele,index) => {
         let item = {
           id: ele["id"],
+          index : index + 1,
           time: moment(ele["createdAt"]).format("YYYY-MM-DD"),
           exercise: ele["exerciseId"]["title"],
           status: ele["status"],
           runtime: ele["timeNeeded"],
           language: ele["programLanguageId"]["name"],
+          exerciseId : ele["exerciseId"]["id"]
         };
         result.push(item);
       });
@@ -1169,11 +1172,6 @@ module.exports = {
   //get submission by Id
   getSubmissionById: async (req, res) => {
     try {
-      console.log(
-        await sails.sockets.broadcast("artsAndEntertainment", "foo", {
-          greeting: "Hola!",
-        })
-      );
       let subId = req.params.subId;
 
       //if teacher -> get submission if your exercise theirr created
@@ -1181,6 +1179,14 @@ module.exports = {
         .populate("programLanguageId")
         .populate("exerciseId");
       let result = {};
+
+      if(!sub) {
+        return res.send({
+          success: false,
+          message: 'Not Found Data',
+          data: null,
+        });
+      }
       if (sub) {
         result = {
           id: sub["id"],

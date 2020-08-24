@@ -177,12 +177,12 @@ module.exports = {
       );
       let codeSnippets = await Promise.all(mappingSnippetPromises);
       exerciseInfos.codeSnippets = [...codeSnippets].filter((t) => t.isActive);
-      res.json({
+       res.json({
         success: true,
         data: { ...exerciseInfos },
       });
     } catch (e) {
-      res.json({
+       res.json({
         success: false,
         code: 500,
       });

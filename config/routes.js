@@ -106,7 +106,6 @@ module.exports.routes = {
   "post /api/notification/push": "NotificationController.pushNotification",
 
   // ReviewControlelr
-  "post /api/review/request": "ReviewController.requestReview",
   "post /api/review": "ReviewController.review",
   "post /api/self-review": "ReviewController.selfReview",
   "get /api/review/request/:requestId": "ReviewController.getRequestReview",

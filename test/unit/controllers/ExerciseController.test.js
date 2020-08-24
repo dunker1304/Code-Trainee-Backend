@@ -1,5 +1,8 @@
 var supertest = require('supertest')
 const { expect } = require('chai');
+const JWT = require('jsonwebtoken');
+const ExerciseComponent = require('../../../api/components/ExerciseComponent');
+const CONSTANTS = require('../../../config/custom').custom
 
 describe('Exercise Controller Testing', () => {
 
@@ -49,16 +52,13 @@ describe('Exercise Controller Testing', () => {
   // })
 
   it('# GET EXERCISE BY ID', (done) => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+    supertest(sails.hooks.http.app)
       .get('/api/exercise?id=1')
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
-        expect(res.body.total).to.equal(1)
+        expect(res.body.total).to.be.an('Number')
         done()
       })
-    })
   })
 
   it('# POST SUBMISSION', (done) => {
@@ -71,18 +71,16 @@ describe('Exercise Controller Testing', () => {
         source_code: `console.log('a')`,
         stdin: '1',
         expected_output: 'a',
-        question_id: 1
+        question_id: exercise[0]['id']
       })
       .end((err, res) => {
-        //expect(res.body[0].success).to.equal(true)
+        expect(res.body).to.be.an('Array')
         done()
       })
     })
   })
 
   it('# GET ALL SUBMISSION BY USER', done => {
-    TrainingHistory.find({}).limit(1).exec((err, submissions) => {
-      if (err) return done(err)
       supertest(sails.hooks.http.app)
       .get('/api/submissions/all?userID=1&exerciseID=1')
       .end((err, res) => {
@@ -90,13 +88,13 @@ describe('Exercise Controller Testing', () => {
         done()
       })
 
-    })
   })
 
-  it('# SUBMIT SOLUTION', done => {
-    TrainingHistory.find({}).limit(1).exec((err, history) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# SUBMIT SOLUTION', async () => {
+
+    let user = await User.find({}).limit(1);
+    let programLanguage = await ProgramLanguage.find({}).limit(1)
+    let res = await supertest(sails.hooks.http.app)
       .post('/api/solution')
       .send({
         question: {
@@ -134,98 +132,95 @@ describe('Exercise Controller Testing', () => {
           } },
         ],
         answer: 'azsdasd',
-        language: 2,
-        userID: 3
+        language: programLanguage[0]['id'],
+        userID: user[0]['id']
       })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+      expect(res.body.success).to.equal(true)
   })
 
   it('# GET RANDOM EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if(err) return done(err)
       supertest(sails.hooks.http.app)
       .get('/api/exercise/random')
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
         done()
       })
-    })
   })
 
   it('# GET INFO EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
+    Exercise.find({isDeleted : 0}).limit(1).exec((err, exercise) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/exercise/basic-info/1')
+      .get(`/api/exercise/basic-info/${exercise[0]['id']}`)
       .end((err, res) => {
+        console.log(res.body)
         expect(res.body.success).to.equal(true)
         done()
       })
     })
   })
 
-  it('# CREATE EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# CREATE EXERCISE', async() => {
+     let user = await User.find({}).limit(4);
+     let language = await ProgramLanguage.find({}).limit(1)
+      let res = await supertest(sails.hooks.http.app)
       .post('/api/exercise/create')
       .send({
         content: 'test exercise',
         title: 'title test',
         points: 50,
         level: 'easy',
-        tags: []
+        tags: ['#'],
+        languages : [ { id : language[0]['id'], sampleCode : '', isActive : true}],
+        reviewerIds : [user[0]['id'],user[1]['id'],user[2]['id']],
+        createdBy : user[3]['id'],
+        testcases :[]
+
       })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+      expect(res.body.success).to.equal(true)
   })
 
-  it('# UPDATE EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# UPDATE EXERCISE', async() => {
+    let exercise = await Exercise.find({}).limit(1);
+    let user = await User.find({}).limit(4);
+    let language = await ProgramLanguage.find({}).limit(1)
+
+     let res = await supertest(sails.hooks.http.app)
       .post('/api/exercise/update')
       .send({
-        id: 1,
+        id: exercise[0]['id'],
         content: 'update content',
         title: 'title test',
         points: 50,
         level: 'easy',
-        tags: []
+        tags: [],
+        content: 'test exercise',
+        languages : [ { id : language[0]['id'], sampleCode : '', isActive : true}],
+        reviewerIds : [user[0]['id'],user[1]['id'],user[2]['id']],
+        createdBy : user[3]['id'],
+        testcases :['#']
+      
       })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+      expect(res.body.success).to.equal(true)
+    
   })
 
-  it('# GET BY OWNER', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .get('/api/exercise/owner/3')
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+  it('# GET BY OWNER', async() => {
+    let user = await User.find({}).limit(1);
+    let res = await supertest(sails.hooks.http.app)
+      .get(`/api/exercise/owner/${user[0]['id']}`)
+    
+    expect(res.body.success).to.equal(true)  
+  
   })
 
-  it('# DELETE EXERCISE', done => {
+  it('# DELETE EXERCISE', (done) => {
     Exercise.find({}).limit(1).exec((err, exercise) => {
       if(err) return done(err)
       supertest(sails.hooks.http.app)
       .post('/api/exercise/delete')
       .send({
-        id: 10
+        id: exercise[0]['id']
       })
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
@@ -235,15 +230,13 @@ describe('Exercise Controller Testing', () => {
   })
 
   it ('# GET APPROVE EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
       supertest(sails.hooks.http.app)
       .get('/api/exercise/approve')
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
         done()
       })
-    })
+   
   })
 
   it('# UPDATE EXERCISE NEED APPROVE', done => {
@@ -252,7 +245,7 @@ describe('Exercise Controller Testing', () => {
       supertest(sails.hooks.http.app)
       .post('/api/exercise/approve/update')
       .send({
-        id: 10
+        id: exercise[0]['id']
       })
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
@@ -261,139 +254,72 @@ describe('Exercise Controller Testing', () => {
     })
   })
 
-  it('# GET VOTE EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .post('/api/exercise/vote')
-      .send({
-        userID: 7,
-        questionID: 1
-      })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+  it('# GET VOTE EXERCISE', async () => {
+      let user = await User.find({}).limit(1);
+      let exercise = await Exercise.find({}).limit(1);
+      let res = await supertest(sails.hooks.http.app)
+      .get(`/api/exercise/vote?userID=${ user[0]['id']}&questionID=${exercise[0]['id']}`)
+      expect(res.body.success).to.equal(true)
+   
   })
 
-  it('# REACT EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# REACT EXERCISE', async () => {
+      let user = await User.find({}).limit(1);
+      let exercise = await Exercise.find({}).limit(1);
+      let res = await supertest(sails.hooks.http.app)
       .post('/api/exercise/react')
       .send({
-        userID: 7,
-        exerciseID: 1,
+        userID: user[0]['id'],
+        exerciseID: exercise[0]['id'],
         status: 'like'
       })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
   })
 
-  it('# REACT EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .post('/api/exercise/react')
-      .send({
-        userID: 7,
-        exerciseID: 1,
-        status: 'dislike'
-      })
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
-  })
-
-  it('# GET VOTE EXERCISE', done => {
-    ExerciseVote.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .get('/api/exercise/vote?userID=9&questionID=1')
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
-  })
-
-  it('# REACT EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .post('/api/exercise/react')
-      .send({
-        userID: 9,
-        exerciseID: 1,
-        status: 1
-      })
-      end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
-  })
-
-  it('# GET EXERCISE TO REVIEW', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .get('/api/exercise/review/3')
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
-  })
 
   it('# SEARCH EXERCISE', done => {
-    Exercise.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
+    
       supertest(sails.hooks.http.app)
       .post('/api/search-exercise')
       .send({
         limit: 20,
         page: 1,
         userId: 1,
-        level: 'easy',
       })
       .end((err, res) => {
         if (err) return done(err)
         expect(res.body.success).to.equal(true)
         done()
       })
-    })
   })
 
-  it('# ADD WISH LIST', done => {
-    WishList.find({}).limit(1).exec((err, exercise) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# ADD WISH LIST', async () => {
+
+    let user = await User.find({}).limit(1);
+    let question = await Exercise.find({}).limit(1);
+
+    let token = 
+    JWT.sign({
+      iss: 'CodeTrainee',
+      sub: user[0].id,
+      iat: new Date().getTime(), // current time
+      exp: new Date().setDate(new Date().getDate() + 1) // current time + 1 day ahead
+    }, CONSTANTS.JWT_SECRET);
+
+
+     let res = await supertest(sails.hooks.http.app)
       .post('/api/add-wishList')
+      .set('Authorization', 'Bearer ' + token)
       .send({
-        userId: 7,
-        questionId: 21,
+        userId: user[0]['id'],
+        questionId: question[0]['id'],
       })
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
   })
 
   it('# GET TAG', done => {
-    Tag.find({}).limit(1).exec((err, tag) => {
-      if (err) return done(err)
       supertest(sails.hooks.http.app)
       .get('/api/get-tag')
       .end((err, res) => {
@@ -401,69 +327,86 @@ describe('Exercise Controller Testing', () => {
         expect(res.body.success).to.equal(true)
         done()
       })
-    })
   })
 
-  it('# REMOVE WISH LIST', done => {
-    WishList.find({}).limit(1).exec((err, wishlist) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# REMOVE WISH LIST', async () => {
+      let exercise = await Exercise.find({}).limit(1);
+      let user = await User.find({}).limit(1);
+
+      let token = 
+      JWT.sign({
+        iss: 'CodeTrainee',
+        sub: user[0].id,
+        iat: new Date().getTime(), // current time
+        exp: new Date().setDate(new Date().getDate() + 1) // current time + 1 day ahead
+      }, CONSTANTS.JWT_SECRET);
+
+      let res = await supertest(sails.hooks.http.app)
       .post('/api/remove-wishList')
+      .set('Authorization', 'Bearer ' + token)
       .send({
-        exerciseId: 1,
+        exerciseId: exercise[0]['id'],
       })
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
+  
   })
 
-  it('# GET SUBMISSION BY USER ID', done => {
-    TrainingHistory.find({}).limit(1).exec((err, history) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .get('/api/get-activity-calendar/7')
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+  it('# GET SUBMISSION BY USER ID', async() => {
+      let user = await User.find({}).limit(1);
+      let res = await supertest(sails.hooks.http.app)
+      .get(`/api/get-activity-calendar/${user[0]['id']}`)
+
+      expect(res.body.success).to.equal(true)
+    
   })
 
-  it('# GET MOST RECENT SUBMISSION', done => {
-    TrainingHistory.find({}).limit(1).exec((err, history) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
-      .get('/api/get-most-recent-sub/7')
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+  it('# GET MOST RECENT SUBMISSION', async () => {
+    let user = await User.find({}).limit(1);
+    let res = await supertest(sails.hooks.http.app)
+      .get(`/api/get-most-recent-sub/${user[0]['id']}`)
+    expect(res.body.success).to.equal(true)
+   
   })
 
-  it('# GET WISH LIST', done => {
-    WishList.find({}).limit(1).exec((err, wishlist) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# GET WISH LIST', async () => {
+      let user = await User.find({}).limit(1);
+
+      let token = 
+      JWT.sign({
+        iss: 'CodeTrainee',
+        sub: user[0].id,
+        iat: new Date().getTime(), // current time
+        exp: new Date().setDate(new Date().getDate() + 1) // current time + 1 day ahead
+      }, CONSTANTS.JWT_SECRET);
+
+      let res = await supertest(sails.hooks.http.app)
       .get('/api/wish-list')
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+      .set('Authorization', 'Bearer ' + token)
+
+      expect(res.body.success).to.equal(true)
+    
   })
 
   it('# GET SUBMISSION BY ID', done => {
-    Transaction.find({}).limit(1).exec((err, history) => {
+    TrainingHistory.find({}).limit(1).exec((err, history) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/submission/7')
+      .get(`/api/submission/${history[0]['id']}`)
+      .end((err, res) => {
+        if (err) return done(err)
+        expect(res.body.success).to.equal(true)
+        done()
+      })
+    })
+  })
+
+  it('# GET STATISTICS OF AN EXERCISE', done => {
+    Exercise.find({isDeleted : 0}).limit(1).exec((err, exe) => {
+      if (err) return done(err)
+      supertest(sails.hooks.http.app)
+      .post(`/api/exercise/statistic`)
+      .send({exerciseId :exe[0]['id'] })
       .end((err, res) => {
         if (err) return done(err)
         expect(res.body.success).to.equal(true)

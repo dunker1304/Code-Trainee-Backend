@@ -10,7 +10,6 @@ module.exports = {
     let { questionId , content , parentId , title } = req.body 
     let userId = req.user && req.user['id'] ?  req.user['id']  : 5
 
-
     //validate comment
     let validateComment = CommentComponent.validateAComment({content,title})
 
@@ -37,7 +36,7 @@ module.exports = {
     //send notification
     if(parentId == -1) {
 
-      let sql = `select DISTINCT sender_id from Comment where parent_id = -1 and exercise_id = ${questionInfo['id']}`
+      let sql = `select DISTINCT sender_id from Comment where parent_id = -1 and exercise_id = ${questionInfo['id']} and sender_id != ${userId}`
       let receivers = await sails.sendNativeQuery(sql);
       
       if(receivers && receivers['rows']) {
@@ -163,10 +162,21 @@ module.exports = {
          sortText = 'ASC'
       }
       let listComment = await Comment.find({ where : { exerciseId : questionId , parentId : -1 , isDeleted : 0} , 
-        skip: (page -1) * 2,
+        skip: (page -1) * 20,
         limit: 20,
         sort: `createdAt ${sortText}` }).populate('senderId')
 
+
+       if(!listComment || listComment.length == 0) {
+          return res.send({
+            success : false,
+            data : {
+              comments :0,
+              total : 0
+            },
+            message: 'Not Found Data!'
+          })
+       }
     
         for(let i= 0 ;i< listComment.length ; i++){
            let totalReply = await Comment.count({where : { parentId : listComment[i]['id'], isDeleted : 0}})
@@ -174,12 +184,14 @@ module.exports = {
         }
 
         let totalCmts = await Comment.count({ where : { exerciseId : questionId , parentId : -1 , isDeleted : 0}} )
-
+        
+        let number = totalCmts%20 == 0 ? totalCmts/20 : Math.floor(totalCmts/20)+1
         return res.send({
           success : true,
           data : {
             comments :listComment,
-            total : totalCmts
+            total : totalCmts,
+            totalPage :number
           }
         })
     } catch (error) {
@@ -203,7 +215,16 @@ module.exports = {
       let userId = req.user && req.user['id'] ? req.user['id'] : null
       let comment = await Comment.findOne({where : { id : commentId }}).populate('senderId')
 
+      if(!comment){
+        return res.send({
+          success : false ,
+          data : null, 
+          message : 'Not Found Data!'
+        })
+      }
+ 
       let commentVoted = await CommentVote.findOne({where : { commentId : comment['id'], userId : userId}})
+     
       if(commentVoted) {
         comment['statusVote'] = commentVoted['statusVote']
         console.log(comment)
