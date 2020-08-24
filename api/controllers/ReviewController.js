@@ -8,7 +8,7 @@ module.exports = {
         where: {
           exerciseId: exerciseId,
         },
-        sort: "updatedAt DESC",
+        sort: "createdAt DESC",
       })
         .limit(1)
         .populate("details");
@@ -28,6 +28,18 @@ module.exports = {
   getRequestReview: async (req, res) => {
     try {
       let { requestId } = req.params;
+      let { userId } = req.query;
+      if (
+        !requestId ||
+        requestId === "" ||
+        (requestId !== undefined && Number.isNaN(Number(requestId)))
+      ) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
       let requestReview = await RequestReview.findOne({
         id: requestId,
         isAccepted: "waiting",
@@ -35,33 +47,63 @@ module.exports = {
       if (requestReview) {
         let exerciseInfos = await Exercise.findOne({
           id: requestReview.exerciseId,
+          isDeleted: false,
         })
           .populate("tags")
           .populate("testCases")
           .populate("codeSnippets");
-        exerciseInfos.createdAt = moment(
-          new Date(exerciseInfos.createdAt).toISOString()
-        ).format();
-        exerciseInfos.updatedAt = moment(
-          new Date(exerciseInfos.updatedAt).toISOString()
-        ).format();
-        let mappingPromises = [...exerciseInfos.codeSnippets].map(async (t) => {
-          let lang = await ProgramLanguage.findOne({ id: t.programLanguageId });
-          return {
-            sampleCode: t.sampleCode,
-            languageName: lang.name,
-            id: t.id,
-            isActive: t.isActive,
-          };
-        });
-        let codeSnippets = await Promise.all(mappingPromises);
-        exerciseInfos.codeSnippets = [...codeSnippets].filter(
-          (t) => t.isActive
-        );
-        res.json({
-          success: true,
-          data: { ...requestReview, exerciseInfos: exerciseInfos },
-        });
+        if (exerciseInfos) {
+          let detail = await DetailReview.findOne({
+            requestId: requestReview.id,
+            reviewer: userId,
+          });
+          if (!detail) {
+            res.json({
+              success: false,
+              code: 403,
+            });
+            return;
+          }
+          if (detail.isAccepted !== "waiting") {
+            res.json({
+              success: false,
+              code: 404,
+            });
+            return;
+          }
+          exerciseInfos.createdAt = moment(
+            new Date(exerciseInfos.createdAt).toISOString()
+          ).format();
+          exerciseInfos.updatedAt = moment(
+            new Date(exerciseInfos.updatedAt).toISOString()
+          ).format();
+          let mappingPromises = [...exerciseInfos.codeSnippets].map(
+            async (t) => {
+              let lang = await ProgramLanguage.findOne({
+                id: t.programLanguageId,
+              });
+              return {
+                sampleCode: t.sampleCode,
+                languageName: lang.name,
+                id: t.id,
+                isActive: t.isActive,
+              };
+            }
+          );
+          let codeSnippets = await Promise.all(mappingPromises);
+          exerciseInfos.codeSnippets = [...codeSnippets].filter(
+            (t) => t.isActive
+          );
+          res.json({
+            success: true,
+            data: { ...requestReview, exerciseInfos: exerciseInfos },
+          });
+        } else {
+          res.json({
+            success: false,
+            code: 404,
+          });
+        }
       } else {
         res.json({
           success: false,
@@ -77,38 +119,71 @@ module.exports = {
     }
   },
 
+  // get infor exercise to self-review
   getExerciseReview: async (req, res) => {
     try {
       let { exerciseId } = req.params;
+      let { userId } = req.query;
+      console.log(exerciseId)
+      if (
+        !exerciseId ||
+        exerciseId === "" ||
+        (exerciseId !== undefined && Number.isNaN(Number(exerciseId)))
+      ) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
       let exerciseInfos = await Exercise.findOne({
         id: exerciseId,
+        isDeleted: false,
+        isApproved: "waiting",
       })
         .populate("tags")
         .populate("testCases")
         .populate("codeSnippets");
+      if (!exerciseInfos) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
+      console.log({ userId: userId, createdBy: exerciseInfos.createdBy });
+      if (exerciseInfos.createdBy !== Number(userId)) {
+        res.json({
+          success: false,
+          code: 403,
+        });
+        return;
+      }
       exerciseInfos.createdAt = moment(
         new Date(exerciseInfos.createdAt).toISOString()
       ).format();
       exerciseInfos.updatedAt = moment(
         new Date(exerciseInfos.updatedAt).toISOString()
       ).format();
-      let mappingPromises = [...exerciseInfos.codeSnippets].map(async (t) => {
-        let lang = await ProgramLanguage.findOne({ id: t.programLanguageId });
-        return {
-          sampleCode: t.sampleCode,
-          languageName: lang.name,
-          id: t.id,
-          isActive: t.isActive,
-        };
-      });
-      let codeSnippets = await Promise.all(mappingPromises);
+      let mappingSnippetPromises = [...exerciseInfos.codeSnippets].map(
+        async (t) => {
+          let lang = await ProgramLanguage.findOne({ id: t.programLanguageId });
+          return {
+            sampleCode: t.sampleCode,
+            languageName: lang.name,
+            id: t.id,
+            isActive: t.isActive,
+          };
+        }
+      );
+      let codeSnippets = await Promise.all(mappingSnippetPromises);
       exerciseInfos.codeSnippets = [...codeSnippets].filter((t) => t.isActive);
-      res.json({
+      return res.json({
         success: true,
         data: { ...exerciseInfos },
       });
     } catch (e) {
-      res.json({
+      return res.json({
         success: false,
         code: 500,
       });
@@ -119,67 +194,112 @@ module.exports = {
   review: async (req, res) => {
     try {
       await sails.getDatastore().transaction(async (db) => {
-        let { comment, isAccepted, exerciseId, userId, requestId } = req.body;
-        // mean self-review
-        if (!!exerciseId) {
-          let requestReview = await RequestReview.find({
-            where: {
-              exerciseId: exerciseId,
-            },
-            sort: "updatedAt DESC",
-          })
-            .limit(1)
-            .usingConnection(db);
-            console.log(requestReview)
-          await RequestReview.updateOne({
-            id: requestReview.id,
-          })
-            .set({
-              isAccepted: isAccepted ? "accepted" : "rejected",
-            })
-            .usingConnection(db);
-          await Exercise.updateOne({
-            id: exerciseId,
-          })
-            .set({
-              isApproved: isAccepted ? "accepted" : "rejected",
-            })
-            .usingConnection(db);
+        let { comment, isAccepted, userId, requestId } = req.body;
+        if (
+          !requestId ||
+          requestId === "" ||
+          (requestId !== undefined && Number.isNaN(Number(requestId)))
+        ) {
           res.json({
-            success: true,
+            success: false,
+            code: 0,
+            data: { message: "not found" },
           });
-        } else {
-          let requestReview = await RequestReview.findOne({
-            id: requestId,
+          return;
+        }
+        let requestReview = await RequestReview.findOne({
+          id: requestId,
+        })
+          .populate("details")
+          .usingConnection(db);
+        if (!requestReview) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        let exercise = await Exercise.findOne({
+          id: requestReview.exerciseId,
+        });
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.isDeleted) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "exercise was deleted" },
+          });
+          return;
+        }
+        if (requestReview.isAccepted !== "waiting") {
+          res.json({
+            success: false,
+            code: 1,
+            data: {
+              message: "already self-reviewed",
+              isAccepted: requestReview.isAccepted,
+            },
+          });
+          return;
+        }
+        let isAuthorize =
+          requestReview.details.filter(
+            (t) => Number(t.reviewer) === Number(userId)
+          ).length === 0
+            ? false
+            : true;
+        if (!isAuthorize) {
+          res.json({
+            success: false,
+            code: 2,
+            data: { message: "not authorized" },
+          });
+          return;
+        }
+        let numberReviewers = requestReview.details.length;
+        await DetailReview.updateOne({
+          requestId: requestId,
+          reviewer: userId,
+        })
+          .set({
+            comment: comment,
+            isAccepted: isAccepted ? "accepted" : "rejected",
           })
-            .populate("details")
-            .usingConnection(db);
-          let numberReviewers = requestReview.details.length;
-          await DetailReview.updateOne({
-            requestId: requestId,
-            reviewer: userId,
-          })
-            .set({
-              comment: comment,
-              isAccepted: isAccepted ? "accepted" : "rejected",
-            })
-            .usingConnection(db);
-          let stillWaitingReview = await DetailReview.find({
-            requestId: requestId,
-            isAccepted: "waiting",
-          }).usingConnection(db);
+          .usingConnection(db);
+        let reviewedBy = await User.findOne({ id: userId });
+        await Notification.create({
+          content: `<a href='#'>${exercise.title}</a> have been reviewed by <a href='/profile/${userId}'>${reviewedBy.displayName}</a> (${reviewedBy.email}).`,
+          linkAction: ``,
+          receiver: exercise.createdBy,
+          type: 3,
+        }).usingConnection(db);
+        let stillWaitingReview = await DetailReview.find({
+          requestId: requestId,
+          isAccepted: "waiting",
+        }).usingConnection(db);
+        // check if exercise is self-reviewed or not
+        if (requestReview.isAccepted === "waiting") {
           // if everyone reviewed
           if (stillWaitingReview.length === 0) {
-            let acceptedReview = await DetailReview.find({
+            let rejectedReview = await DetailReview.find({
               requestId: requestId,
-              isAccepted: "accepted",
+              isAccepted: "rejected",
             }).usingConnection(db);
-            if (acceptedReview.length === numberReviewers) {
+            if (rejectedReview.length === 0) {
               await RequestReview.updateOne({
                 id: requestReview.id,
               })
                 .set({
                   isAccepted: "accepted",
+                  isSelfReview: false,
                 })
                 .usingConnection(db);
               await Exercise.updateOne({
@@ -195,6 +315,7 @@ module.exports = {
               })
                 .set({
                   isAccepted: "rejected",
+                  isSelfReview: false,
                 })
                 .usingConnection(db);
               await Exercise.updateOne({
@@ -206,7 +327,101 @@ module.exports = {
                 .usingConnection(db);
             }
           }
-          res.json({ success: true });
+        }
+        res.json({ success: true });
+      });
+    } catch (e) {
+      res.json({
+        success: false,
+        code: 500,
+      });
+      console.log(e);
+    }
+  },
+
+  selfReview: async (req, res) => {
+    try {
+      await sails.getDatastore('test').transaction(async (db) => {
+        let { comment, isAccepted, exerciseId, userId } = req.body;
+        if (
+          !exerciseId ||
+          exerciseId === "" ||
+          (exerciseId !== undefined && Number.isNaN(Number(exerciseId)))
+        ) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        let exercise = await Exercise.findOne({
+          id: exerciseId,
+        });
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.isDeleted) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "exercise was deleted" },
+          });
+          return;
+        }
+        if (exercise.createdBy !== Number(userId)) {
+          res.json({
+            success: false,
+            code: 2,
+            data: { message: "not authorized" },
+          });
+          return;
+        }
+        let requestReview = await RequestReview.find({
+          where: {
+            exerciseId: exerciseId,
+          },
+          sort: "createdAt DESC",
+        })
+          .limit(1)
+         .usingConnection(db);
+        requestReview = requestReview[0];
+        console.log(requestReview)
+        if (requestReview && requestReview.isAccepted === "waiting") {
+          await RequestReview.updateOne({
+            id: requestReview.id,
+          })
+            .set({
+              isAccepted: isAccepted ? "accepted" : "rejected",
+              selfComment: comment,
+              isSelfReview: true,
+            })
+            .usingConnection(db);
+          await Exercise.updateOne({
+            id: exerciseId,
+          })
+            .set({
+              isApproved: isAccepted ? "accepted" : "rejected",
+            })
+            .usingConnection(db);
+          res.json({
+            success: true,
+          });
+        } else {
+          res.json({
+            success: false,
+            code: 1,
+            data: {
+              isAccepted: requestReview.isAccepted,
+              message: "already reviewed.",
+            },
+          });
+          return;
         }
       });
     } catch (e) {

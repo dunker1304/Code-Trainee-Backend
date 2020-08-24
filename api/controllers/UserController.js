@@ -349,9 +349,19 @@ module.exports = {
         return res.send({
           success: false,
           data: {},
+          message : 'User Not Found!',
           error: CONSTANTS.NOT_FOUND_USER
         })
       }
+      let points = 0;
+
+      let sub = await TrainingHistory.find({ where : { userId : user['id'] }}).populate('exerciseId')
+        
+      sub.forEach(element => {
+        points+= element['exerciseId']['points']
+      });
+
+      user['points'] = points
 
       return res.send({
         success: true,
@@ -371,7 +381,7 @@ module.exports = {
       let userId =  req.params.userId  ? req.params.userId :null
 
       //count All exercise
-      let allExercise = await Exercise.count({ isApproved : 'accepted'});
+      let allExercise = await Exercise.count({ isApproved : 'Accepted'});
 
       //count specific level if question
       // let easyE  = await Exercise.count({level:'Easy'})
@@ -386,11 +396,11 @@ module.exports = {
       let runtimeError = 0;
       let totalSubmission = 0;
       let attempted = 0
-       userId = parseInt(req.query.userId);
+       userId = parseInt(userId);
       if(Number.isInteger(userId) ) {
 
-      let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Correct Answer\' AND user_id = ${userId}) `)
-
+      let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Accepted\' AND user_id = ${userId}) `)
+      
       rawResult['rows'].forEach(ele => {
         if (ele['level'] == 'Easy') easyE++;
         if (ele['level'] == 'Medium') mediumE++;
@@ -401,11 +411,11 @@ module.exports = {
 
       attempted = await sails.sendNativeQuery(`SELECT COUNT(DISTINCT \`exercise_id\`) AS attempted FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND user_id = ${userId}`)
 
-      acceptedSubmissions = await TrainingHistory.count({ where: { isFinished: 1, status: 'Correct Answer', userId : userId } })
+      acceptedSubmissions = await TrainingHistory.count({ where: { isFinished: 1, status: 'Accepted', userId : userId } })
 
       wrongAnswer = await TrainingHistory.count({ where: { isFinished: 1, status: 'Wrong Answer', userId : userId } })
 
-      runtimeError = await TrainingHistory.count({ where: { isFinished: 1, status: 'Runtime Error', userId : userId } })
+      runtimeError = await TrainingHistory.count({ where: { isFinished: 1, status: 'Runtime Error (NZEC)', userId : userId } })
 
       totalSubmission = await TrainingHistory.count({where: {userId : userId}})
     }
@@ -497,13 +507,17 @@ module.exports = {
 
   getAllTeachersActive: async (req, res) => {
     try {
-      let teachers = await Role.findOne({ id: 4 }).populate("users", {
+      let teacherRoles = await Role.findOne({ id: 4 }).populate("users", {
         isDeleted: false
       });
+      
+      let activeTeachers = teacherRoles.users.filter(
+        (t) => (t.isLoginLocal === 1 && t.status === 1) || t.isLoginGoogle === 1
+      );
 
       res.json({
         success: true,
-        data: teachers.users,
+        data: activeTeachers,
       });
     } catch (e) {
       res.json({

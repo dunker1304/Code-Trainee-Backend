@@ -88,7 +88,7 @@ module.exports = {
       let count = await Exercise.count();
       let exercise = await Exercise.findOne({
         id: id,
-        isApproved: 'accepted',
+        isApproved: "accepted",
         isDeleted: false,
       });
       let testCases;
@@ -263,20 +263,45 @@ module.exports = {
   getBasicInfoById: async (req, res) => {
     try {
       let { exerciseId } = req.params;
+      let { userId } = req.query;
+      if (
+        !exerciseId ||
+        exerciseId === "" ||
+        (exerciseId !== undefined && Number.isNaN(Number(exerciseId)))
+      ) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
       let exercise = await Exercise.findOne({
         id: exerciseId,
         isDeleted: false,
       }).populate("tags");
       if (!exercise) {
-        throw new Error("already deleted");
+        res.json({
+          success: false,
+          code: 404,
+        });
+      } else {
+        console.log({ createdBy: exercise.createdBy, userId });
+        if (exercise.createdBy === Number(userId)) {
+          res.json({
+            success: true,
+            data: { ...exercise },
+          });
+        } else {
+          res.json({
+            success: false,
+            code: 403,
+          });
+        }
       }
-      res.json({
-        success: true,
-        data: { ...exercise },
-      });
     } catch (e) {
       res.json({
         success: false,
+        code: 500,
       });
       console.log(e);
     }
@@ -284,11 +309,14 @@ module.exports = {
 
   getRandom: async (req, res) => {
     try {
-      let count = await Exercise.count({ isDeleted: false, isApproved: 'accepted' });
+      let count = await Exercise.count({
+        isDeleted: false,
+        isApproved: "accepted",
+      });
       let random = parseInt(Math.random() * count);
       let allExercise = await Exercise.find({
         isDeleted: false,
-        isApproved: 'accepted',
+        isApproved: "accepted",
       });
       res.send({
         success: true,
@@ -428,19 +456,32 @@ module.exports = {
         reviewerIds,
         createdBy,
       } = req.body;
-      console.log({
-        id,
-        content,
-        title,
-        points,
-        level,
-        tags,
-        testcases,
-        languages,
-        reviewerIds,
-        createdBy,
-      });
-      await sails.getDatastore('test').transaction(async (db) => {
+      await sails.getDatastore().transaction(async (db) => {
+        let exercise = await Exercise.findOne({ id: id }).usingConnection(db);
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.isDeleted) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "exercise was deleted" },
+          });
+          return;
+        }
+        if (exercise.createdBy !== Number(createdBy)) {
+          res.json({
+            success: false,
+            code: 2,
+            data: { message: "not authorized" },
+          });
+          return;
+        }
         let mappingTagPromises = [...tags].map((e) =>
           Tag.findOrCreate(
             {
@@ -455,7 +496,7 @@ module.exports = {
         let mappingTags = await Promise.all(mappingTagPromises);
         let mappingTagIds = [...mappingTags].map((e) => e.id);
         content = purifier.purify(content); // escape XSR
-        let exercise = await Exercise.updateOne({
+        await Exercise.updateOne({
           id: id,
         })
           .set({
@@ -858,6 +899,9 @@ module.exports = {
           name: ele["exerciseId"]["title"],
           language: ele["programLanguageId"]["name"],
           status: ele["status"],
+          id : ele['id'],
+          index : index + 1,
+          exerciseId :  ele["exerciseId"]['id']
         };
 
         result.push(item);
@@ -880,26 +924,26 @@ module.exports = {
     try {
       let userId = req.user["id"];
 
-      let listWishList = await WishList.find({ userId: userId }).populate(
-        "exerciseId"
-      ).populate('userId')
+      let listWishList = await WishList.find({ userId: userId })
+        .populate("exerciseId")
+        .populate("userId");
 
       //format response
-      let result  = []
-      listWishList.forEach( (ele,index) => {
+      let result = [];
+      listWishList.forEach((ele, index) => {
         let tmp = {
-          'id' : ele['id'],
-          'index' : index + 1,
-          'userId' : ele['userId'],
-          'exercise': {
-            'id' : ele['exerciseId']['id'],
-            'title' : ele['exerciseId']['title'],
-            'loc' : ele['exerciseId']['points'],
-            'author' : ele['userId']['displayName'],
-            'level' :  ele['exerciseId']['level'],
-          }
-        }
-        result.push(tmp)
+          id: ele["id"],
+          index: index + 1,
+          userId: ele["userId"],
+          exercise: {
+            id: ele["exerciseId"]["id"],
+            title: ele["exerciseId"]["title"],
+            loc: ele["exerciseId"]["points"],
+            author: ele["userId"]["displayName"],
+            level: ele["exerciseId"]["level"],
+          },
+        };
+        result.push(tmp);
       });
 
       return res.send({
@@ -926,14 +970,50 @@ module.exports = {
         },
         sort: "updatedAt DESC",
       });
-      let resutl = [...exercises].map((t) => ({
-        ...t,
-        createdAt: moment(new Date(t.createdAt).toISOString()).format(),
-        updatedAt: moment(new Date(t.updatedAt).toISOString()).format(),
-      }));
+      let resultPromises = [...exercises].map(async (t) => {
+        let lastRequestReview = (
+          await RequestReview.find({
+            where: {
+              exerciseId: t.id,
+            },
+            sort: "updatedAt DESC",
+          })
+            .limit(1)
+            .populate("details")
+        )[0];
+        if (lastRequestReview) {
+          lastRequestReview.createdAt = moment(
+            new Date(lastRequestReview.createdAt).toISOString()
+          ).format();
+          lastRequestReview.updatedAt = moment(
+            new Date(lastRequestReview.updatedAt).toISOString()
+          ).format();
+          let detailsPromises = [...lastRequestReview.details].map(
+            async (e) => {
+              let user = await User.findOne({ id: e.reviewer });
+              e.reviewer = user;
+              e.createdAt = moment(
+                new Date(e.createdAt).toISOString()
+              ).format();
+              e.updatedAt = moment(
+                new Date(e.updatedAt).toISOString()
+              ).format();
+              return e;
+            }
+          );
+          lastRequestReview.details = await Promise.all(detailsPromises);
+        }
+        return {
+          ...t,
+          createdAt: moment(new Date(t.createdAt).toISOString()).format(),
+          updatedAt: moment(new Date(t.updatedAt).toISOString()).format(),
+          lastRequestReview: lastRequestReview,
+        };
+      });
+      let result = await Promise.all(resultPromises);
       res.json({
         success: true,
-        data: resutl,
+        data: result,
       });
     } catch (e) {
       res.json({
@@ -946,17 +1026,36 @@ module.exports = {
   // delete exercise
   deleteExercise: async (req, res) => {
     try {
-      let { id } = req.body;
-      let deletedExercise = await Exercise.updateOne({
-        id: id,
-      }).set({
-        isDeleted: true,
-      });
-      res.json({
-        success: true,
-        data: {
-          id: deletedExercise.id,
-        },
+      await sails.getDatastore().transaction(async (db) => {
+        let { id, userId } = req.body;
+        let exercise = await Exercise.findOne({ id: id });
+        if (!exercise) {
+          res.json({
+            success: false,
+            code: 0,
+            data: { message: "not found" },
+          });
+          return;
+        }
+        if (exercise.createdBy !== Number(userId)) {
+          res.json({
+            success: false,
+            code: 3,
+            data: { message: "not authorized." },
+          });
+          return;
+        }
+        let deletedExercise = await Exercise.updateOne({
+          id: id,
+        }).set({
+          isDeleted: true,
+        });
+        res.json({
+          success: true,
+          data: {
+            id: deletedExercise.id,
+          },
+        });
       });
     } catch (e) {
       res.json({
@@ -969,9 +1068,7 @@ module.exports = {
   // get all submission_quynhkt
   getAllSubmission: async (req, res) => {
     try {
-      sails.sockets.broadcast("artsAndEntertainment", "foo", {
-        greeting: "Hola!",
-      });
+     
       let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
@@ -983,14 +1080,16 @@ module.exports = {
         where: { userId: userId, isFinished: 1 },
       });
       let result = [];
-      listSubmission.forEach((ele) => {
+      listSubmission.forEach((ele,index) => {
         let item = {
           id: ele["id"],
+          index : index + 1,
           time: moment(ele["createdAt"]).format("YYYY-MM-DD"),
           exercise: ele["exerciseId"]["title"],
           status: ele["status"],
           runtime: ele["timeNeeded"],
           language: ele["programLanguageId"]["name"],
+          exerciseId : ele["exerciseId"]["id"]
         };
         result.push(item);
       });
@@ -1018,11 +1117,6 @@ module.exports = {
   //get submission by Id
   getSubmissionById: async (req, res) => {
     try {
-      console.log(
-        await sails.sockets.broadcast("artsAndEntertainment", "foo", {
-          greeting: "Hola!",
-        })
-      );
       let subId = req.params.subId;
 
       //if teacher -> get submission if your exercise theirr created
@@ -1030,6 +1124,14 @@ module.exports = {
         .populate("programLanguageId")
         .populate("exerciseId");
       let result = {};
+
+      if(!sub) {
+        return res.send({
+          success: false,
+          message: 'Not Found Data',
+          data: null,
+        });
+      }
       if (sub) {
         result = {
           id: sub["id"],
@@ -1064,7 +1166,7 @@ module.exports = {
     try {
       let exerciseNeedApproval = await Exercise.find({
         where: {
-          isApproved: 'rejected',
+          isApproved: "rejected",
           isDeleted: false,
         },
         sort: "updatedAt DESC",
@@ -1087,7 +1189,7 @@ module.exports = {
       let updatedExercise = await Exercise.updateOne({
         id: id,
       }).set({
-        isApproved: 'accepted',
+        isApproved: "accepted",
       });
       res.json({
         success: true,
@@ -1140,13 +1242,13 @@ module.exports = {
         let tmp = {};
         tmp["index"] = index + 1;
         tmp["id"] = element["id"];
-        tmp['createdAt'] = moment(element["createdAt"]).format("YYYY-MM-DD"),
-        tmp["user"] = element["userId"]
-          ? {
-              name: element["userId"]["displayName"],
-              id: element["userId"]["id"],
-            }
-          : null;
+        (tmp["createdAt"] = moment(element["createdAt"]).format("YYYY-MM-DD")),
+          (tmp["user"] = element["userId"]
+            ? {
+                name: element["userId"]["displayName"],
+                id: element["userId"]["id"],
+              }
+            : null);
         tmp["language"] = element["programLanguageId"]
           ? {
               name: element["programLanguageId"]["name"],
