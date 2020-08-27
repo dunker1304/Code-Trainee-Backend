@@ -497,13 +497,17 @@ module.exports = {
 
   getAllTeachersActive: async (req, res) => {
     try {
+      let {userId} = req.query;
       let teacherRoles = await Role.findOne({ id: 4 }).populate("users", {
         isDeleted: false
       });
       
-      let activeTeachers = teacherRoles.users.filter(
-        (t) => (t.isLoginLocal === 1 && t.status === 1) || t.isLoginGoogle === 1
-      );
+      let activeTeachers = teacherRoles.users
+        .filter(
+          (t) =>
+            (t.isLoginLocal === 1 && t.status === 1) || t.isLoginGoogle === 1
+        )
+        .filter((e) => e.id !== Number(userId));
 
       res.json({
         success: true,

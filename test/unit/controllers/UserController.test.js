@@ -169,7 +169,7 @@ describe("User Controller Testing",function(){
     Role.find({}).limit(1).exec((err, role) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get('/api/user/teacher/all')
+      .get('/api/user/teacher/all?userId=1')
       .end((err, res) => {
         expect(res.body.success).to.equal(true)
         done()
