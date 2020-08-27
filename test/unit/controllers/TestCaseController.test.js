@@ -22,47 +22,37 @@ describe('Test Case Controller Testing', () => {
   //   })
   // })
 
-  it('# GET TEST CASE', (done) => {
-    TestCase.find({}).limit(1).exec((err, testcase) => {
-      if (err) { return done(err) }
+  it('# GET TEST CASE BY ID', (done) => {
       supertest(sails.hooks.http.app)
       .get('/api/testcase?id=1')
       .end((err, res) => {
         expect(res.body.success).to.equal(true);
         done();
       })
-    })
   })
 
   it('# GET TEST CASE BY EXERCISE', (done) => {
-    TestCase.find({}).exec((err, testcases) => {
-      if (err) { return done(err) }
       supertest(sails.hooks.http.app)
       .get('/api/testcase/exercise/1')
       .end((err, res) => {
         expect(res.body.success).to.equal(true);
         done()
       })
-    })
   })
 
-  it('# CREATE TEST CASE', done => {
-    TestCase.find({}).limit(1).exec((err, testcase) => {
-      if (err) return done(err)
-      supertest(sails.hooks.http.app)
+  it('# CREATE TEST CASE', async() => {
+     let exercise = await Exercise.find({}).limit(1);
+     let res = await supertest(sails.hooks.http.app)
       .post('/api/testcase/create')
       .send({
         isHidden: false,
         input: "10",
         expectedOutput: '10',
-        exerciseId: 1
+        exerciseId: exercise[0]['id']
       })
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.success).to.equal(true)
-        done()
-      })
-    })
+
+      expect(res.body.success).to.equal(true)
+    
   })
 
   it('# UPDATE TEST CASE', done => {
@@ -74,7 +64,7 @@ describe('Test Case Controller Testing', () => {
         isHidden: false,
         input: "10",
         output: '11',
-        id: 1
+        id: testcase[0]['id']
       })
       .end((err, res) => {
         if (err) return done(err)

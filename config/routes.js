@@ -37,6 +37,8 @@ module.exports.routes = {
   // ExerciseController
   "get /api/exercise": "ExerciseController.getExerciseById",
   "post /api/submissions": "ExerciseController.submitExercise",
+  "post /api/exercise/save-code": "ExerciseController.saveCode",
+  "get /api/exercise/temp-code": "ExerciseController.getTempCode",
   "get /api/submissions/all": "ExerciseController.getAllSubmissions",
   "post /api/solution": "ExerciseController.submitSolution",
   "get /api/exercise/random": "ExerciseController.getRandom",
@@ -104,7 +106,6 @@ module.exports.routes = {
   "post /api/notification/push": "NotificationController.pushNotification",
 
   // ReviewControlelr
-  "post /api/review/request": "ReviewController.requestReview",
   "post /api/review": "ReviewController.review",
   "post /api/self-review": "ReviewController.selfReview",
   "get /api/review/request/:requestId": "ReviewController.getRequestReview",

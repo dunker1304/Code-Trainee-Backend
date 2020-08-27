@@ -72,6 +72,44 @@ module.exports = {
     }
   },
 
+  saveCode: async (req, res) => {
+    console.log('hajksdhkas saveCode');
+    try {
+      let { question, answer, language, userID } = req.body;
+      let temp;
+      let status = 'Temp'
+
+      let existed = await TrainingHistory.findOne({ 
+        where: { userId: userID, programLanguageId: language, exerciseId: question.id, status: 'Temp' }
+      })
+
+      if (existed) {
+        temp = await TrainingHistory.updateOne({ id: existed.id }).set({
+          userId: userID,
+          exerciseId: question.id,
+          status: 'Temp',
+          answer: answer,
+          programLanguageId: language,
+          isFinished: status == "Accepted" ? true : false,
+        })
+      } else {
+        temp = await TrainingHistory.create({
+          userId: userID,
+          exerciseId: question.id,
+          status: 'Temp',
+          answer: answer,
+          programLanguageId: language,
+          isFinished: status == "Accepted" ? true : false,
+        }).fetch();
+      }
+
+      res.send({ success: true, temp: temp });
+    } catch (error) {
+      console.log(error)
+      res.send({ success: false, message: error, code: 500 });
+    }
+  },
+
   // get exercise by id
   getExerciseById: async (req, res) => {
     //let q = await Exercise.create({ points: '20', level: 'easy', content: 'You have to count all of elements of array', title: 'Sum of Array'}).fetch();
@@ -93,7 +131,7 @@ module.exports = {
       });
       let testCases;
       if (exercise) {
-        testCases = await TestCase.find({ exerciseId: exercise.id });
+        testCases = await TestCase.find({ exerciseId: exercise.id }).sort('isHidden ASC');
       }
       res.send({
         success: true,
@@ -102,6 +140,23 @@ module.exports = {
         total: count,
       });
     } catch (e) {
+      res.send({ success: false, message: e, code: 500 });
+    }
+  },
+
+  getTempCode: async (req, res) => {
+    try {
+      let id = req.query.id
+      let languageID = req.query.languageID
+      let userID = req.query.userID
+      let temp = await TrainingHistory.findOne({ 
+        where: { userId: userID, programLanguageId: languageID, exerciseId: id, status: 'Temp' }
+      })
+
+      res.send({ success: true, temp: temp })
+
+    } catch (e) {
+      console.log(e)
       res.send({ success: false, message: e, code: 500 });
     }
   },
@@ -899,6 +954,9 @@ module.exports = {
           name: ele["exerciseId"]["title"],
           language: ele["programLanguageId"]["name"],
           status: ele["status"],
+          id : ele['id'],
+          index : index + 1,
+          exerciseId :  ele["exerciseId"]['id']
         };
 
         result.push(item);
@@ -1065,9 +1123,7 @@ module.exports = {
   // get all submission_quynhkt
   getAllSubmission: async (req, res) => {
     try {
-      sails.sockets.broadcast("artsAndEntertainment", "foo", {
-        greeting: "Hola!",
-      });
+     
       let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
@@ -1079,14 +1135,16 @@ module.exports = {
         where: { userId: userId, isFinished: 1 },
       });
       let result = [];
-      listSubmission.forEach((ele) => {
+      listSubmission.forEach((ele,index) => {
         let item = {
           id: ele["id"],
+          index : index + 1,
           time: moment(ele["createdAt"]).format("YYYY-MM-DD"),
           exercise: ele["exerciseId"]["title"],
           status: ele["status"],
           runtime: ele["timeNeeded"],
           language: ele["programLanguageId"]["name"],
+          exerciseId : ele["exerciseId"]["id"]
         };
         result.push(item);
       });
@@ -1114,11 +1172,6 @@ module.exports = {
   //get submission by Id
   getSubmissionById: async (req, res) => {
     try {
-      console.log(
-        await sails.sockets.broadcast("artsAndEntertainment", "foo", {
-          greeting: "Hola!",
-        })
-      );
       let subId = req.params.subId;
 
       //if teacher -> get submission if your exercise theirr created
@@ -1126,6 +1179,14 @@ module.exports = {
         .populate("programLanguageId")
         .populate("exerciseId");
       let result = {};
+
+      if(!sub) {
+        return res.send({
+          success: false,
+          message: 'Not Found Data',
+          data: null,
+        });
+      }
       if (sub) {
         result = {
           id: sub["id"],
