@@ -39,6 +39,10 @@ module.exports = {
       via: "userId",
       through: "WishList",
     },
+    notifications: {
+      collection: "Notification",
+      via: "receiver",
+    },
   },
   customToJSON: function () {
     return _.omit(this, ["password"]);
