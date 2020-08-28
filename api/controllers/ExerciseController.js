@@ -340,7 +340,7 @@ module.exports = {
           code: 404,
         });
       } else {
-        console.log({ createdBy: exercise.createdBy, userId });
+      //  console.log({ createdBy: exercise.createdBy, userId });
         if (exercise.createdBy === Number(userId)) {
           res.json({
             success: true,
@@ -757,7 +757,7 @@ module.exports = {
         (await ExerciseComponent.createQuery(selectSQL, typeJoin)) +
         condition1 +
         pagging;
-      console.log(SQL);
+      //console.log(SQL);
       let resultSQL = await sails.sendNativeQuery(SQL);
       resultSQL = resultSQL["rows"];
       let resultFormated = [];
