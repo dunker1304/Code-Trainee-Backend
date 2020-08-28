@@ -9,6 +9,6 @@ module.exports = {
       model: "Role",
       columnName: "role_id",
     },
-    createdBy: { type: "number", columnName: "created_by" },
+    createdBy: { type: "number", columnName: "created_by", allowNull : true },
   },
 };

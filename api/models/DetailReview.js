@@ -1,7 +1,7 @@
 module.exports = {
   tableName: "DetailReview",
   attributes: {
-    comment: { type: "string" },
+    comment: { type: "string" , allowNull : true },
     reviewer: { type: "number", columnName: "reviewer" },
     isAccepted: {
       type: "string",
