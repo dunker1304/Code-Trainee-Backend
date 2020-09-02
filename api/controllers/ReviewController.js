@@ -143,6 +143,24 @@ module.exports = {
         .populate("tags")
         .populate("testCases")
         .populate("codeSnippets");
+      exerciseInfos.createdAt = moment(
+        new Date(exerciseInfos.createdAt).toISOString()
+      ).format();
+      exerciseInfos.updatedAt = moment(
+        new Date(exerciseInfos.updatedAt).toISOString()
+      ).format();
+      const currDuration =
+        moment.now() - moment(exerciseInfos.updatedAt).valueOf();
+      const durationNeedToWait =
+        sails.config.constant.DURATION_TIME_TO_SELF_REVIEW;
+      if (currDuration < durationNeedToWait) {
+        res.json({
+          success: false,
+          code: 404,
+        });
+        return;
+      }
+
       if (!exerciseInfos) {
         res.json({
           success: false,
@@ -158,12 +176,6 @@ module.exports = {
         });
         return;
       }
-      exerciseInfos.createdAt = moment(
-        new Date(exerciseInfos.createdAt).toISOString()
-      ).format();
-      exerciseInfos.updatedAt = moment(
-        new Date(exerciseInfos.updatedAt).toISOString()
-      ).format();
       let mappingSnippetPromises = [...exerciseInfos.codeSnippets].map(
         async (t) => {
           let lang = await ProgramLanguage.findOne({ id: t.programLanguageId });
@@ -177,12 +189,12 @@ module.exports = {
       );
       let codeSnippets = await Promise.all(mappingSnippetPromises);
       exerciseInfos.codeSnippets = [...codeSnippets].filter((t) => t.isActive);
-       res.json({
+      res.json({
         success: true,
         data: { ...exerciseInfos },
       });
     } catch (e) {
-       res.json({
+      res.json({
         success: false,
         code: 500,
       });
@@ -378,6 +390,21 @@ module.exports = {
             success: false,
             code: 2,
             data: { message: "not authorized" },
+          });
+          return;
+        }
+        exercise.updatedAt = moment(
+          new Date(exercise.updatedAt).toISOString()
+        ).format();
+        const currDuration =
+          moment.now() - moment(exercise.updatedAt).valueOf();
+        const durationNeedToWait =
+          sails.config.constant.DURATION_TIME_TO_SELF_REVIEW;
+        if (currDuration < durationNeedToWait) {
+          res.json({
+            success: false,
+            code: 4,
+            data: { message: "cannot self-review at this time" },
           });
           return;
         }
