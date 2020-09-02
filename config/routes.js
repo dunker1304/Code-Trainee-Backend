@@ -48,8 +48,6 @@ module.exports.routes = {
   "post /api/exercise/update": "ExerciseController.updateExercise",
   "get /api/exercise/owner/:ownerId": "ExerciseController.getByOwner",
   "post /api/exercise/delete": "ExerciseController.deleteExercise",
-  "get /api/exercise/approve": "ExerciseController.getExerciseNeedApproval",
-  "post /api/exercise/approve/update": "ExerciseController.updateExerciseNeedApproval",
   "get /api/exercise/vote": "ExerciseController.getVoteExercise",
   'post /api/exercise/react': 'ExerciseController.reactExercise',
 
