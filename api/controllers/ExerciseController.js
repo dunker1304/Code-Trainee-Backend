@@ -286,7 +286,7 @@ module.exports = {
         let submissions = await TrainingHistory.find({
           exerciseId: exerciseID,
           userId: userID,
-          status: {'!': 'Temp'}
+          status: {'!=': 'Temp'}
         })
           .populate("programLanguageId")
           .sort([{ createdAt: "DESC" }]);
@@ -1134,7 +1134,7 @@ module.exports = {
       let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
-        where: { userId: userId, isFinished: 1 },
+        where: { userId: userId, isFinished: 1 , status: {'!=': 'Temp'} },
       })
         .populate("programLanguageId")
         .populate("exerciseId");
