@@ -1134,12 +1134,12 @@ module.exports = {
       let userId = req.query.userId ? req.query.userId : null;
 
       let listSubmission = await TrainingHistory.find({
-        where: { userId: userId, isFinished: 1 , status: {'!=': 'Temp'} },
+        where: { userId: userId , status: {'!=': 'Temp'} },
       })
         .populate("programLanguageId")
         .populate("exerciseId");
       let totalSub = await TrainingHistory.count({
-        where: { userId: userId, isFinished: 1 },
+        where: { userId: userId },
       });
       let result = [];
       listSubmission.forEach((ele,index) => {
