@@ -51,14 +51,13 @@ describe('Exercise Controller Testing', () => {
     
   // })
 
-  it('# GET EXERCISE BY ID', (done) => {
-    supertest(sails.hooks.http.app)
-      .get('/api/exercise?id=1')
-      .end((err, res) => {
-        expect(res.body.success).to.equal(true)
-        expect(res.body.total).to.be.an('Number')
-        done()
-      })
+  it('# GET EXERCISE BY ID', async () => {
+
+    let exercise = await Exercise.find({isApproved : 'accepted' , isDeleted : 0}).limit(1);
+    let res = await supertest(sails.hooks.http.app)
+      .get(`/api/exercise?id=${exercise[0]['id']}`)
+    expect(res.body.success).to.equal(true)
+    expect(res.body.total).to.be.an('Number')
   })
 
   it('# POST SUBMISSION', (done) => {
