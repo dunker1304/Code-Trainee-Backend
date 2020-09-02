@@ -31,8 +31,8 @@ module.exports.routes = {
   "post /api/delete-a-comment": "CommentController.deleteAComment",
 
   // TestController
-  "post /api/test": "TestController.post",
-  "get /api/get": "TestController.get",
+  // "post /api/test": "TestController.post",
+  // "get /api/get": "TestController.get",
 
   // ExerciseController
   "get /api/exercise": "ExerciseController.getExerciseById",
@@ -62,8 +62,8 @@ module.exports.routes = {
     "ExerciseController.getSubmmitionByUserId",
   "get /api/get-most-recent-sub/:userId":
     "ExerciseController.getMostRecentSubmission",
-  "post /api/add-type-wish-list": "ExerciseController.addTypeWishList",
-  "get /api/wish-list/:type": "ExerciseController.getWishListByType",
+  //"post /api/add-type-wish-list": "ExerciseController.addTypeWishList",
+  //"get /api/wish-list/:type": "ExerciseController.getWishListByType",
   "get /api/wish-list": "ExerciseController.getWishList",
   "get /api/all-submission": "ExerciseController.getAllSubmission",
   "get /api/submission/:subId" : "ExerciseController.getSubmissionById",

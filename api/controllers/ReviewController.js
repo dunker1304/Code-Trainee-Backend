@@ -168,6 +168,7 @@ module.exports = {
         });
         return;
       }
+      //console.log({ userId: userId, createdBy: exerciseInfos.createdBy });
       if (exerciseInfos.createdBy !== Number(userId)) {
         res.json({
           success: false,

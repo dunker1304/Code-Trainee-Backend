@@ -227,7 +227,6 @@ module.exports = {
      
       if(commentVoted) {
         comment['statusVote'] = commentVoted['statusVote']
-        console.log(comment)
       }
 
       if(comment && comment.senderId && comment.senderId.id == userId) {

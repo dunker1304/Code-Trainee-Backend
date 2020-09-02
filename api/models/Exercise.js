@@ -18,7 +18,7 @@ module.exports = {
     },
     like: { type: "number", defaultsTo: 0 },
     dislike: { type: "number", defaultsTo: 0 },
-    content: { type: "string" },
+    content: { type: "string" ,allowNull  : true},
     title: { type: "string" },
     createdBy: { type: "number", columnName: "created_by" },
     tags: {

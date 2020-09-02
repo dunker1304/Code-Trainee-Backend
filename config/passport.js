@@ -76,9 +76,9 @@ passport.use(new LocalStrategy({
     criteria['isLoginLocal'] = 1;
     
     // Find the user given the email or username
-    console.log(criteria)
+    // console.log(criteria)
     const user = await User.findOne(criteria).populate('roles', { id : req.body.role});
-    console.log(user)
+    // console.log(user)
    
     // If not, handle it
     if (!user || (user && user['roles'] && user['roles'].length == 0)) {

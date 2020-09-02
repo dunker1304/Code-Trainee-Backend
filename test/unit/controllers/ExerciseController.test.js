@@ -151,9 +151,8 @@ describe('Exercise Controller Testing', () => {
     Exercise.find({isDeleted : 0}).limit(1).exec((err, exercise) => {
       if (err) return done(err)
       supertest(sails.hooks.http.app)
-      .get(`/api/exercise/basic-info/${exercise[0]['id']}`)
+      .get(`/api/exercise/basic-info/${exercise[0]['id']}?userId=${exercise[0]['createdBy']}`)
       .end((err, res) => {
-        console.log(res.body)
         expect(res.body.success).to.equal(true)
         done()
       })
@@ -181,7 +180,7 @@ describe('Exercise Controller Testing', () => {
   })
 
   it('# UPDATE EXERCISE', async() => {
-    let exercise = await Exercise.find({}).limit(1);
+    let exercise = await Exercise.find({isDeleted : 0}).limit(1);
     let user = await User.find({}).limit(4);
     let language = await ProgramLanguage.find({}).limit(1)
 
@@ -197,7 +196,7 @@ describe('Exercise Controller Testing', () => {
         content: 'test exercise',
         languages : [ { id : language[0]['id'], sampleCode : '', isActive : true}],
         reviewerIds : [user[0]['id'],user[1]['id'],user[2]['id']],
-        createdBy : user[3]['id'],
+        createdBy : exercise[0]['createdBy'],
         testcases :['#']
       
       })
@@ -220,7 +219,8 @@ describe('Exercise Controller Testing', () => {
       supertest(sails.hooks.http.app)
       .post('/api/exercise/delete')
       .send({
-        id: exercise[0]['id']
+        id: exercise[0]['id'],
+        userId : exercise[0]['createdBy']
       })
       .end((err, res) => {
         expect(res.body.success).to.equal(true)

@@ -132,13 +132,19 @@ module.exports = {
       let testCases;
       if (exercise) {
         testCases = await TestCase.find({ exerciseId: exercise.id }).sort('isHidden ASC');
+        res.send({
+          success: true,
+          question: exercise,
+          testCases: testCases,
+          total: count,
+        });
+      } else {
+        res.send({
+          success: false,
+          message: "Invalid exercise id"
+        })
       }
-      res.send({
-        success: true,
-        question: exercise,
-        testCases: testCases,
-        total: count,
-      });
+      
     } catch (e) {
       res.send({ success: false, message: e, code: 500 });
     }
@@ -280,6 +286,7 @@ module.exports = {
         let submissions = await TrainingHistory.find({
           exerciseId: exerciseID,
           userId: userID,
+          status: {'!': 'Temp'}
         })
           .populate("programLanguageId")
           .sort([{ createdAt: "DESC" }]);
@@ -340,7 +347,7 @@ module.exports = {
           code: 404,
         });
       } else {
-        console.log({ createdBy: exercise.createdBy, userId });
+      //  console.log({ createdBy: exercise.createdBy, userId });
         if (exercise.createdBy === Number(userId)) {
           res.json({
             success: true,
@@ -757,7 +764,7 @@ module.exports = {
         (await ExerciseComponent.createQuery(selectSQL, typeJoin)) +
         condition1 +
         pagging;
-      console.log(SQL);
+      //console.log(SQL);
       let resultSQL = await sails.sendNativeQuery(SQL);
       resultSQL = resultSQL["rows"];
       let resultFormated = [];
