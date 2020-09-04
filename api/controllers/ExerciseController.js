@@ -301,18 +301,22 @@ module.exports = {
     try {
       let { question, testcases, answer, language, userID } = req.body;
       let status = "Accepted";
+      let totalTime = 0;
       testcases.forEach((testcase) => {
         if (testcase.data.description != "Accepted") {
           status = testcase.data.status.description;
+          totalTime = totalTime + parseFloat(testcase.data.time)
           return;
         }
       });
+      let average = parseFloat((totalTime / testcases.length).toFixed(3))
       let history = await TrainingHistory.create({
         userId: userID || 3,
         exerciseId: question.id,
         status: status,
         answer: answer,
         programLanguageId: language,
+        timeNeeded: average,
         isFinished: status == "Accepted" ? true : false,
       }).fetch();
 
