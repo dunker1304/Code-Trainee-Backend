@@ -4,13 +4,13 @@ module.exports = {
       let { exerciseId } = req.params;
       let languages = await ProgramLanguage.find().populate("codeSnippets", {
         exerciseId: exerciseId,
-        isActive: true
+        // isActive: true
       });
-      languages.forEach((language, index) => {
-        if (language.codeSnippets.length == 0) {
-          languages.splice(index, 1);
-        }
-      })
+      // languages.forEach((language, index) => {
+      //   if (language.codeSnippets.length == 0) {
+      //     languages.splice(index, 1);
+      //   }
+      // })
       res.json({
         success: true,
         data: languages,
