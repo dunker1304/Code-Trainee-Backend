@@ -81,6 +81,7 @@ module.exports.routes = {
 
   // ProgramLanguageController
   "get /api/language/exercise/:exerciseId": "ProgramLanguageController.getAllByExerciseId",
+  "get /api/language/exercise-playground/:exerciseId": "ProgramLanguageController.getAllByExerciseIdPlayground",
   "get /api/language/all": "ProgramLanguageController.getAll",
 
   // TagController
