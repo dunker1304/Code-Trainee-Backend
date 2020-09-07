@@ -77,11 +77,17 @@ module.exports = {
     try {
       //let userId = req.user ? req.user['id'] : 5;
       let userId= req.params.userId;
-      let noties = await Notification.find({ where : { receiver : userId , isDeleted : false} , sort : "createdAt DESC"})
+      let limit = req.query.limit ? req.query.limit : 5;
+      let page = req.query.page ? req.query.page : 1
+
+      let noties = await Notification.find({ where : { receiver : userId , isDeleted : false} , sort : "createdAt DESC",limit : limit , skip : (page-1)*limit})
+      
+      let count = await Notification.count({ where : { receiver : userId , isDeleted : false} })
       
       return res.send({
         success : true,
-        data :noties
+        data :noties,
+        page: count%limit == 0 ? count/limit : Math.floor(count/limit) + 1
       })
     } catch (error) {
       return res.send({

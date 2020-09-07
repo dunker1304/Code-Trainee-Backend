@@ -381,12 +381,8 @@ module.exports = {
       let userId =  req.params.userId  ? req.params.userId :null
 
       //count All exercise
-      let allExercise = await Exercise.count({ isApproved : 'Accepted'});
+      let allExercise = await Exercise.count({ isApproved : 'Accepted' , isDeleted : 0});
 
-      //count specific level if question
-      // let easyE  = await Exercise.count({level:'Easy'})
-      // let mediumE  = await Exercise.count({level :'Medium'})
-      // let hardE    = await Exercise.count({level :'Hard'})
       let easyE = 0;
       let mediumE = 0;
       let hardE = 0;
@@ -395,19 +391,26 @@ module.exports = {
       let wrongAnswer = 0;
       let runtimeError = 0;
       let totalSubmission = 0;
-      let attempted = 0
+      let attempted = 0;
+      let rateAcceptedSubmissions = 0;
        userId = parseInt(userId);
       if(Number.isInteger(userId) ) {
 
-      let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Accepted\' AND user_id = ${userId}) `)
+      let rawResult = await sails.sendNativeQuery(`SELECT * FROM Exercise WHERE id IN (SELECT DISTINCT \`exercise_id\` FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND \`status\` = \'Accepted\' AND user_id = ${userId}) AND is_deleted = 0`)
       
-      rawResult['rows'].forEach(ele => {
-        if (ele['level'] == 'Easy') easyE++;
-        if (ele['level'] == 'Medium') mediumE++;
-        if (ele['level'] == 'Hard') hardE++;
-      });
+      // rawResult['rows'].forEach(ele => {
+      //   if (ele['level'] == 'Easy') easyE++;
+      //   if (ele['level'] == 'Medium') mediumE++;
+      //   if (ele['level'] == 'Hard') hardE++;
+      // });
 
-      solved = easyE + mediumE + hardE;
+
+      solved = rawResult['rows'] ? rawResult['rows'].length : 0;
+
+      //count specific level if question
+      easyE  = await Exercise.count({level:'easy' ,isApproved : 'Accepted' , isDeleted : 0})
+      mediumE  = await Exercise.count({level :'medium',isApproved : 'Accepted' ,isDeleted : 0})
+      hardE    = await Exercise.count({level :'hard',isApproved : 'Accepted' ,  isDeleted : 0})
 
       attempted = await sails.sendNativeQuery(`SELECT COUNT(DISTINCT \`exercise_id\`) AS attempted FROM \`TrainingHistory\` AS a WHERE \`is_finished\` = 1 AND user_id = ${userId}`)
 
@@ -435,7 +438,7 @@ module.exports = {
         wrongAnswer: wrongAnswer,
         runtimeError: runtimeError,
         other: totalSubmission - (wrongAnswer + runtimeError + acceptedSubmissions),
-        rateAcceptedSubmissions: (acceptedSubmissions / totalSubmission).toFixed(2) * (100)
+        rateAcceptedSubmissions: !isNaN((acceptedSubmissions * 100/totalSubmission).toFixed(2))  ? (acceptedSubmissions * 100/totalSubmission).toFixed(2) : 0
       }
     })
 

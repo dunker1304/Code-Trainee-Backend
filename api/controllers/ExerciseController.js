@@ -755,7 +755,7 @@ module.exports = {
         condition1 += ` AND ${conditionKeySearch}`;
       }
 
-      let pagging = ` ORDER BY a.ID ASC LIMIT ${(page - 1) * limit},${limit}`;
+      let pagging = ` ORDER BY a.updated_at DESC LIMIT ${(page - 1) * limit},${limit}`;
 
       //count
       let SQLCount = SQL + condition1;
@@ -997,19 +997,22 @@ module.exports = {
       //format response
       let result = [];
       listWishList.forEach((ele, index) => {
-        let tmp = {
-          id: ele["id"],
-          index: index + 1,
-          userId: ele["userId"],
-          exercise: {
-            id: ele["exerciseId"]["id"],
-            title: ele["exerciseId"]["title"],
-            loc: ele["exerciseId"]["points"],
-            author: ele["userId"]["displayName"],
-            level: ele["exerciseId"]["level"],
-          },
-        };
-        result.push(tmp);
+        if(!ele["exerciseId"]['isDeleted'] && ele["exerciseId"]['isApproved'] == 'accepted') {
+          let tmp = {
+            id: ele["id"],
+            index: index + 1,
+            userId: ele["userId"],
+            exercise: {
+              id: ele["exerciseId"]["id"],
+              title: ele["exerciseId"]["title"],
+              loc: ele["exerciseId"]["points"],
+              author: ele["userId"]["displayName"],
+              level: ele["exerciseId"]["level"],
+            },
+          };
+          result.push(tmp);
+        }
+      
       });
 
       return res.send({
@@ -1276,7 +1279,7 @@ module.exports = {
       let limit = 20;
       //get all submission of this exxercise Id
       let list = await TrainingHistory.find({
-        where: { exerciseId: exeId },
+        where: { exerciseId: exeId ,status: {'!=': 'Temp'}},
         limit: limit,
         sort: "createdAt DESC",
         skip: (page - 1) * limit,
