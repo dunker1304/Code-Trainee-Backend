@@ -951,7 +951,7 @@ module.exports = {
       let { userId } = req.params;
 
       let submissions = await TrainingHistory.find({
-        where: { userId: userId },
+        where: { userId: userId  , status: {'!=': 'Temp'}},
         sort: "createdAt DESC",
         limit: 5,
       })
@@ -996,11 +996,13 @@ module.exports = {
 
       //format response
       let result = [];
+      let count = 0;
       listWishList.forEach((ele, index) => {
         if(!ele["exerciseId"]['isDeleted'] && ele["exerciseId"]['isApproved'] == 'accepted') {
+          count++;
           let tmp = {
             id: ele["id"],
-            index: index + 1,
+            index: count,
             userId: ele["userId"],
             exercise: {
               id: ele["exerciseId"]["id"],
@@ -1153,7 +1155,7 @@ module.exports = {
         let item = {
           id: ele["id"],
           index : index + 1,
-          time: moment(ele["createdAt"]).format("YYYY-MM-DD"),
+          time: ele["createdAt"],
           exercise: ele["exerciseId"]["title"],
           status: ele["status"],
           runtime: ele["timeNeeded"],
@@ -1213,7 +1215,7 @@ module.exports = {
             name: sub["programLanguageId"]["name"],
           },
           answer: sub["answer"],
-          createdAt: moment(sub["createdAt"]).format("YYYY-MM-DD"),
+          createdAt: sub["createdAt"],
           userId: sub["userId"],
           status: sub["status"],
         };
@@ -1299,7 +1301,7 @@ module.exports = {
       let exer = {
         id: exericse["id"],
         loc: exericse["points"],
-        createdAt: moment(exericse["createdAt"]).format("YYYY-MM-DD"),
+        createdAt: exericse["createdAt"],
         level: exericse["level"],
         totalSubmission: count,
         title: exericse["title"],
