@@ -1148,7 +1148,7 @@ module.exports = {
         .populate("programLanguageId")
         .populate("exerciseId");
       let totalSub = await TrainingHistory.count({
-        where: { userId: userId },
+        where: { userId: userId ,status: {'!=': 'Temp'}},
       });
       let result = [];
       listSubmission.forEach((ele,index) => {

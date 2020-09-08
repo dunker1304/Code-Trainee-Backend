@@ -436,6 +436,7 @@ module.exports = {
         acceptedSubmissions: acceptedSubmissions,// số lần submiss success,
         wrongAnswer: wrongAnswer,
         runtimeError: runtimeError,
+        totalSubmission:totalSubmission,
         other: totalSubmission - (wrongAnswer + runtimeError + acceptedSubmissions),
         rateAcceptedSubmissions: !isNaN((acceptedSubmissions * 100/totalSubmission).toFixed(2))  ? (acceptedSubmissions * 100/totalSubmission).toFixed(2) : 0
       }
