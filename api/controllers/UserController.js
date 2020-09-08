@@ -404,7 +404,6 @@ module.exports = {
       //   if (ele['level'] == 'Hard') hardE++;
       // });
 
-
       solved = rawResult['rows'] ? rawResult['rows'].length : 0;
 
       //count specific level if question
@@ -420,7 +419,7 @@ module.exports = {
 
       runtimeError = await TrainingHistory.count({ where: { isFinished: 1, status: 'Runtime Error (NZEC)', userId : userId } })
 
-      totalSubmission = await TrainingHistory.count({where: {userId : userId}})
+      totalSubmission = await TrainingHistory.count({where: {userId : userId ,status: {'!=': 'Temp'}}})
     }
 
     return res.send({
