@@ -6,7 +6,7 @@
   "keywords": [],
   "dependencies": {
     "@sailshq/lodash": "^3.10.3",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "fuzzysort": "^1.1.4",
     "html-purify": "^1.1.0",
