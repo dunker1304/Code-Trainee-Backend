@@ -11,7 +11,7 @@
     "fuzzysort": "^1.1.4",
     "html-purify": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.27.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.31",
     "nodemailer": "^6.4.8",
     "nodemon": "^2.0.4",
