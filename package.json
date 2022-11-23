@@ -26,7 +26,7 @@
     "sails": "^1.2.4",
     "sails-hook-orm": "^2.1.1",
     "sails-hook-sentry": "^2.0.0-beta.2",
-    "sails-hook-sockets": "^2.0.0",
+    "sails-hook-sockets": "^2.0.3",
     "sails-mysql": "^1.0.1",
     "sails-pager": "^2.1.0",
     "unique-string": "^2.0.0"
